@@ -1,0 +1,10 @@
+the ERA 5 rates and rtp should be done by tomorrow (or sometime over the weekend) The jobs continue to run, I’ll let you know progress is 3320 of 4608
+~chepplew/data/rates_anomalies/tiled/era5_mon/{fits/, rtp/} (edited) 
+
+for era 5 see: /home/chepplew/projects/rates_anomalies/tiled/drive_era5_tiles_to_rtp.m
+and child scripts called therein.
+For Merra - mostly load_and_plot_merra2_rates.m same directory
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+cp -a /home/chepplew/projects/rates_anomalies/tiled/*.m CHepplwhite/.

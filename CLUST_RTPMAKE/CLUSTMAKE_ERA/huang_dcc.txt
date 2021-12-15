@@ -1,0 +1,30 @@
+% DCC from Yi Huang paper
+% Cloud-Assisted Retrieval of Lower-Stratospheric Water Vapor from
+% Nadir-View Satellite Measurements
+% JING FENG AND YI HUANG
+% Jour Atmos and Oceanic Tech March 2018 , DOI: 10.1175/JTECH-D-17-0132.1
+%
+% xpdf  /home/sergio/PAPERS/AIRS/airs_stm_oct18/SingleFootPrint/sergio_singlefootprint.pdf
+%
+%2015 05 16 041
+%
+% 2005 05 16 075
+% 2005 05 16 076
+% 2005 05 16 092
+% 2005 05 16 186
+% 2005 05 16 187
+% 2005 05 16 203
+%
+% this is the DCC
+2005 06 17 083
+% these are clear after DCC
+2005 06 17 193
+2005 06 17 194
+% 2005 07 07 079
+% 2005 07 07 189
+%
+%
+% try this also
+2014 03 04 030
+2014 03 04 031
+2014 03 04 153

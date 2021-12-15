@@ -1,0 +1,20 @@
+cd /home/sergio/MATLABCODE/rtp_prod/airs/rtp
+cd /home/sergio/MATLABCODE/rtp_prod/airs/rtp
+
+if you want to make an rtp file with OBSERVATIONS in it, then 
+  create_rtp_full YYMMDD        will do all 240 grans
+  create_rtp_full YYMMDD-GG     will do all the one specified gran
+ 
+  clustcmd -L create_rtp_full.m list    where list = YYMMDD-GG
+ 
+This creates  /asl/data/rtprod_airs/2007/02/24/airs_l1b.2007.02.24.111.rtp
+
+now you need to add ERA or ECM
+  ceate_rcalc_era_x     or
+  ceate_rcalc_ecm_x
+where _x could be allfov,subset    
+
+clustcmd -L create_rcalc_era_allfov.m 20070224   looks for all L1B rtp files
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+

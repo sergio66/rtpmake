@@ -1,0 +1,7 @@
+%% see https://www-air.larc.nasa.gov/cgi-bin/ArcView/owlets.2018?SONDE=1
+2018 06 29 186
+2018 06 30 177
+2018 07 01 184
+2018 07 02 175
+2018 07 03 182
+

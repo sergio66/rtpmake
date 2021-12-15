@@ -1,0 +1,67 @@
+I like /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA_CLOUD_NADIR/clustbatch_make_eracloudrtp_nadir_sarta_filelist_ORIG_2track.m
+sbatch --array=4370-4780 sergio_matlab_jobB.sbatch
+
+makes eg
+[sergio@maya-usr1 CLUSTMAKE_ERA_CLOUD_NADIR]$ ls -lt /asl/data/rtprod_airs/2014/10/31/
+total 2187512
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:57 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.23.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:53 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.22.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:50 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.21.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:47 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.20.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:44 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.19.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:41 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.18.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:38 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.17.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:35 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.16.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:32 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.15.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:28 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.14.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:25 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.13.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:22 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.12.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:19 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.11.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:16 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.10.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:13 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.09.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:10 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.08.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:07 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.07.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:04 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.06.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 05:00 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.05.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 04:57 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.04.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 04:54 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.03.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 04:51 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.02.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 04:48 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.01.rtp
+-rw-rw-r-- 1 sergio pi_strow 93327619 Sep 24 04:45 sergio_nadir_cloudy_airs_l1b_era_sarta_baum_ice.2014.10.31.00.rtp
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Then go to  /home/sergio/MATLABCODE/ROSES_2013_GRANT/SpectralRates/, to do 40 EQUAL AREA bins
+
+first
+  run daily_averges_notmade
+
+%% put together the hourly /asl/data/rtprod_airs/YYYY/MM/DD/sergio_nadir_cloudy_airs_l1b_eraHH.rtp files into ONE structure, then AVERAGES over 40 equal area zonal bins
+srun matlab -nodisplay -r "clust_driver_make_avgfiles; exit"            %% loops DAILY, over hourly files
+
+%% now read in these files, and averahe them MONTHLY
+srun matlab -nodisplay -r "clust_driver_puttogether_avgfiles; exit"     %% loops IN A YEAR, over each month
+
+%% now that you have the monthly averages, do the radiance trends etc on ROBS<RCKD,RCLR,geophysical
+srun matlab -nodisplay -r "clust_driver_puttogether_avgfiles_results_latbin; exit"    %% does ONE latbin
+
+%% now do the anomalies
+srun matlab -nodisplay -r "clust_anomaly_latbins**; exit"    %% does ONE latbin     may be in SpectralRatesAnomaly/clust_anomaly_latbins.m
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Then go to  /home/sergio/MATLABCODE/ROSES_2013_GRANT/SpectralRates/, to do 80 EQUAL AREA bins
+
+first
+  run daily_avergaes_ENSO_notmade
+
+%% put together the hourly /asl/data/rtprod_airs/YYYY/MM/DD/sergio_nadir_cloudy_airs_l1b_eraHH.rtp files into ONE structure, then AVERAGES over 40 equal area zonal bins
+srun matlab -nodisplay -r "clust_driver_make_avgfiles_ENSO; exit"            %% loops DAILY, over hourly files
+
+%% now read in these files, and averahe them MONTHLY
+srun matlab -nodisplay -r "clust_driver_puttogether_avgfiles; exit"     %% loops IN A YEAR, over each month
+
+%% now that you have the monthly averages, do the radiance trends etc on ROBS<RCKD,RCLR,geophysical
+srun matlab -nodisplay -r "clust_driver_puttogether_avgfiles_results_latbin; exit"    %% does ONE latbin
+
+%% now do the anomalies
+srun matlab -nodisplay -r "clust_anomaly_latbins; exit"    %% does ONE latbin
+

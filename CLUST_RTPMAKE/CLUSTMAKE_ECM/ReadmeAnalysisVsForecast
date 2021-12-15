@@ -1,0 +1,30 @@
+Analysis        at 00,06,12,18
+3 hour Forecast at 03,09,15,21
+
+%% so for G044, which is taken at 04:24, the closest 3 hour file is the 0300 forecast
+%%              while the bracketing analysis done at 00 and 06
+
+%%%%%%%%%%%% this is FORECAST
+>>     [pCloset,hClosest] = fill_ecmwf(p,h);
+ecmwf file name fn = /asl/data/ecmwf_nc/2002/09/UAD09060000090603001   IE 3 hr forecast done using 0000 analysis
+New file
+>>> found SPRES is finite on hybrid level level 18
+>>> WARNING: fill_ecmwf now sets model attribute in pattr.
+   Update calls to fill_ecmwf to include pattr. i.e. [p,h,pa] = fill_ecmwf(p,h,pa)
+
+%%%%%%%%%%%% these are bracketing ANALYSIS
+>>     pB1 = p; pB1.rtime = ones(size(pB1.rtime)) * tB1;
+>>       [pB1,hB1] = fill_ecmwf(pB1,h);
+ecmwf file name fn = /asl/data/ecmwf_nc/2002/09/UAD09060000090600001 IE analysis done at 0000
+New file
+>>> found SPRES is finite on hybrid level level 22
+>>> WARNING: fill_ecmwf now sets model attribute in pattr.
+   Update calls to fill_ecmwf to include pattr. i.e. [p,h,pa] = fill_ecmwf(p,h,pa)
+
+>>     pB2 = p; pB2.rtime = ones(size(pB1.rtime)) * tB2;
+>>     [pB2,hB2] = fill_ecmwf(pB2,h);
+ecmwf file name fn = /asl/data/ecmwf_nc/2002/09/UAD09060600090606001 IE analysis done at 0600
+New file
+>>> found SPRES is finite on hybrid level level 22
+>>> WARNING: fill_ecmwf now sets model attribute in pattr.
+    Update calls to fill_ecmwf to include pattr. i.e. [p,h,pa] = fill_ecmwf(p,h,pa)

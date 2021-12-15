@@ -1,0 +1,2 @@
+#!/bin/bash
+getairs ${1:0:8} 1 AIRIBRAD.005

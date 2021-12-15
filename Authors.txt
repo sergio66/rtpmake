@@ -1,0 +1,14 @@
+Copyright 1996- 
+L. Larrabee Strow,  Sergio DeSouza-Machado, Scott hannon, Howard Motteler, Steve Buczkowski
+Atmospheric Spectroscopy Laboratory
+
+Code is distributed under the terms of the GNU GPL v3
+
+See Copyright.txt
+
+------------------------------------------------------------------------
+
+Code development
+
+Larabee Strow     : Principal Investigator
+
