@@ -192,6 +192,7 @@ for ixx = 1 : length(iaGlist)
     %addpath /asl/rtp_prod2/util/
     addpath /asl/packages/rtp_prod2/emis/
     addpath /asl/packages/rtp_prod2/util/    
+    p.rlon = wrapTo180(p.rlon);
     [p,pa] = rtp_add_emis(p,pa);
     
     %figure(1)

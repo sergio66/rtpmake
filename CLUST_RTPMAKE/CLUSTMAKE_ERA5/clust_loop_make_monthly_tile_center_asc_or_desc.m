@@ -93,6 +93,8 @@ elseif iDorA < 0
   %%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
+rlon = wrapTo180(rlon);
+
 figure(1); scatter_coast(rlon,rlat,50,solzen); colormap jet
 figure(2); scatter_coast(rlon,rlat,50,satzen); colormap jet
 figure(3); scatter_coast(rlon,rlat,50,hour); colormap jet

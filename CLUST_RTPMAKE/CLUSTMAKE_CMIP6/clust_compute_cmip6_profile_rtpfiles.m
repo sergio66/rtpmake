@@ -109,6 +109,12 @@ yy = 2014; yjunk = yy*ones(1,8);
 for ii = JOB + (i2002-1)
   [allyears(ii) allmonths(ii) yyuse(ii-i2002+1) mmuse(ii-i2002+1)]  
   fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/CMIP6/Tile_Center/cmip6_tile_center_monthly_timestep_' num2str(ii-i2002+1,'%03d') '.mat']; 
+  
+addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
+addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
+addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/time
+  p.rlon = wrapTo180(p.rlon);
+  [p,pa] = rtp_add_emis(p,pa);
 
   pnew_ip = p;
   hnew_ip = h;

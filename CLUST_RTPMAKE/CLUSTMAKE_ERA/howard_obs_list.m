@@ -94,7 +94,11 @@ addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis/
 addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/    
 p1.satzen = zeros(size(p1.stemp));
 p1.wspeed = ones(size(p1.stemp)) * 10;
+
+p1.rlon = wrapTo180(p1.rlon);
 [p1,pa] = rtp_add_emis(p1,pa);
+
+p.rlon = wrapTo180(p.rlon);
 [p,pa] = rtp_add_emis(p,pa);
     
 [pX] = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);

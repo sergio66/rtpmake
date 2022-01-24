@@ -99,7 +99,11 @@ p0 = p;
    pa = {{'profiles','rtime','seconds since 1958'}};
    ha = {{'header','hdf file','check 2014/01/28'}};
 
-[p,pa] = rtp_add_emis(p,pa);
+addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
+addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
+addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/time
+  p.rlon = wrapTo180(p.rlon);
+  [p,pa] = rtp_add_emis(p,pa);
 
 %figure(1)
 %scatter_coast(p.rlon,p.rlat,10,p.nemis); 

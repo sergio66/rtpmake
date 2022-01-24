@@ -16,6 +16,7 @@ for ii = 1 : 4
 end
 
 [zdust,hVolc,p,zz35,filename] = is_there_dust_hdf(yIN,mIN,dIN,gIN,'F');
+p.rlon = wrapTo180(p.rlon);
 figure(1); scatter_coast(p.rlon,p.rlat,50,zz35);          title('BT1231 - BT961');
 figure(2); scatter_coast(p.rlon,p.rlat,50,p.dust_flag);   title('DustFLag');
 figure(3); scatter_coast(p.rlon,p.rlat,50,p.dust_score);  title('Dust Score')
@@ -75,6 +76,8 @@ wvXY    = squeeze(nanmean(wvXY,1));
 o3XY    = squeeze(nanmean(o3XY,1));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+p.rlon = wrapTo180(p.rlon);
 
 rlon = p.rlon; rlon(rlon < min(zlon(:))) = min(zlon(:)); rlon(rlon > max(zlon(:))) = max(zlon(:));
 rlat = p.rlat; rlat(rlat < min(zlat(:))) = min(zlat(:)); rlat(rlat > max(zlat(:))) = max(zlat(:));

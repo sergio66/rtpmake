@@ -87,6 +87,7 @@ p0 = p;
    pa = {{'profiles','rtime','seconds since 1958'}};
    ha = {{'header','hdf file','check 2014/01/28'}};
 
+p.rlon = wrapTo180(p.rlon);
 [p,pa] = rtp_add_emis(p,pa);
 
 %figure(1)

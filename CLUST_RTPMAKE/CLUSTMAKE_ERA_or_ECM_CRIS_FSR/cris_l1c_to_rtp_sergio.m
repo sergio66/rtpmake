@@ -257,6 +257,9 @@ for fn=iign
   prof = struct;
   prof.rlat = single(geo.Latitude(:)');
   prof.rlon = single(geo.Longitude(:)');
+
+  prof.rlon = wrapTo180(prof.rlon);
+
   %prof.rtime = reshape(ones(9,1) * (geo.FORTime(:)' * 1e-6 - tdif), 1, nobs);
   prof.rtime = reshape(ones(9,1) * (geo.FORTime(:)' * 1e-6 ), 1, nobs);
   prof.satzen = single(geo.SatelliteZenithAngle(:)');

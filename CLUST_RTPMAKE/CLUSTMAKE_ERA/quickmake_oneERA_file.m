@@ -12,6 +12,7 @@ p0 = p;
 
 addpath /asl/rtp_prod2/emis/
 addpath /asl/rtp_prod2/util/
+%p.rlon = wrapTo180(p.rlon);
 %[p,pa] = rtp_add_emis(p,pa);
     
 %figure(1)
