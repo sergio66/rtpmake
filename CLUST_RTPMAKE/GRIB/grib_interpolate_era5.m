@@ -15,8 +15,17 @@ function F = grib_interpolate_era5(fn_s,fn_h,fn_2m,hindex);
 %
 % L. Strow, June 11, 2014
 
+if nargin <= 3
+  error('grib_interpolate_era5 needs 4 arguments, not 3')
+end
+if hindex < 1 | hindex > 8
+  error('need hindex == 1 .. 8 for grib_interpolate_era5.m');
+end
+
 F.s_longitude = ncread(fn_s,'longitude');
+  %% longitude is 0 to 360
 F.s_latitude  = ncread(fn_s,'latitude');
+  %% latitude is +90 to -90
 F.s_time      = ncread(fn_s,'time',[hindex],[1]);
 F.s_mtime     = datenum(1900,0,0,double(F.s_time),0,0);
 

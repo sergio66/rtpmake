@@ -1,5 +1,39 @@
 %{
 
+
+Hi Sergio,
+
+Thanks for your patience on the AMIP runs. You can find the
+model-means on Taki at /asl/s1/rkramer/CMIP6_modelmean_Sergio. Like
+last time you’ll see a separate file for air temperature “ta”, surface
+air temperature “tas” atmospheric specific humidity “hus” and for
+surface specific humidity “huss”. You are looking for the versions
+with “amip” in the filename.  Note the AMIP runs are only for Jan 1979
+to December 2014, shorter than the fully coupled historical runs. So
+keep that in mind in case your codes need some modifying.
+
+I used same 11 models we used for the historical, hist-nat and
+hist-GHG model-mean results so you can easily compare with AMIP. At
+some point, especially if you want to publish these results, it may be
+worth adding more models in for AMIP and historical runs. We stopped
+at these 11 models because they are the only ones also available for
+hist-nat and hist-GHG but I’m not sure you are planning to use those
+extra two experiments anymore (used to decompose the historical
+results into contributions from natural vs GHG forcing only). I don’t
+think adding models will change your model-mean results, but it can’t
+hurt to add more if they are available. At least for the sake of
+completeness.
+
+Let me know if you run into any issues! I saved the original amip
+files for each model in that directory tree we created at
+/asl/models/cmip6 in case you want to use them down the road.
+
+ 
+
+Ryan
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 /asl/models/cmip6/[experiment name]/[variable type]/[temporal frequency]/[variable name]/[model name]/*files.nc
 For example for the file tas_Amon_NorESM2-LM_historical_r1i1p1f1_gn_201001-201412.nc,  the path would be: 
 /asl/models/cmip6/historical/atmos/mon/tas/NorESM2-LM
@@ -22,6 +56,7 @@ me know. Now that I have all the code set up, it will be really quick
 to make changes.
 
 dir0 = '/asl/models/cmip6/';
+dir0 = '/asl/s1/rkramer/CMIP6_modelmean_Sergio/';
 
 expt_name = 'hist-GHG';   %% only GHG forcings
 expt_name = 'hist-nat';   %% only natural forcings
@@ -65,34 +100,44 @@ fip = mktempS('fx.ip.rtp');
 fop = mktempS('fx.op.rtp');
 frp = mktempS('fx.rp.rtp');
 
-hus = read_netcdf_lls('/asl/s1/rkramer/CMIP6_modelmean_Sergio/hus_CMIP6_historical_modelmean.nc');
-huss = read_netcdf_lls('/asl/s1/rkramer/CMIP6_modelmean_Sergio/huss_CMIP6_historical_modelmean.nc');
-ta   = read_netcdf_lls('/asl/s1/rkramer/CMIP6_modelmean_Sergio/ta_CMIP6_historical_modelmean.nc');
-tas  = read_netcdf_lls('/asl/s1/rkramer/CMIP6_modelmean_Sergio/tas_CMIP6_historical_modelmean.nc');
+hus = read_netcdf_lls('/asl/s1/rkramer/CMIP6_modelmean_Sergio/hus_CMIP6_amip_modelmean.nc');
+huss = read_netcdf_lls('/asl/s1/rkramer/CMIP6_modelmean_Sergio/huss_CMIP6_amip_modelmean.nc');
+ta   = read_netcdf_lls('/asl/s1/rkramer/CMIP6_modelmean_Sergio/ta_CMIP6_amip_modelmean.nc');
+tas  = read_netcdf_lls('/asl/s1/rkramer/CMIP6_modelmean_Sergio/tas_CMIP6_amip_modelmean.nc');
 
 %% "time" is hours since noon at the midpoint of the first month
 
 figure(1); pcolor(nanmean(tas.tas,3)'); colormap jet; shading flat; colorbar; title('mean ST')
 figure(2); pcolor(nanmean(huss.huss,3)'); colormap jet; shading flat; colorbar; title('mean SH at surface')
 
-cmip6_start = 1850;
-
-numtime = (2015-cmip6_start)*12;   %% yes, the 1980 timesteps Ryan has saved
-
 allyears = [];
 allmonths = [];
-for ii = cmip6_start:2014
+
+amip6_start = 1850;
+amip6_start = 1979;
+
+numtime = (2015-amip6_start)*12;   %% yes, the 1980 timesteps Ryan has saved
+
+for ii = amip6_start:2014
   junkyear = ii*ones(1,12);
   junkmonth = [1 2 3 4 5 6 7 8 9 10 11 12];
   allyears = [allyears junkyear];
   allmonths = [allmonths junkmonth];
 end
 
-i2002 = (2002-cmip6_start)*12 + 9;  %% 2002/09
-i2014 = (2014-cmip6_start)*12 + 8;  %% 2014/09
+i2002 = (2002-amip6_start)*12 + 9;  %% 2002/09
+i2014 = (2014-amip6_start)*12 + 8;  %% 2014/09
 [allyears(i2002) allmonths(i2002) allyears(i2014) allmonths(i2014)]
 
 [h,ha,p,pa] = rtpread('/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp');
+
+if length(pa) == 0
+  pa = {{'profiles','rtime','seconds since 1993'}};
+  pa = {{'profiles','rtime','seconds since 1958'}};
+end
+if length(ha) == 0
+  ha = {{'header','hdf file','amip6 stuff'}};
+end
 
 yyuse = [2002 2002 2002 2002];
 mmuse = [09   10   11   12  ];
@@ -110,13 +155,13 @@ yy = 2014; yjunk = yy*ones(1,8);
 %for ii = i2002 : i2014
 for ii = JOB + (i2002-1)
   [allyears(ii) allmonths(ii) yyuse(ii-i2002+1) mmuse(ii-i2002+1)]  
-  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/CMIP6/Tile_Center/cmip6_tile_center_monthly_timestep_' num2str(ii-i2002+1,'%03d') '.mat']; 
+  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/AMIP6/Tile_Center/amip6_tile_center_monthly_timestep_' num2str(ii-i2002+1,'%03d') '.mat']; 
   
 addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
 addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
 addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/time
   p.rlon = wrapTo180(p.rlon);
-  [p,pa] = rtp_add_emis(p,pa);
+%  [p,pa] = rtp_add_emis(p,pa);
 
   pnew_ip = p;
   hnew_ip = h;
@@ -223,8 +268,8 @@ addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/time
 
   yyuseII = yyuse(ii-i2002+1);
   mmuseII = mmuse(ii-i2002+1);
-  comment = 'see /home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/driver_compute_cmip6_profile_rtpfiles.m';
-  comment = 'see /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_CMIP6/clust_compute_cmip6_profile_rtpfiles.m';
+  comment = 'see /home/sergio/MATLABCODE/oem_pkg_run/FIND_NWP_MODEL_TRENDS/driver_compute_amip6_profile_rtpfiles.m';
+  comment = 'see /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_CMIP6/clust_compute_amip6_profile_rtpfiles.m';
   saver = ['save ' fout ' comment        hnew_ip ha pnew_ip pa     hnew_op ha2 pnew_op pa2    yyuseII mmuseII'];
   if ~exist(fout)
     [yyuseII mmuseII]

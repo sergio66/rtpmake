@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # have 12 years of data (2002/09 to 2014/08) so 12x12 = 144
-# run this with sbatch -p high_mem --array=1-144 sergio_matlab_jobB.sbatch 
+# run this with sbatch -p high_mem --array=1-144 sergio_matlab_jobB.sbatch 1          for cmip6
+# run this with sbatch -p cpu2021  --array=1-144 sergio_matlab_jobB.sbatch 2          for amip6
 
 #  Name of the job:
-#SBATCH --job-name=CLUST_MAKE_CMIP6_RTP
+#SBATCH --job-name=CLUST_MAKE_ACMIP6_RTP
 #  N specifies that 1 job step is to be allocated per instance of
 #matlab
 #SBATCH -N1
@@ -38,9 +39,12 @@ fi
 ########################################################################
 
 if [[ "$1" -eq "" ]]; then
-  echo "cmd line arg = DNE, filelist run"
+  echo "cmd line arg = DNE, cmip6 filelist run"
   srun matlab -nodisplay -r "clust_compute_cmip6_profile_rtpfiles;exit"
 elif [[ "$1" -eq "1" ]]; then
-  echo "cmd line arg = 1, filelist run"
+  echo "cmd line arg = 1, cmip6 filelist run"
   srun matlab -nodisplay -r "clust_compute_cmip6_profile_rtpfiles;exit"
+elif [[ "$1" -eq "2" ]]; then
+  echo "cmd line arg = 1, amip6 filelist run"
+  srun matlab -nodisplay -r "clust_compute_amip6_profile_rtpfiles;exit"
 fi

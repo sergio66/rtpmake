@@ -1,0 +1,44 @@
+>> addpath /home/sergio/MATLABCODE
+>> a = read_netcdf_lls('/umbc/xfs3/strow/asl/merra2_monthly/2019/merra2_201912_sfc.nc');
+>> a
+         time: 0
+           q2: [576x361 double]
+           ci: [576x361 double]
+           sp: [576x361 double]
+          tcc: [576x361 double]
+          u10: [576x361 double]
+          v10: [576x361 double]
+          skt: [576x361 double]
+    longitude: [576x1 double]
+     latitude: [361x1 double]
+
+>> b = read_netcdf_lls('/umbc/xfs3/strow/asl/merra2_monthly/2019/merra2_201912_lev.nc');
+>> b
+         time: 0
+           rh: [576x361x42 double]
+            t: [576x361x42 double]
+            q: [576x361x42 double]
+           o3: [576x361x42 double]
+         clwc: [576x361x42 double]
+         ciwc: [576x361x42 double]
+           cc: [576x361x42 double]
+    longitude: [576x1 double]
+     latitude: [361x1 double]
+        level: [42x1 double]
+
+semilogy(b.level,'o-')    %% 1000 to 0.1 mb
+imagesc(flipud(a.skt')); colormap jet; colorbar
+
+>> imagesc(flipud(a.skt')); colormap jet; colorbar
+>> imagesc(flipud(a.tcc')); colormap jet; colorbar
+>> imagesc(flipud(a.ci')); colormap jet; colorbar
+>> imagesc(flipud(a.sp')); colormap jet; colorbar
+>> imagesc(flipud(a.u10')); colormap jet; colorbar
+>> imagesc(flipud(a.v10')); colormap jet; colorbar
+>> imagesc(flipud(squeeze(b.t(:,:,1))')); colormap jet; colorbar
+>> imagesc(flipud(squeeze(b.t(:,:,10))')); colormap jet; colorbar
+>> imagesc(flipud(squeeze(b.q(:,:,10))')); colormap jet; colorbar
+>> imagesc(flipud(squeeze(b.o3(:,:,10))')); colormap jet; colorbar
+>> imagesc(flipud(squeeze(b.cc(:,:,10))')); colormap jet; colorbar
+>> imagesc(flipud(squeeze(b.ciwc(:,:,10))')); colormap jet; colorbar
+>> imagesc(flipud(squeeze(b.clwc(:,:,10))')); colormap jet; colorbar
