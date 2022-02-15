@@ -8,6 +8,7 @@ sfc = read_netcdf_lls('/asl/models/era5_avg/2002/2002-08_sfc.nc');
 lev = read_netcdf_lls('/asl/models/era5_avg/2002/2002-08_lev.nc');
 era5plevs =  lev.level;
 save /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA5/era5plevs.mat era5plevs
+NOTE era5plevs are from 1 to 1000 mb ie automatically already sorted from minimum to maximum
 %}
 
 function [prof, head, pattr] = fill_era5_monthly(prof, head, pattr)
@@ -144,7 +145,8 @@ for i=1:n
          % F(fhi).msl.ig   % Not in rtp for now
          % Hybrid parameters
          % levid = 1 is top of atmosphere
-         % b are the sortedd level IDs   
+         % b are the sortedd level IDs
+         % NOTE era5plevs are from 1 to 1000 mb ie automatically already sorted from minimum to maximum   
          [b,j]=sort(F(fhi).levid);
          for l=1:length(F(fhi).levid)
             prof.ptemp(l,k) = F(fhi).t(j(l)).ig(rlat,rlon);
@@ -159,6 +161,7 @@ for i=1:n
          %prof.plevs(:,k) = xtemp(b,:);  % subset to ones in grib file
          %prof.nlevs(k) = length(F(fhi).levid);
 
+         % NOTE era5plevs are from 1 to 1000 mb ie automatically already sorted from minimum to maximum   
          xtemp = double(era5plevs);
          prof.plevs(1:37,k) = xtemp * ones(1,length(k));  % subset to ones in grib file
          prof.nlevs(k) = 37;

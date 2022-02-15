@@ -2,8 +2,7 @@
 
 %% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-JOB = 228
-JOB = 1
+%JOB = 228
 
 addpath /asl/matlib/rtptools/
 addpath /asl/matlib/aslutil
@@ -98,12 +97,12 @@ end
 
 rlon = wrapTo180(rlon);
 
-figure(1); scatter_coast(rlon,rlat,50,solzen); colormap jet
-figure(2); scatter_coast(rlon,rlat,50,satzen); colormap jet
-figure(3); scatter_coast(rlon,rlat,50,hour); colormap jet
-figure(4); scatter_coast(rlon,rlat,50,bt1231); colormap jet
-figure(5); scatter_coast(rlon,rlat,50,rlon-p.rlon); colormap jet
-figure(6); scatter_coast(rlon,rlat,50,rlat-p.rlat); colormap jet
+figure(1); scatter_coast(rlon,rlat,50,solzen); title('solzen'); colormap jet; 
+figure(2); scatter_coast(rlon,rlat,50,satzen); title('satzen'); colormap jet
+figure(3); scatter_coast(rlon,rlat,50,hour);   title('hour'); colormap jet
+figure(4); scatter_coast(rlon,rlat,50,bt1231); title('BT1231'); colormap jet
+figure(5); scatter_coast(rlon,rlat,50,rlon-p.rlon); title('rlon-p.rlon'); colormap jet
+figure(6); scatter_coast(rlon,rlat,50,rlat-p.rlat); title('rlat-p.rlat'); colormap jet
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% dirs used by /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries
@@ -180,8 +179,8 @@ if iDo > 0
   pnew_ip.co2ppm = co2ppm;
   fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),pnew_ip.co2ppm(1));
   fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),pnew_ip.co2ppm(end));
-  figure(1); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_ip.co2ppm);
-  figure(2); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_ip.stemp); title('stemp')
+  figure(1); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_ip.co2ppm); title('co2ppm')
+  figure(2); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_ip.stemp);  title('stemp')
   pause(0.1)
 
   fip = mktemp('fx.ip.rtp');
@@ -201,7 +200,8 @@ if iDo > 0
   run_sarta.sartacloud_code = code1;
   run_sarta.co2ppm = co2ppm;
 
-  [p2] = driver_sarta_cloud_rtp(hnew_ip,ha,pnew_ip,pa,run_sarta);
+  %[p2] = driver_sarta_cloud_rtp(hnew_ip,ha,pnew_ip,pa,run_sarta);
+  [p2] = driver_wrapperArbNlevs_sarta_cloud_rtp(hnew_ip,ha,pnew_ip,pa,run_sarta);
   %pnew_ip.rcalc = p2.rcalc;
   %pnew_ip.sarta_rclearcalc = p2.sarta_rclearcalc;
 

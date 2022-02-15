@@ -8,6 +8,7 @@ sfc = read_netcdf_lls('/asl/models/merra2_monthly/2019/merra2_201912_sfc.nc');
 lev = read_netcdf_lls('/asl/models/merra2_monthly/2019/merra2_201912_lev.nc');
 merra2plevs =  lev.level;
 save /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_MERRA/merra2plevs.mat merra2plevs
+% NOTE merra2plevs are from 1000 to 1 mb mb ie from maximum to minimum
 %}
 
 function [prof, head, pattr] = fill_merra2_monthly(prof, head, pattr)
@@ -150,12 +151,15 @@ for i=1:n
          prof.plat(k) = floor(rlat/gdlat)*gdlat + gdlat/2;
          prof.plon(k) = wrapTo180(floor(rlon/gdlon)*gdlon + gdlon/2);
 
+         iVers = 0; %% the orginal code
+
          % F(fhi).tcwv.ig  % Total column water?  Use this instead of ours?
          % F(fhi).msl.ig   % Not in rtp for now
          % Hybrid parameters
          % levid = 1 is top of atmosphere
          % b are the sortedd level IDs   
-         [b,j]=sort(F(fhi).levid);
+         [b,j]=sort(F(fhi).levid);  %% NOTE F(hi).levid is basically same as merra2plevs, so if you sort things, watch out!!!!
+         % NOTE merra2plevs are from 1000 to 1 mb mb ie from maximum to minimum so this SWAPS things if you are not careful
          for l=1:length(F(fhi).levid)
             prof.ptemp(l,k) = F(fhi).t(j(l)).ig(rlat,rlon);
             prof.gas_1(l,k) = F(fhi).q(j(l)).ig(rlat,rlon);
@@ -164,17 +168,59 @@ for i=1:n
             prof.clwc(l,k)  = F(fhi).clwc(j(l)).ig(rlat,rlon);
             prof.ciwc(l,k)  = F(fhi).ciwc(j(l)).ig(rlat,rlon);
          end
-
+         
 % Only want pressure levels in grib file, in order
          %xtemp = p60_ecmwf(prof.spres(k));  % all 137 pressure levels         
          %prof.plevs(:,k) = xtemp(b,:);  % subset to ones in grib file
          %prof.nlevs(k) = length(F(fhi).levid);
 
-         xtemp = double(merra2plevs);
+         xtemp = double(sort(merra2plevs));  %% THIS IS NEW, before eg for era5plevs, I did not sort it since things were fine
          prof.plevs(1:42,k) = xtemp * ones(1,length(k));  % subset to ones in grib file
          prof.nlevs(k) = 42;
 
-         %% now have to fix the proiles wrt surface
+%{ 
+% for 4608 tiles, dbuggging a tropical ocean profile (2333) vs Himalayas (3149 3220 3221 3222)
+semilogy(prof.ptemp(:,[2333 3149 3220 3221 3222]),flipud(merra2plevs)); set(gca,'ydir','reverse')
+ax = axis; line([ax(1) ax(2)],[mean(prof.spres([3149 3220 3221 3222])) mean(prof.spres([3149 3220 3221 3222]))],'color','k');
+
+xtemp = double(sort(merra2plevs)); 
+semilogy(prof.ptemp(:,[2333 3149 3220 3221 3222]),xtemp); set(gca,'ydir','reverse')
+ax = axis; line([ax(1) ax(2)],[mean(prof.spres([3149 3220 3221 3222])) mean(prof.spres([3149 3220 3221 3222]))],'color','k');
+
+semilogy(prof.ptemp(:,[2333 3149 3220 3221 3222]),prof.plevs(:,[2333 3149 3220 3221 3222])); set(gca,'ydir','reverse')
+ax = axis; line([ax(1) ax(2)],[mean(prof.spres([3149 3220 3221 3222])) mean(prof.spres([3149 3220 3221 3222]))],'color','k');
+
+[merra2plevs prof.ptemp(:,[2333 3149 3220 3221 3222])]
+[xtemp       prof.ptemp(:,[2333 3149 3220 3221 3222])]
+%}
+
+         for ijk=1:length(prof.stemp)
+           woo = find(isnan(prof.ptemp(:,ijk)) | isnan(prof.gas_1(:,ijk)) | isnan(prof.gas_3(:,ijk)) | isnan(prof.cc(:,ijk)) | isnan(prof.ciwc(:,ijk)) | isnan(prof.clwc(:,ijk)));
+           if length(woo) > 0
+             nanprofile(ijk) = length(woo);
+             nanabovesurface(ijk) = length(find(xtemp > prof.spres(ijk)));
+             zoo = setdiff(1:length(F(fhi).levid),woo);
+             goo = length(F(fhi).levid)-length(zoo)+1:length(F(fhi).levid);
+             prof.ptemp(woo,ijk) = -9999;
+             prof.gas_1(goo,ijk) = 0;
+             prof.gas_3(goo,ijk) = 0;
+             prof.cc(goo,ijk)   = 0;
+             prof.clwc(goo,ijk) = 0;
+             prof.ciwc(goo,ijk) = 0;
+             prof.nlevs(ijk) = length(zoo);
+           else
+             nanprofile(ijk) = 0;
+             nanabovesurface(ijk) = length(F(fhi).levid);
+             prof.nlevs(ijk) = 42;
+           end
+         end
+
+% scatter_coast(prof.rlon,prof.rlat,50,prof.nlevs)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%{          
+OLD AND WRONG SINCE I FORGOT ABOUT SORTING merra2plevs
+         %% now have to fix the profiles wrt surface, no need any more since now xtemp is sorted
          for ijk=1:length(prof.stemp)
            woo = find(isnan(prof.ptemp(:,ijk)) | isnan(prof.gas_1(:,ijk)) | isnan(prof.gas_3(:,ijk)) | isnan(prof.cc(:,ijk)) | isnan(prof.ciwc(:,ijk)) | isnan(prof.clwc(:,ijk)));
            if length(woo) > 0
@@ -183,11 +229,11 @@ for i=1:n
              zoo = setdiff(1:length(F(fhi).levid),woo);
              goo = length(F(fhi).levid)-length(zoo)+1:length(F(fhi).levid);
              prof.ptemp(goo,ijk) = prof.ptemp(zoo,ijk);    prof.ptemp(1:min(goo)-1,ijk) = -9999;
-             prof.gas_1(goo,ijk) = prof.gas_1(zoo,ijk);    prof.gas_1(1:min(goo)-1,ijk) = -9999;
-             prof.gas_3(goo,ijk) = prof.gas_3(zoo,ijk);    prof.gas_3(1:min(goo)-1,ijk) = -9999;
-             prof.cc(goo,ijk)   = prof.cc(zoo,ijk);        prof.cc(1:min(goo)-1,ijk) = -9999;
-             prof.clwc(goo,ijk) = prof.clwc(zoo,ijk);      prof.clwc(1:min(goo)-1,ijk) = -9999;
-             prof.ciwc(goo,ijk) = prof.ciwc(zoo,ijk);      prof.ciwc(1:min(goo)-1,ijk) = -9999;
+             prof.gas_1(goo,ijk) = prof.gas_1(zoo,ijk);    prof.gas_1(1:min(goo)-1,ijk) = 0;
+             prof.gas_3(goo,ijk) = prof.gas_3(zoo,ijk);    prof.gas_3(1:min(goo)-1,ijk) = 0;
+             prof.cc(goo,ijk)   = prof.cc(zoo,ijk);        prof.cc(1:min(goo)-1,ijk) = 0;
+             prof.clwc(goo,ijk) = prof.clwc(zoo,ijk);      prof.clwc(1:min(goo)-1,ijk) = 0;
+             prof.ciwc(goo,ijk) = prof.ciwc(zoo,ijk);      prof.ciwc(1:min(goo)-1,ijk) = 0;
              prof.nlevs(ijk) = length(zoo);
            else
              nanprofile(ijk) = 0;
@@ -195,6 +241,9 @@ for i=1:n
              prof.nlevs(ijk) = 42;
            end
          end
+OLD AND WRONG SINCE I FORGOT ABOUT SORTING merra2plevs
+%}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
       end  % k loop  LLS
    end
