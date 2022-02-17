@@ -3,6 +3,7 @@
 %% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 %JOB = 228
+%JOB = 1
 
 addpath /asl/matlib/rtptools/
 addpath /asl/matlib/aslutil
@@ -18,6 +19,29 @@ system_slurm_stats
 
 iDorA = -1;  %% asc
 iDorA = +1;  %% desc
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% make sure all files are greater than 20400000 bytes in size
+% ls -lt /asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/MERRA2/Tile_Center/DESC/ | grep -in 'strow 1'           should give nothin
+% ls -lt /asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/MERRA2/Tile_Center/DESC/ | grep -in 'strow 20[123]'     should give nothin
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% dirs used by /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries
+if iDorA > 0
+  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/MERRA2/Tile_Center/DESC/merra2_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+elseif iDorA < 0
+  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/MERRA2/Tile_Center/ASC/merra2_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+else
+  iDorA
+  error('need iDorA = +/- 1')
+end
+
+iDo = +1;
+if exist(fout)
+  fprintf(1,'JOB %3i : avg era timeseries file %s already exists \n',JOB,fout);
+  error('noooooooo')
+  iDo = -1;
+end
 
 N = 29; N1 = 1;
 firstORend = 0;
@@ -105,21 +129,6 @@ figure(5); scatter_coast(rlon,rlat,50,rlon-p.rlon); title('rlon-p.rlon'); colorm
 figure(6); scatter_coast(rlon,rlat,50,rlat-p.rlat); title('rlat-p.rlat'); colormap jet
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% dirs used by /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries
-if iDorA > 0
-  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/MERRA2/Tile_Center/DESC/merra2_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
-elseif iDorA < 0
-  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/MERRA2/Tile_Center/ASC/merra2_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
-else
-  iDorA
-  error('need iDorA = +/- 1')
-end
-
-iDo = +1;
-if exist(fout)
-  fprintf(1,'JOB %3i : avg era timeseries file %s already exists \n',JOB,fout);
-  iDo = -1;
-end
 
 %iDo = +1;  %% forgot to add wet bulb temp and RH
 if iDo > 0
@@ -191,7 +200,7 @@ if iDo > 0
   run_sarta.clear = +1;
   run_sarta.cloud = +1;
   run_sarta.cumsum = 9999;  %% larrabee likes this, puts clouds high so does well for DCC
-  run_sarta.cumsum = -1;    %% this is "closer" to MRO but since cliuds are at centroid, does not do too well with DCC
+  run_sarta.cumsum = -1;    %% this is "closer" to MRO but since cliuds are at centroid, does not do too well with DCC -- but it will fail for Antartica and Himalayas
   code0 = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
   code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
   code1 = '/home/sergio/SARTA_CLOUDY/BinV201/xsarta_apr08_m140_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';

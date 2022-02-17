@@ -174,7 +174,8 @@ for i=1:n
          %prof.plevs(:,k) = xtemp(b,:);  % subset to ones in grib file
          %prof.nlevs(k) = length(F(fhi).levid);
 
-         xtemp = double(sort(merra2plevs));  %% THIS IS NEW, before eg for era5plevs, I did not sort it since things were fine
+         xtemp = double(sort(merra2plevs));   %% THIS IS NEW, before eg for era5plevs, I did not sort it since things were fine
+         xtemp = double(sort(F(fhi).levid));  %% THIS IS EQUIVALENT
          prof.plevs(1:42,k) = xtemp * ones(1,length(k));  % subset to ones in grib file
          prof.nlevs(k) = 42;
 
@@ -194,6 +195,11 @@ ax = axis; line([ax(1) ax(2)],[mean(prof.spres([3149 3220 3221 3222])) mean(prof
 [xtemp       prof.ptemp(:,[2333 3149 3220 3221 3222])]
 %}
 
+%keyboard_nowindow
+%plot(prof.rlon(1:72),prof.rlat(1:72),'.')
+%figure(1); plot(prof.ptemp(:,1:72),prof.plevs(:,1:72)); set(gca,'ydir','reverse'); 
+%figure(2); plot(prof.gas_1(:,1:72),prof.plevs(:,1:72)); set(gca,'ydir','reverse'); disp('ret 1'); pause(0.1)
+
          for ijk=1:length(prof.stemp)
            woo = find(isnan(prof.ptemp(:,ijk)) | isnan(prof.gas_1(:,ijk)) | isnan(prof.gas_3(:,ijk)) | isnan(prof.cc(:,ijk)) | isnan(prof.ciwc(:,ijk)) | isnan(prof.clwc(:,ijk)));
            if length(woo) > 0
@@ -202,11 +208,11 @@ ax = axis; line([ax(1) ax(2)],[mean(prof.spres([3149 3220 3221 3222])) mean(prof
              zoo = setdiff(1:length(F(fhi).levid),woo);
              goo = length(F(fhi).levid)-length(zoo)+1:length(F(fhi).levid);
              prof.ptemp(woo,ijk) = -9999;
-             prof.gas_1(goo,ijk) = 0;
-             prof.gas_3(goo,ijk) = 0;
-             prof.cc(goo,ijk)   = 0;
-             prof.clwc(goo,ijk) = 0;
-             prof.ciwc(goo,ijk) = 0;
+             prof.gas_1(woo,ijk) = 0;
+             prof.gas_3(woo,ijk) = 0;
+             prof.cc(woo,ijk)   = 0;
+             prof.clwc(woo,ijk) = 0;
+             prof.ciwc(woo,ijk) = 0;
              prof.nlevs(ijk) = length(zoo);
            else
              nanprofile(ijk) = 0;
@@ -215,6 +221,8 @@ ax = axis; line([ax(1) ax(2)],[mean(prof.spres([3149 3220 3221 3222])) mean(prof
            end
          end
 
+%figure(3); plot(prof.ptemp(:,1:72),prof.plevs(:,1:72)); set(gca,'ydir','reverse'); 
+%figure(4); plot(prof.gas_1(:,1:72),prof.plevs(:,1:72)); set(gca,'ydir','reverse'); disp('ret 2'); pause(0.1)
 % scatter_coast(prof.rlon,prof.rlat,50,prof.nlevs)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -249,6 +257,8 @@ OLD AND WRONG SINCE I FORGOT ABOUT SORTING merra2plevs
    end
 end
 prof.nlevs = int32(prof.nlevs);
+
+%figure(5); plot(prof.gas_1(:,1:72),prof.plevs(:,1:72)); set(gca,'ydir','reverse'); disp('ret 3'); pause
 
 % Header info
 head.ptype = 0;

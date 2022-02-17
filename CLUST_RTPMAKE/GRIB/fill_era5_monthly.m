@@ -162,7 +162,8 @@ for i=1:n
          %prof.nlevs(k) = length(F(fhi).levid);
 
          % NOTE era5plevs are from 1 to 1000 mb ie automatically already sorted from minimum to maximum   
-         xtemp = double(era5plevs);
+         xtemp = double(era5plevs);          
+         xtemp = double(sort(F(fhi).levid));  %% THIS IS EQUIVALENT
          prof.plevs(1:37,k) = xtemp * ones(1,length(k));  % subset to ones in grib file
          prof.nlevs(k) = 37;
 
