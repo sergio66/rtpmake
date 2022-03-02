@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# run this with sbatch --exclude=cnode[225,267] --array=1-48 --output='testslurm' sergio_matlab_jobB.sbatch
-# run this with sbatch --exclude=cnode[225,267] --array=1-48 sergio_matlab_jobB.sbatch 1 for filelist
-# run this with sbatch --exclude=cnode[225,267] --array=1-48 sergio_matlab_jobB.sbatch 2 for loop over a day
+# run this with  sbatch --exclude=cnode[225,267] --array=1-48 --output='testslurm' sergio_matlab_jobB.sbatch
+# run this with  sbatch --exclude=cnode[225,267] --array=1-48 sergio_matlab_jobB.sbatch 1 for filelist
+# run this with  sbatch -p cpu2021               --array=1-48 sergio_matlab_jobB.sbatch 1 for filelist
+# run this with  sbatch --exclude=cnode[225,267] --array=1-48 sergio_matlab_jobB.sbatch 2 for loop over a day
 
 #  Name of the job:
 #SBATCH --job-name=CLUST_MAKE_ECM_RTP

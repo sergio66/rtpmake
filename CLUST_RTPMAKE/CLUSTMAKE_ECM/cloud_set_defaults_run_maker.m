@@ -172,6 +172,7 @@ for ixx = 1 : length(iaGlist)
       filename = ['/asl/data/airs/L1C/' ystr '/'];
       filename = ['/asl/data/airs/L1C_v672/' ystr '/'];
       filename = ['/asl/airs/l1c_v672/' ystr '/'];
+      filename = ['/asl/airs/l1c_v674/' ystr '/'];
       filename = [filename num2str(days_so_far,'%03d') '/'];
 
       %filename = ['/asl/ftp/incoming/L1c/']; %AIRS.2020.06.20.037.L1C.AIRS_Rad.v6.7.2.0.G20172225834.hdf’

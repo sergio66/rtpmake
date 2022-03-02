@@ -46,3 +46,5 @@ filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/LookAtHurricanes/Hurrica
 filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/pbl_briancaroll_AMT.txt';
 %
 %filelist = 'onetime.txt';
+filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/tonga_volcano_jan2022.txt';
+filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/tonga_volcano_jan2022_jpss.txt';

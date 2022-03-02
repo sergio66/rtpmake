@@ -16,13 +16,24 @@ addpath /home/sergio/MATLABCODE/PLOTTER
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta/
 
 set_filelist
+
+if ~exist('iERAorECM')
+  iERAorECM = +1; %% till June 2019
+  iERAorECM = -1; %% after June 2019
+end
+
+if ~exist('iSNPPorJ1orJ2')
+  iSNPPorJ1orJ2 = +0; %% SuomiNPP
+  iSNPPorJ1orJ2 = +1; %% J1
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-JOB = 14  %% NPP H. Dorian 2019/09/03 at 6.45 am
-JOB = 15  %% J-1 H. Dorian 2019/09/03 at 7.30 am
-JOB = 4   %% NPP HALO lidar 2019/04/25 at 22.10 pm --> JPSS 2019/04/25 at 21.20 pm, kinda misses HALO
-JOB = 3   %% NPP HALO lidar 2019/04/25 at 22.10 pm --> JPSS 2019/04/25 at 21.25 pm, gets most of HALO /asl/s1/sergio/rtp/j1_ccast_hires/allfov/2019/04/25//cloudy_airs_l1c_ecm_sarta_baum_ice.2019.04.25.214.rtp
+%JOB = 14  %% NPP H. Dorian 2019/09/03 at 6.45 am
+%JOB = 15  %% J-1 H. Dorian 2019/09/03 at 7.30 am
+%JOB = 4   %% NPP HALO lidar 2019/04/25 at 22.10 pm --> JPSS 2019/04/25 at 21.20 pm, kinda misses HALO
+%JOB = 3   %% NPP HALO lidar 2019/04/25 at 22.10 pm --> JPSS 2019/04/25 at 21.25 pm, gets most of HALO /asl/s1/sergio/rtp/j1_ccast_hires/allfov/2019/04/25//cloudy_airs_l1c_ecm_sarta_baum_ice.2019.04.25.214.rtp
 
 thefilelist = load(filelist);
 thefilelist = thefilelist(JOB,:);
@@ -40,9 +51,6 @@ iSlabCld_CumSumStrowORGeorge = -1; %% aumann, cumsum -1,   cloud at mean of cld 
 
 yy = yymmdd0(1); mm = yymmdd0(2); dd = yymmdd0(3); gg = iaGlist;
 
-iSNPPorJ1orJ2 = +0; %% SuomiNPP
-iSNPPorJ1orJ2 = +1; %% J1
-
 if iSNPPorJ1orJ2 == 0
   NONONOdout = ['/asl/rtp/cris/npp_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
   dout = ['/asl/s1/sergio/rtp/npp_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
@@ -56,9 +64,6 @@ if ~exist(dout)
   mker = ['!mkdir -p ' dout];
   eval(mker)
 end
-
-iERAorECM = +1; %% till June 2019
-iERAorECM = -1; %% after June 2019
 
 if iERAorECM == 1
   fout = ['fsr_allfov_era_' num2str(gg,'%03d') '*.rtp'];

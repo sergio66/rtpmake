@@ -99,8 +99,8 @@ end
 d.home = [d.home sprintf('/%4d/%03d/',syear,jday)];
 
 % CCAST processing version and get file listing
-vers = 'v20d';  %% wot Chris H code has
 vers = 'v20a';  %% hmm for HALO  /asl/cris/ccast/sdr45_j01_HR//2019/115/  I only see v20a
+vers = 'v20d';  %% wot Chris H code has
 if (~ismember(vers,{'v20d'})) & (~ismember(vers,{'v20a'}))
   error('invalid ccast version'); 
   return; 
