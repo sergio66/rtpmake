@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# run this with sbatch --array=1-X --output='testslurm' sergio_matlab_jobB.sbatch
-# run this with sbatch --array=1-Y sergio_matlab_jobB.sbatch 1 for filelist
-# run this with sbatch --array=1-Z --output='/dev/null' sergio_matlab_jobB.sbatch 
-# run this with sbatch --array=1-240 sergio_matlab_jobB.sbatch 2 for loop over a day
+# run this with   sbatch -p cpu2021 --array=1-X --output='testslurm' sergio_matlab_jobB.sbatch
+# run this with   sbatch -p cpu2021 --array=1-Z --output='/dev/null' sergio_matlab_jobB.sbatch 
+# run this with   sbatch -p cpu2021 --array=1-Y sergio_matlab_jobB.sbatch 1         for filelist
+# run this with   sbatch -p cpu2021 --array=1-240 sergio_matlab_jobB.sbatch 2       for loop over a day
 
 #  Name of the job:
 #SBATCH --job-name=CLUST_MAKE_ERA_RTP
@@ -47,7 +47,7 @@ elif [[ "$1" -eq "1" ]]; then
   srun matlab -nodisplay -r "clustbatch_make_eracloudrtp_sergio_sarta_filelist;exit"
 elif [[ "$1" -eq "2" ]]; then
   echo "cmd line arg = 2, choose day, loop over all granules in the day"
-  srun matlab -nodisplay -r "clust_make_eracloudrtp_sergio_sarta_YYMMDD_loopGG; exit"
+  srun matlab -nodisplay -r "clustbatch_make_eracloudrtp_sergio_sarta_YYMMDD_loopGG; exit"
 elif [[ "$1" -eq "3" ]]; then
   echo "cmd line arg = 3, making uniform clear from allfov"
   srun matlab -nodisplay -r "clustmake_uniformclear_from_clearcalc; exit"

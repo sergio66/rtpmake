@@ -171,8 +171,15 @@ for ixx = 1 : length(iaGlist)
       %% L1C
       filename = ['/asl/data/airs/L1C/' ystr '/'];
       filename = ['/asl/data/airs/L1C_v672/' ystr '/'];
-      filename = ['/asl/airs/l1c_v672/' ystr '/'];
-      filename = ['/asl/airs/l1c_v674/' ystr '/'];
+      if yymmddgg(1) <= 2021
+        if days_so_far <= 266
+          filename = ['/asl/airs/l1c_v672/' ystr '/'];
+        else
+          filename = ['/asl/airs/l1c_v674/' ystr '/'];
+        end
+      elseif yymmddgg(1) > 2021
+        filename = ['/asl/airs/l1c_v674/' ystr '/'];
+      end
       filename = [filename num2str(days_so_far,'%03d') '/'];
 
       %filename = ['/asl/ftp/incoming/L1c/']; %AIRS.2020.06.20.037.L1C.AIRS_Rad.v6.7.2.0.G20172225834.hdf’
@@ -274,6 +281,7 @@ addpath /home/sergio/MATLABCODE/TIME
 time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
 co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
 p.co2ppm = co2ppm;
+run_sarta.co2ppm = p.co2ppm;
 fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),p.co2ppm(1));
 fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),p.co2ppm(end));
 

@@ -274,6 +274,14 @@ for fn=iign
   prof.zobs = ones(1,nobs)*temp;
   clear temp;
 
+addpath /home/sergio/MATLABCODE/TIME
+[xyy,xmm,xdd,xhh] = tai2utcSergio(prof.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
+time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
+co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
+prof.co2ppm = co2ppm;
+fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),prof.co2ppm(1));
+fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),prof.co2ppm(end));
+
   iobs = 1:nobs;
   prof.atrack = int32( 1 + floor((iobs-1)/(nfov*nfor)) );
   prof.xtrack = int32( 1 + mod(floor((iobs-1)/9),30) );
@@ -529,6 +537,7 @@ pause(0.1);
   if(strcmp(prod,'sct'))
     disp('allsky calcs')
 
+run_sarta.co2ppm = prof.co2ppm;
 run_sarta.clear = +1;
 run_sarta.cloud = +1;
 run_sarta.cumsum = -1;    %% this is "closer" to MRO but since cliuds are at centroid, does not do too well with DCC
@@ -544,6 +553,10 @@ run_sarta.sartaclear_code = sartaclr_bin.fsr;
 run_sarta.sartacloud_code = sartasct_bin.fsr;
 
 run_sarta
+
+    if ~isfield(prof,'scanang')
+      prof.scanang = saconv(prof.satzen,prof.zobs);
+    end
 
     [p2] = driver_sarta_cloud_rtp(head,hattr,prof,pattr,run_sarta);
     [head,hattr,p2x,pattr] = rtptrim_sartacloud(head,hattr,p2,pattr);
