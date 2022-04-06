@@ -58,7 +58,9 @@ addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
 addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS/Strow_humidity/convert_humidity
 addpath /home/sergio/MATLABCODE/TROPOPAUSE
 
-JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
+% run this with sbatch -p high_mem --array=1-144 sergio_matlab_jobB.sbatch 1          for cmip6
+% run this with sbatch -p cpu2021  --array=1-144 sergio_matlab_jobB.sbatch 2          for amip6
+JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));     %% this is monthly time step since 2002/09
 %JOB = 1
 
 fip = mktempS('fx.ip.rtp');
