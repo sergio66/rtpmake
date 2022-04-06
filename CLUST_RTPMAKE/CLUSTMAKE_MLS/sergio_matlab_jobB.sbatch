@@ -1,8 +1,10 @@
 #!/bin/bash
 
 # have 18 years of data (2004/09 to 2020/08) so 12x18 = 216
+# run this with sbatch -p cpu2021  --array=1-216 sergio_matlab_jobB.sbatch 1          for mls
 # run this with sbatch -p high_mem --array=1-216 sergio_matlab_jobB.sbatch 1          for mls
-
+#    or after running sqfail
+#               sbatch -p high_mem --exclude=cnode006,cnode007,cnode008,cnode027,cnode028 --array=1-216 sergio_matlab_jobB.sbatch 1   for mls; 
 #  Name of the job:
 #SBATCH --job-name=CLUST_MAKE_ACMIP6_RTP
 #  N specifies that 1 job step is to be allocated per instance of

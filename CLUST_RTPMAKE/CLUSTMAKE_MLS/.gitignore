@@ -4,6 +4,8 @@
 slurm*
 disk_space*
 ugh*
+grepslurmerror.txt
+unique_grepslurmerror.txt
 
 # tex work files
 *.aux

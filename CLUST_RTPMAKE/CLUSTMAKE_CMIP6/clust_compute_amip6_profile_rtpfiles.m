@@ -139,6 +139,7 @@ if length(ha) == 0
   ha = {{'header','hdf file','amip6 stuff'}};
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 yyuse = [2002 2002 2002 2002];
 mmuse = [09   10   11   12  ];
 for yy = 2003:2013
@@ -151,6 +152,25 @@ yy = 2014; yjunk = yy*ones(1,8);
            mjunk = [1 2 3 4 5 6 7 8];
   yyuse = [yyuse yjunk];
   mmuse = [mmuse mjunk];
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+yySE = [2002 2014];  %% should do this
+yyuse = ones(1,4)*yySE(1); 
+mmuse = [09   10   11   12  ];
+
+%% now go from 2003 to 2013
+for yy = yySE(1)+1 : yySE(2)-1
+  yjunk = yy*ones(1,12);
+  mjunk = [1 2 3 4 5 6 7 8 9 10 11 12];
+  yyuse = [yyuse yjunk];
+  mmuse = [mmuse mjunk];
+end
+yy = yySE(2); yjunk = yy*ones(1,8);
+           mjunk = [1 2 3 4 5 6 7 8];
+  yyuse = [yyuse yjunk];
+  mmuse = [mmuse mjunk];
+[1:length(yyuse); yyuse; mmuse]';
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %for ii = i2002 : i2014
 for ii = JOB + (i2002-1)

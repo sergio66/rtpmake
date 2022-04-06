@@ -30,18 +30,28 @@ frp = mktempS('fx.rp.rtp');
 
 [h,ha,p,pa] = rtpread('/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp');
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+yySE = [2004 2021];  %% should do this
+yySE = [2004 2020];  %% but only have this data
+
 yyuse = [2004 2004 2004 2004];
+yyuse = ones(1,4)*yySE(1); 
 mmuse = [09   10   11   12  ];
-for yy = 2003:2019
+
+%% now go from 2005 to 2019
+for yy = yySE(1)+1 : yySE(2)-1
   yjunk = yy*ones(1,12);
   mjunk = [1 2 3 4 5 6 7 8 9 10 11 12];
   yyuse = [yyuse yjunk];
   mmuse = [mmuse mjunk];
 end
-yy = 2020; yjunk = yy*ones(1,8);
+yy = 2020;    yjunk = yy*ones(1,8);
+yy = yySE(2); yjunk = yy*ones(1,8);
            mjunk = [1 2 3 4 5 6 7 8];
   yyuse = [yyuse yjunk];
   mmuse = [mmuse mjunk];
+[1:length(yyuse); yyuse; mmuse]';
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 for ii = JOB
   [yyuse(ii) mmuse(ii)]  

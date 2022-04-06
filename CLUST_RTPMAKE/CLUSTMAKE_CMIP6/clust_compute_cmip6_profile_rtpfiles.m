@@ -96,6 +96,7 @@ i2014 = (2014-cmip6_start)*12 + 8;  %% 2014/09
 
 [h,ha,p,pa] = rtpread('/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp');
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 yyuse = [2002 2002 2002 2002];
 mmuse = [09   10   11   12  ];
 for yy = 2003:2013
@@ -109,10 +110,29 @@ yy = 2014; yjunk = yy*ones(1,8);
   yyuse = [yyuse yjunk];
   mmuse = [mmuse mjunk];
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+yySE = [2002 2014];  %% should do this
+yyuse = ones(1,4)*yySE(1); 
+mmuse = [09   10   11   12  ];
+
+%% now go from 2003 to 2013
+for yy = yySE(1)+1 : yySE(2)-1
+  yjunk = yy*ones(1,12);
+  mjunk = [1 2 3 4 5 6 7 8 9 10 11 12];
+  yyuse = [yyuse yjunk];
+  mmuse = [mmuse mjunk];
+end
+yy = yySE(2); yjunk = yy*ones(1,8);
+           mjunk = [1 2 3 4 5 6 7 8];
+  yyuse = [yyuse yjunk];
+  mmuse = [mmuse mjunk];
+[1:length(yyuse); yyuse; mmuse]';
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %for ii = i2002 : i2014
 for ii = JOB + (i2002-1)
   [allyears(ii) allmonths(ii) yyuse(ii-i2002+1) mmuse(ii-i2002+1)]  
-  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/CMIP6/Tile_Center/cmip6_tile_center_monthly_timestep_' num2str(ii-i2002+1,'%03d') '.mat']; 
+  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/CMIP6/Tile_Center/cmip6_tile_center_monthly_timestep_' num2str(ii-i2002+1,'%03d') '.mat'];
   
 addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
 addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
