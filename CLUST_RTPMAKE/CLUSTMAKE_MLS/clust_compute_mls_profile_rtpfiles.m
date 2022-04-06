@@ -75,6 +75,20 @@ for ii = JOB
   mls_T  = ['/asl/xfs3/mls/ML3MBT_004/MLS-Aura_L3MB-Temperature_v04-23-c02_' num2str(yyuse(ii)) '.nc'];
   mls_W  = ['/asl/xfs3/mls/ML3MBH2O_004/MLS-Aura_L3MB-H2O_v04-23-c02_' num2str(yyuse(ii)) '.nc'];
   mls_O3 = ['/asl/xfs3/mls/ML3MBO3_004/MLS-Aura_L3MB-O3_v04-23-c02_' num2str(yyuse(ii)) '.nc'];
+
+  mls_T  = ['/asl/xfs3/mls/ML3MBT_004/MLS-Aura_L3MB-Temperature_v04*' num2str(yyuse(ii)) '.nc'];
+    bonk = dir(mls_T);
+    mls_T = ['/asl/xfs3/mls/ML3MBT_004/' bonk.name];
+  mls_W  = ['/asl/xfs3/mls/ML3MBH2O_004/MLS-Aura_L3MB-H2O_v04*' num2str(yyuse(ii)) '.nc'];
+    bonk = dir(mls_W);
+    mls_W = ['/asl/xfs3/mls/ML3MBH2O_004/' bonk.name];
+  mls_O3 = ['/asl/xfs3/mls/ML3MBO3_004/MLS-Aura_L3MB-O3_v04*' num2str(yyuse(ii)) '.nc'];
+    bonk = dir(mls_O3);
+    mls_O3 = ['/asl/xfs3/mls/ML3MBO3_004/' bonk.name];
+  fprintf(1,' T  = %s \n',mls_T)
+  fprintf(1,' W  = %s \n',mls_W)
+  fprintf(1,' O3 = %s \n',mls_O3)
+
   [aT,aW,aO3] = mls_reader_L3(mls_T,mls_W,mls_O3,mmuse(ii));
   %% T,O3  works from level 08 to 55 (261 to 0,001 mb)
   %% WV works from level 07 to 55 (316 to 0,001 mb)
