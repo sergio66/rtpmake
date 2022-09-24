@@ -20,11 +20,11 @@ JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 yymmdd0  = [2011 03 11];  ddLoop = [];  %% for JPL set 1
 yymmdd0  = [2011 07 11];  ddLoop = [];  %% for JPL set 2
 
-yymmdd0  = [2018 10 31];  ddLoop = [];  %% for Alan Geer set 1
-yymmdd0  = [2018 11 01];  ddLoop = [];  %% for Alan Geer set 2
-
 yymmdd0  = [2018 06 29];  ddLoop = [];  %% for Ruben Delgado chesapeake data and testing IASI-NG
 yymmdd0  = [2022 01 15];  ddLoop = [13 14 15 16 17 18 19 20 21 22];  %% <<<<<<<<<<<<<<<<<< CAN LOOP OVER DAYS >>>>>>>>>>>>>>>>>>>>>>    %% ECMWF says ATMS shows gravity waves from Tonga
+
+yymmdd0  = [2018 10 31];  ddLoop = [];  %% for Alan Geer set 1
+yymmdd0  = [2018 11 01];  ddLoop = [];  %% for Alan Geer set 2
 
 if length(ddLoop) == 0
   ddLoop = yymmdd0(3);

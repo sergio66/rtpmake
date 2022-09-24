@@ -3,7 +3,9 @@
 %% N1 = 1, N2 = number of files to be processed
 
 %% specify text file which has YY MM DD GG lst that needs to be processed 
-filelist = '/home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ECM/gravity_waves.txt';
+%% filelist = '/home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ECM/gravity_waves.txt';
+
+set_filelist
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

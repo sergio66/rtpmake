@@ -39,19 +39,24 @@ sarta   = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
 
 addpath /asl/matlab2012/airs/readers
 addpath /asl/matlib/aslutil
-addpath /asl/matlib/science
+%addpath /asl/matlib/science
+addpath /home/sergio/MATLABCODE/matlib/science/
 addpath /asl/matlib/rtptools
 addpath /asl/matlib/h4tools/
 addpath /asl/matlib/rtptools/
 addpath /asl/matlib/gribtools/
+addpath /asl/matlib/time
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
 addpath /home/sergio/MATLABCODE
+addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
 
-%addpath /home/strow/cress/Work/Rtp
+% addpath /home/strow/cress/Work/Rtp
 % addpath /home/strow/Matlab/Grib     WARNING /home/strow/Matlab/Grib/rtpadd_grib_data.m DIFFERENT than /asl/matlib/gribtools/rtpadd_era_data.m
 % addpath /home/sergio/MATLABCODE/CRIS_HiRes             %% for sergio_fill_ecmwf
 % addpath /home/strow/Git/rtp_prod2/grib                  %% for fill_ecm
-addpath /asl/packages/rtp_prod2/grib
+% addpath /asl/packages/rtp_prod2/grib
+addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/grib
+addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
 
 if iv5or6 == 5
   theinds = (1 : 2378)';
@@ -177,7 +182,18 @@ for ixx = 1 : length(iaGlist)
       %% L1C
       filename = ['/asl/data/airs/L1C/' ystr '/'];
       filename = ['/asl/data/airs/L1C_v672/' ystr '/'];
+      if yymmddgg(1) <= 2021
+        if days_so_far <= 266
+          filename = ['/asl/airs/l1c_v672/' ystr '/'];
+        else
+          filename = ['/asl/airs/l1c_v674/' ystr '/'];
+        end
+      elseif yymmddgg(1) > 2021
+        filename = ['/asl/airs/l1c_v674/' ystr '/'];
+      end
       filename = [filename num2str(days_so_far,'%03d') '/'];
+%filename = ['/asl/ftp/incoming/L1c/']; %AIRS.2020.06.20.037.L1C.AIRS_Rad.v6.7.2.0.G20172225834.hdf’
+
       dir0 = filename;
       filename = [filename 'AIRS.' ystr '.' mstr '.' dstr '.' gstr];
       filename = [filename '.L1C.AIRS_Rad.v6*.hdf'];
@@ -197,6 +213,7 @@ for ixx = 1 : length(iaGlist)
     elseif iv5or6 == 6
       %% find v6_readl2cc.m  /asl/*/rtp_prod2/airs/readers
       addpath /asl/packages/rtp_prod2/airs/readers/
+      addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/airs/readers
       addpath /asl/matlib/time
       [eq_x_tai, f, gdata, attr, opt] = read_airicrad(fname);  % Steve
       f0_2645 = f;
