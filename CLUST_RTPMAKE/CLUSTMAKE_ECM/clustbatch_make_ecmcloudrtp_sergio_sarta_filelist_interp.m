@@ -4,7 +4,7 @@
 %% N1 = 1, N2 = number of files to be processed
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-%JOB = 2
+JOB = 2
 warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,8 +31,15 @@ iSlabCld_CumSumStrowORGeorge = +1; %% strow,  cumsum 9999, cloud at PEAK of wgt 
 iSlabCld_CumSumStrowORGeorge = -1; %% aumann, cumsum -1,   cloud at mean of cld profile
 
 if iPertTCC <= 0
-  cloud_set_defaults_run_maker  %% this is just the nearest ECMWF file, whether 00,06,12,18 analysis or 03,09,15,21 forecast
+  iTimeOffset = 060;     %% time offset in minutes
+  iTimeOffset = 120;     %% time offset in minutes
+  iTimeOffset = -060;    %% time offset in minutes
+  iTimeOffset = -120;    %% time offset in minutes
+
+  iTimeOffset = 000;     %% time offset in minutes
+
+  cloud_set_defaults_run_maker_interp_analysis %% this interps the 00,06,12,18 analysis
 else
-  cloud_set_defaults_run_maker_pertTCC
+  error('enh wazzup doc, not yet possible to interp this : cloud_set_defaults_run_maker_pertTCC')
 end
 

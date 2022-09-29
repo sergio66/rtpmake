@@ -287,12 +287,110 @@ f2645 = f(ichan);
     %[p,h] = sergio_fill_ecmwf(p,h,'/asl/data/ecmwf/',-1);
     %save test_2002_09_08_g044_sergio.mat p h
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%
-    %orig_8_ECMfiles_interp_analysis
-    new_8_ECMfiles_interp_analysis
-    %%%%%%%%%%%%%%%%%%%%%%%%%
+    fprintf(1,'mean p.rtime = %8.6f \n',mean(p.rtime));
+    [xyyh,xmmh,xddh,xhhh] = tai2utcSergio(mean(p.rtime));
+    fprintf(1,'mean rtime in AIRS l1 data corresponds to following : %4i %2i %2i %6.3f \n',xyyh,xmmh,xddh,xhhh);
+    %fprintf(1,'when hhh = %6.3f is same as %2i : %2i \n',hhh,floor(xhhh),floor((xhhh-floor(xhhh))*60));
+    if xhhh >= 0 & xhhh <= 6
+      tB1 = utc2taiSergio(xyyh,xmmh,xddh,0.0);
+      tB2 = utc2taiSergio(xyyh,xmmh,xddh,6.0);
+    elseif xhhh > 6 & xhhh <= 12
+      tB1 = utc2taiSergio(xyyh,xmmh,xddh,6.0);
+      tB2 = utc2taiSergio(xyyh,xmmh,xddh,12.0);      
+    elseif xhhh > 12 & xhhh <= 18
+      tB1 = utc2taiSergio(xyyh,xmmh,xddh,12.0);
+      tB2 = utc2taiSergio(xyyh,xmmh,xddh,18.0);      
+    elseif xhhh > 18 & xhhh <= 24
+      tB1 = utc2taiSergio(xyyh,xmmh,xddh,18.0);
+      tB2 = utc2taiSergio(xyyh,xmmh,xddh,24.0);
+    end
+    frac1 = 1 - (p.rtime-tB1)/(6*60*60);
+    frac1(frac1 < 0) = 0;
+    frac1(frac1 > 1) = 1;    
+    frac2 = 1-frac1;
+    
+keyboard_nowindow
+which fill_ecmwf
+disp('calling fill_ecmwf')
 
+    [pClosest,hClosest] = fill_ecmwf(p,h);
+    pB1 = p; pB1.rtime = ones(size(pB1.rtime)) * tB1;
+      [pB1,hB1] = fill_ecmwf(pB1,h);
+    pB2 = p; pB2.rtime = ones(size(pB1.rtime)) * tB2;      
+    [pB2,hB2] = fill_ecmwf(pB2,h);
+    
+    scatter_coast(pClosest.rlon,pClosest.rlat,30,pClosest.stemp-pB1.stemp);
+    p = pClosest;
+    p.sst   = frac1 .* pB1.sst + frac2 .* pB2.sst;
+    p.spres = frac1 .* pB1.spres + frac2 .* pB2.spres;    
+    p.stemp = frac1 .* pB1.stemp + frac2 .* pB2.stemp;
+    p.wspeed = frac1 .* pB1.wspeed + frac2 .* pB2.wspeed;
+    p.wsource = frac1 .* pB1.wsource + frac2 .* pB2.wsource;
+    p.tcc = frac1 .* pB1.tcc + frac2 .* pB2.tcc;
+    p.plat = frac1 .* pB1.plat + frac2 .* pB2.plat;
+    p.plon = frac1 .* pB1.plon + frac2 .* pB2.plon;
+
+    frac1matr = ones(mean(pB1.nlevs),1) * frac1;
+    frac2matr = ones(mean(pB1.nlevs),1) * frac2;        
+    p.ptemp = frac1matr .* pB1.ptemp + frac2matr .* pB2.ptemp;        
+    p.gas_1 = frac1matr .* pB1.gas_1 + frac2matr .* pB2.gas_1;
+    p.gas_3 = frac1matr .* pB1.gas_3 + frac2matr .* pB2.gas_3;
+    p.cc = frac1matr .* pB1.cc + frac2matr .* pB2.cc;
+    p.clwc = frac1matr .* pB1.clwc + frac2matr .* pB2.clwc;
+    p.ciwc = frac1matr .* pB1.ciwc + frac2matr .* pB2.ciwc;            
+    p.plevs = frac1matr .* pB1.plevs + frac2matr .* pB2.plevs;
+    
+    %p.nlevs = frac1 .* pB1.nlevs + frac2 .* pB2.nlevs;
+    p.nlevs = pB1.nlevs;
     p0 = p;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%{
+p321 = find(p.plevs(:,1) > 321,1);
+
+figure(1); scatter_coast(pClosest.rlon,pClosest.rlat,30,p.gas_1(p321,:));
+figure(2); scatter_coast(pClosest.rlon,pClosest.rlat,30,pClosest.gas_1(p321,:));
+figure(3); scatter_coast(pClosest.rlon,pClosest.rlat,30,pB1.gas_1(p321,:));
+figure(4); scatter_coast(pClosest.rlon,pClosest.rlat,30,pB2.gas_1(p321,:));
+
+rh321      = mixr2rh(p.gas_1(p321,:)*1000,p.plevs(p321,:),p.ptemp(p321,:),1);  %% from IDL routines
+irionrh321 = mixr2rh(p.gas_1(p321,:)*1000,p.plevs(p321,:),p.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+rah = p.gas_1(p321,:); %% SH in g/g
+rah = rah./(1-rah);       %% mixR in g/g
+irionrh321 = mixr2rh(rah*1000,p.plevs(p321,:),p.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+xrh321 = convert_humidity(p.plevs(p321,:),p.ptemp(p321,:),p.gas_1(p321,:),'mixing ratio','relative humidity');  %% from Strow
+xrh321 = xrh321*100;
+figure(1); clf; scatter_coast(pClosest.rlon,pClosest.rlat,30,irionrh321); caxis([0 120]); colormap jet; title('analysis interp')
+axis([115 145 10 40]); colormap(irion_idl_colormap);
+    
+rh321      = mixr2rh(pClosest.gas_1(p321,:)*1000,pClosest.plevs(p321,:),pClosest.ptemp(p321,:),1);  %% from IDL routines
+irionrh321 = mixr2rh(pClosest.gas_1(p321,:)*1000,pClosest.plevs(p321,:),pClosest.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+rah = pClosest.gas_1(p321,:); %% SH in g/g
+rah = rah./(1-rah);       %% mixR in g/g
+irionrh321 = mixr2rh(rah*1000,pClosest.plevs(p321,:),pClosest.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+xrh321 = convert_humidity(pClosest.plevs(p321,:),pClosest.ptemp(p321,:),pClosest.gas_1(p321,:),'mixing ratio','relative humidity');  %% from Strow
+xrh321 = xrh321*100;
+figure(2); clf; scatter_coast(pClosest.rlon,pClosest.rlat,30,irionrh321); caxis([0 120]); colormap jet; title('pClosest in time')
+axis([115 145 10 40]); colormap(irion_idl_colormap);
+
+[hx,hax,px,pax] = rtpread('/asl/rtp/rtprod_airs/2002/09/06/cloudy_airs_l1b_ecm_sarta_baum_ice.2002.09.06.044.rtp');
+p321 = find(px.plevs(:,1) > 321,1)
+rh321      = mixr2rh(px.gas_1(p321,:)*1000,px.plevs(p321,:),px.ptemp(p321,:),1);  %% from IDL routines
+irionrh321 = mixr2rh(px.gas_1(p321,:)*1000,px.plevs(p321,:),px.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+rah = px.gas_1(p321,:); %% SH in g/g
+rah = rah./(1-rah);       %% mixR in g/g
+irionrh321 = mixr2rh(rah*1000,px.plevs(p321,:),px.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+xrh321 = convert_humidity(px.plevs(p321,:),px.ptemp(p321,:),px.gas_1(p321,:),'mixing ratio','relative humidity');  %% from Strow
+xrh321 = xrh321*100;
+figure(3); clf; scatter_coast(pClosest.rlon,pClosest.rlat,30,irionrh321); caxis([0 120]); colormap jet; title('px')
+axis([115 145 10 40]); colormap(irion_idl_colormap);
+
+for ip = 1 : 3
+  figure(ip); colormap jet
+  axis([115 145 10 40]); colormap(irion_idl_colormap);  
+end
+%}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

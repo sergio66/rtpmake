@@ -39,24 +39,29 @@ sarta   = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
 
 addpath /asl/matlab2012/airs/readers
 addpath /asl/matlib/aslutil
-%addpath /asl/matlib/science
-addpath /home/sergio/MATLABCODE/matlib/science/
+addpath /asl/matlib/science
 addpath /asl/matlib/rtptools
 addpath /asl/matlib/h4tools/
 addpath /asl/matlib/rtptools/
 addpath /asl/matlib/gribtools/
-addpath /asl/matlib/time
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
-addpath /home/sergio/MATLABCODE
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
+addpath /home/sergio/MATLABCODE/TIME
+addpath /home/sergio/MATLABCODE/PLOTTER
+addpath /home/sergio/MATLABCODE/COLORMAP
 
-% addpath /home/strow/cress/Work/Rtp
-% addpath /home/strow/Matlab/Grib     WARNING /home/strow/Matlab/Grib/rtpadd_grib_data.m DIFFERENT than /asl/matlib/gribtools/rtpadd_era_data.m
-% addpath /home/sergio/MATLABCODE/CRIS_HiRes             %% for sergio_fill_ecmwf
-% addpath /home/strow/Git/rtp_prod2/grib                  %% for fill_ecm
-% addpath /asl/packages/rtp_prod2/grib
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/grib
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
+%addpath /home/strow/cress/Work/Rtp
+%addpath /home/strow/Matlab/Grib
+
+%addpath /home/sergio/MATLABCODE/CRIS_HiRes             %% for sergio_fill_ecmwf
+%addpath /home/strow/Git/rtp_prod2/grib                  %% for fill_ecm 
+%addpath /asl/rtp_prod2/grib/                           %% for fill_ecmwf
+
+%addpath  /asl/packages/rtp_prod2/grib
+%addpath  /home/sbuczko1/git/rtp_prod2/grib
+
+addpath /home/strow/git/rtp_prod2/grib
+addpath /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB
+addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS/Strow_humidity/convert_humidity/
 
 if iv5or6 == 5
   theinds = (1 : 2378)';
@@ -69,12 +74,7 @@ end
 
 run_sarta.clear = +1;
 run_sarta.cloud = +1;
-
-if iSlabCld_CumSumStrowORGeorge > 0
-  run_sarta.cumsum = 9999;  %% strow pick, cloud at PEAK of wgt fcn
-else
-  run_sarta.cumsum = -1;  %% aumann pick, cloud at wgt mean of profile
-end
+run_sarta.cumsum = 9999;
 
 codeX = 0; %% use default with A. Baran params
 codeX = 1; %% use new     with B. Baum, P. Yang params
@@ -93,15 +93,17 @@ else
 end
 
 %icestr = ['NEWLANDFRAC/cloudy_airs_l1b_ecm' icestr '.'];
+%icestr = ['interp_analysis_cloudy_airs_l1b_ecm' icestr '.'];
 if iv5or6 == 5
-  icestr = ['cloudy_airs_l1b_ecm' icestr '.'];
+  icestr = ['interp_analysis_cloudy_airs_l1b_ecm' icestr ];
 elseif iv5or6 == 6
-  icestr = ['cloudy_airs_l1c_ecm' icestr '.'];
+  icestr = ['interp_analysis_cloudy_airs_l1c_ecm' icestr ];
 end
+icestr = [icestr '_timeoffset_' num2str(iTimeOffset,'%04d') '_'];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% typically iaGList == JOB so this loop runs ONCE .. so you control multiple files via the cluster
+%% typically iaGList == JOB so this loop runs ONCE .. so you control muktiple files via the cluster
 
 for ixx = 1 : length(iaGlist)
   ix = iaGlist(ixx);
@@ -127,7 +129,7 @@ for ixx = 1 : length(iaGlist)
     eval(mker);
     fprintf(1,'made %s \n',fdirOUT)
   end
-  
+
   if iSlabCld_CumSumStrowORGeorge == 1
     fnameOUT= [fdirOUT icestr ystr '.' mstr '.' dstr '.' gstr '.rtp'];
   else
@@ -137,9 +139,6 @@ for ixx = 1 : length(iaGlist)
   eeP = exist(fnameOUT);
 
   if eeP == 0
-    !ls -lt /asl/models/ecmwf
-    !ls -lt /asl/models/ecmwf/2020
-
     fprintf(1,' making %s \n',fnameOUT);
     toucher = ['!touch ' fnameOUT];
     eval(toucher)
@@ -181,7 +180,6 @@ for ixx = 1 : length(iaGlist)
         filename = ['/asl/airs/l1c_v674/' ystr '/'];
       end
       filename = [filename num2str(days_so_far,'%03d') '/'];
-%filename = ['/asl/ftp/incoming/L1c/']; %AIRS.2020.06.20.037.L1C.AIRS_Rad.v6.7.2.0.G20172225834.hdf’
 
       dir0 = filename;
       filename = [filename 'AIRS.' ystr '.' mstr '.' dstr '.' gstr];
@@ -203,8 +201,10 @@ for ixx = 1 : length(iaGlist)
       %% find v6_readl2cc.m  /asl/*/rtp_prod2/airs/readers
       addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/airs/readers
       addpath /asl/matlib/time
+
       [eq_x_tai, f, gdata, attr, opt] = read_airicrad(fname);  % Steve
       f0_2645 = f;
+      end
 
 hdffile = '/home/sergio/MATLABCODE/airs_l1c_srf_tables_lls_20181205.hdf';   % what he gave in Dec 2018
 vchan2834 = hdfread(hdffile,'freq');
@@ -233,8 +233,10 @@ f2645 = f(ichan);
       p = gdata;
     end
 
-    p.pobs = zeros(size(p.solzen));
-    p.upwell = ones(size(p.solzen));
+    p.rtime = p.rtime + iTimeOffset*60;  %% <<<<<<< add on timeoffset , convert to seconds >>>>>>>>>>
+
+    p.pobs = zeros(size(p.solazi));
+    p.upwell = ones(size(p.solazi));
     %p.irinst = AIRSinst*ones(1,nobs);
     %p.findex = grannum*ones(1,nobs);
 
@@ -245,15 +247,9 @@ f2645 = f(ichan);
 
     h.pfields=5; % (1=prof + 4=IRobs);
 
-    if iv5or6 == 5
-      h.nchan = length(theinds);
-      h.ichan = 1:2378;
-      h.vchan = f(h.ichan);
-    else
-      h.nchan = length(theinds2645);
-      h.ichan = theinds2645;;
-      h.vchan = f2645;
-    end
+    h.nchan = length(theinds);
+    h.ichan = theinds;;
+    h.vchan = f(h.ichan);;
 
     %%% this is NEW
     p.landfrac_fromL1B = p.landfrac;
@@ -270,23 +266,61 @@ f2645 = f(ichan);
     %[p,h] = sergio_fill_ecmwf(p,h,'/asl/data/ecmwf/',-1);
     %save test_2002_09_08_g044_sergio.mat p h
 
-which fill_ecmwf
-disp('calling fill_ecmwf')
-
-%p00 = p
-
-    [p,h] = fill_ecmwf(p,h);
-
-addpath /home/sergio/MATLABCODE/TIME
-[xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
-time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
-co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
-p.co2ppm = co2ppm;
-run_sarta.co2ppm = p.co2ppm;
-fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),p.co2ppm(1));
-fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),p.co2ppm(end));
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    orig_8_ECMfiles_interp_analysis
+    %%%%%%%%%%%%%%%%%%%%%%%%%
 
     p0 = p;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%{
+p321 = find(p.plevs(:,1) > 321,1);
+
+figure(1); scatter_coast(pClosest.rlon,pClosest.rlat,30,p.gas_1(p321,:));
+figure(2); scatter_coast(pClosest.rlon,pClosest.rlat,30,pClosest.gas_1(p321,:));
+figure(3); scatter_coast(pClosest.rlon,pClosest.rlat,30,pB1.gas_1(p321,:));
+figure(4); scatter_coast(pClosest.rlon,pClosest.rlat,30,pB2.gas_1(p321,:));
+
+rh321      = mixr2rh(p.gas_1(p321,:)*1000,p.plevs(p321,:),p.ptemp(p321,:),1);  %% from IDL routines
+irionrh321 = mixr2rh(p.gas_1(p321,:)*1000,p.plevs(p321,:),p.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+rah = p.gas_1(p321,:); %% SH in g/g
+rah = rah./(1-rah);       %% mixR in g/g
+irionrh321 = mixr2rh(rah*1000,p.plevs(p321,:),p.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+xrh321 = convert_humidity(p.plevs(p321,:),p.ptemp(p321,:),p.gas_1(p321,:),'mixing ratio','relative humidity');  %% from Strow
+xrh321 = xrh321*100;
+figure(1); clf; scatter_coast(pClosest.rlon,pClosest.rlat,30,irionrh321); caxis([0 120]); colormap jet; title('analysis interp')
+axis([115 145 10 40]); colormap(irion_idl_colormap);
+    
+rh321      = mixr2rh(pClosest.gas_1(p321,:)*1000,pClosest.plevs(p321,:),pClosest.ptemp(p321,:),1);  %% from IDL routines
+irionrh321 = mixr2rh(pClosest.gas_1(p321,:)*1000,pClosest.plevs(p321,:),pClosest.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+rah = pClosest.gas_1(p321,:); %% SH in g/g
+rah = rah./(1-rah);       %% mixR in g/g
+irionrh321 = mixr2rh(rah*1000,pClosest.plevs(p321,:),pClosest.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+xrh321 = convert_humidity(pClosest.plevs(p321,:),pClosest.ptemp(p321,:),pClosest.gas_1(p321,:),'mixing ratio','relative humidity');  %% from Strow
+xrh321 = xrh321*100;
+figure(2); clf; scatter_coast(pClosest.rlon,pClosest.rlat,30,irionrh321); caxis([0 120]); colormap jet; title('pClosest in time')
+axis([115 145 10 40]); colormap(irion_idl_colormap);
+
+[hx,hax,px,pax] = rtpread('/asl/rtp/rtprod_airs/2002/09/06/cloudy_airs_l1b_ecm_sarta_baum_ice.2002.09.06.044.rtp');
+p321 = find(px.plevs(:,1) > 321,1)
+rh321      = mixr2rh(px.gas_1(p321,:)*1000,px.plevs(p321,:),px.ptemp(p321,:),1);  %% from IDL routines
+irionrh321 = mixr2rh(px.gas_1(p321,:)*1000,px.plevs(p321,:),px.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+rah = px.gas_1(p321,:); %% SH in g/g
+rah = rah./(1-rah);       %% mixR in g/g
+irionrh321 = mixr2rh(rah*1000,px.plevs(p321,:),px.ptemp(p321,:),0);  %% from IDL routines, with SVP a linear mix of I/W (Irion)
+xrh321 = convert_humidity(px.plevs(p321,:),px.ptemp(p321,:),px.gas_1(p321,:),'mixing ratio','relative humidity');  %% from Strow
+xrh321 = xrh321*100;
+figure(3); clf; scatter_coast(pClosest.rlon,pClosest.rlat,30,irionrh321); caxis([0 120]); colormap jet; title('px')
+axis([115 145 10 40]); colormap(irion_idl_colormap);
+
+for ip = 1 : 3
+  figure(ip); colormap jet
+  axis([115 145 10 40]); colormap(irion_idl_colormap);  
+end
+%}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %[h,ha,p,pa] = rtpadd_emis_DanZhou2(h,ha,p,pa);
     %p = Prof_add_emis(p,yymmddgg(1),yymmddgg(2),yymmddgg(3));  %% broken crap by whoever
@@ -296,7 +330,9 @@ fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm
     %addpath /asl/rtp_prod2/util/    
     %addpath /asl/packages/rtp_prod2/emis/
     %addpath /asl/packages/rtp_prod2/util/
-
+    %addpath /asl/rtp_prod2/emis/
+    %addpath /asl/rtp_prod2/util/
+ 
     addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis/
     addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/
 
@@ -308,48 +344,12 @@ fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    [p2] = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
+    [p2] = driver_sarta_cloud_rtp(hB2,ha,p,pa,run_sarta);
 
     fnamex = fnameOUT;
     [h,ha,p2x,pa] = rtptrim_sartacloud(h,ha,p2,pa);
     rtpwrite(fnamex,h,ha,p2x,pa)
-    fprintf(1,'saved %s \n',fnamex)
-
-    %{
-    i1231 = find(h.vchan >= 1231,1);
-    tobs1231 = real(rad2bt(h.vchan(i1231),p2x.robs1(i1231,:)));
-    tclr1231 = rad2bt(h.vchan(i1231),p2x.sarta_rclearcalc(i1231,:));
-    tcld1231 = rad2bt(h.vchan(i1231),p2x.rcalc(i1231,:));
-
-    addpath /home/sergio/MATLABCODE/PLOTTER
-    scatter_coast(p2x.rlon,p2x.rlat,10,tobs1231)
-    scatter_coast(p2x.rlon,p2x.rlat,10,tobs1231-tcld1231); caxis([-10 +10]); colorbar
-    %}   
-
-    %{
-    addpath /home/sergio/MATLABCODE/matlib/clouds/sarta/
-    addpath /home/sergio/MATLABCODE/matlib/clouds/TCC/
-    tcc1 = tcc_method1(p);
-    tcc2 = tcc_method2(p);
-    [tcc3A,tcc3B] = tcc_method3(p);
-
-figure(1); scatter_coast(p2x.rlon,p2x.rlat,10,tcc1); colormap jet; title('METHOD 1')
-figure(2); scatter_coast(p2x.rlon,p2x.rlat,10,tcc2); colormap jet; title('METHOD 2')
-figure(3); scatter_coast(p2x.rlon,p2x.rlat,10,tcc3A); colormap jet; title('METHOD 3A')
-figure(4); scatter_coast(p2x.rlon,p2x.rlat,10,tcc3B); colormap jet; title('METHOD 3B')
-figure(5); scatter_coast(p2x.rlon,p2x.rlat,10,p.tcc); colormap jet; title('ORIG')
-
-[Y,I] = sort(p.tcc);
-figure(6); plot(p.tcc(I),tcc1(I),'b',p.tcc(I),tcc2(I),'g',p.tcc(I),tcc3A(I),'r',p.tcc(I),tcc3B(I),'m')
-addpath /home/sergio/MATLABCODE/NANROUTINES
-corr1 = linearcorrelation(p.tcc,tcc1);
-corr2 = linearcorrelation(p.tcc,tcc2);
-corr3A = linearcorrelation(p.tcc,tcc3A);
-corr3B = nanlinearcorrelation(p.tcc,tcc3B);
-[corr1 corr2 corr3A corr3B]
-
-    %}
-    
+    fprintf(1,'saved to %s \n',fnamex)
   else
     fprintf(1,' %s already exists \n',fnameOUT)
   end
