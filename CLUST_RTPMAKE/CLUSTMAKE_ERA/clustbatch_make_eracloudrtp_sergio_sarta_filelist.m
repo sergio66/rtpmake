@@ -16,8 +16,8 @@ thefilelist = thefilelist(JOB,:);
 yymmdd0  = thefilelist(1:3); %% YY MM DD
 iaGlist  = thefilelist(4);   %% granule
 
-yymmdd0 = [2016 01 18]; iaGlist = 180;               %% steve has made this. looks same as mine (colwater = 50 mm water in tropics) ../CLUSTMAKE_ERA5/ERAorECM/allfov_era_airicrad_day_2016018_180.rtp
-yymmdd0 = [2014 01 29]; iaGlist = 16; iaGlist = 32;  iaGlist = 31; %% crazy col water amount, 120 mm
+%yymmdd0 = [2016 01 18]; iaGlist = 180;               %% steve has made this. looks same as mine (colwater = 50 mm water in tropics) ../CLUSTMAKE_ERA5/ERAorECM/allfov_era_airicrad_day_2016018_180.rtp
+5yymmdd0 = [2014 01 29]; iaGlist = 16; iaGlist = 32;  iaGlist = 31; %% crazy col water amount, 120 mm
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 iPertTCC = +1;  %% use tcc model 1 (best so far)

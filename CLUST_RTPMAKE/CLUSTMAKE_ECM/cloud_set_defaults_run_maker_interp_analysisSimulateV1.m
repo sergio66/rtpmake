@@ -19,6 +19,10 @@ HDFSW will be removed in a future release. Use MATLAB.IO.HDFEOS.SW instead.
 
 addpath /home/sergio/MATLABCODE
 
+error('USE cloud_set_defaults_run_maker_interp_analysis')
+error('USE cloud_set_defaults_run_maker_interp_analysis')
+error('USE cloud_set_defaults_run_maker_interp_analysis')
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 iv5or6 = 5;   %% AIRS L1B
@@ -309,9 +313,9 @@ f2645 = f(ichan);
     frac1(frac1 > 1) = 1;    
     frac2 = 1-frac1;
     
-keyboard_nowindow
-which fill_ecmwf
-disp('calling fill_ecmwf')
+% keyboard_nowindow
+% which fill_ecmwf
+% disp('calling fill_ecmwf')
 
     [pClosest,hClosest] = fill_ecmwf(p,h);
     pB1 = p; pB1.rtime = ones(size(pB1.rtime)) * tB1;

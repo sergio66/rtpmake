@@ -104,23 +104,24 @@ for i = 1:n
     skipped = skipped + length(k);
     fprintf(1,'skipping to next time partition, will have to ignore %4i FOVS \n',length(k))
     continue % Go to next partition  ORIGNALLY WAS BREAK SO EXITED THE LOOP COMPLETELY
-   end
+  end
    
   % If the filename has changed, re-load F   
   %keyboard
-   if ~strcmp(ename,fn) 
-      clear F  % Probably not needed
-      disp('New file')
-      F = grib_interpolate(fn_s,fn_h);
-      ename = fn;
-   end   
+  if ~strcmp(ename,fn) 
+    clear F  % Probably not needed
+    disp('New file')
+    F = grib_interpolate(fn_s,fn_h);
+    ename = fn;
+  end   
   % Fill rtp fields
-   k = find( ic == i );  % indices of first partition (of n total)
-   if ~isfield(headin,'ngas')
-     headin.ngas = 0;
-   end
-   [head,prof] = subset_rtp(headin,profin,[],[],k);
-   iaDone(k) = 1;
+  k = find( ic == i );  % indices of first partition (of n total)
+  if ~isfield(headin,'ngas')
+    headin.ngas = 0;
+  end
+
+  [head,prof] = subset_rtp(headin,profin,[],[],k);
+  iaDone(k) = 1;
 
   % Assume rtp lat/lon are +-180??  Need to be 0-360 for grib interpolation
   %   rlat = prof.rlat(k);

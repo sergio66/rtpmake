@@ -1,6 +1,6 @@
 fprintf(1,'mean p.rtime = %8.6f \n',mean(p.rtime));
 [xyyh,xmmh,xddh,xhhh] = tai2utcSergio(mean(p.rtime));
-fprintf(1,'mean rtime in AIRS l1 data corresponds to following : %4i %2i %2i %6.3f \n',xyyh,xmmh,xddh,xhhh);
+fprintf(1,'mean rtime in AIRS L1B/C data corresponds to following : %4i %2i %2i %6.3f \n',xyyh,xmmh,xddh,xhhh);
 %fprintf(1,'when hhh = %6.3f is same as %2i : %2i \n',hhh,floor(xhhh),floor((xhhh-floor(xhhh))*60));
 
 if xhhh >= 0 & xhhh <= 3
@@ -29,7 +29,8 @@ elseif xhhh > 21 & xhhh <= 24
   tB2 = utc2taiSergio(xyyh,xmmh,xddh,24.0);
 end
 
-frac1 = 1 - (p.rtime-tB1)/(6*60*60);
+iFileSpanHour = 3;  %% 8 files so each spans 3 hours
+frac1 = 1 - (p.rtime-tB1)/(iFileSpanHour*60*60);
 frac1(frac1 < 0) = 0;
 frac1(frac1 > 1) = 1;    
 frac2 = 1-frac1;

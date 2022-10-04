@@ -35,38 +35,40 @@ iv5or6 = 6;   %% AIRS L1C
 %% creates an rtp file for ONE granule
 %% can be modified for more!
 
-%klayers = '/asl/packages/klayers/Bin/klayers_airs';
-%sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
+klayers = '/asl/packages/klayers/Bin/klayers_airs';
+sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
 
-%klayers = '/asl/packages/klayers/Bin/klayers_airs';
-%sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
+klayers = '/asl/packages/klayers/Bin/klayers_airs';
+sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
 
 klayers = '/asl/packages/klayersV205/BinV201/klayers_airs';
 sarta   = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
 
-addpath /home/sergio/MATLABCODE
 addpath /asl/matlab2012/airs/readers
 addpath /asl/matlib/aslutil
-%addpath /asl/matlib/science
-addpath /home/sergio/MATLABCODE/matlib/science/
+addpath /asl/matlib/science
 addpath /asl/matlib/rtptools
 addpath /asl/matlib/h4tools/
 addpath /asl/matlib/rtptools/
 addpath /asl/matlib/gribtools/
-addpath /asl/matlib/time
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
-addpath /home/sergio/MATLABCODE
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
+addpath /home/sergio/MATLABCODE/TIME
+addpath /home/sergio/MATLABCODE/PLOTTER
+addpath /home/sergio/MATLABCODE/COLORMAP
 
-% addpath /home/strow/cress/Work/Rtp
-% addpath /home/strow/Matlab/Grib     WARNING /home/strow/Matlab/Grib/rtpadd_grib_data.m DIFFERENT than /asl/matlib/gribtools/rtpadd_era_data.m
-% addpath /home/sergio/MATLABCODE/CRIS_HiRes             %% for sergio_fill_ecmwf
-% addpath /home/strow/Git/rtp_prod2/grib                  %% for fill_ecm
-% addpath /asl/packages/rtp_prod2/grib
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/grib
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
+%addpath /home/strow/cress/Work/Rtp
+%addpath /home/strow/Matlab/Grib
 
+%addpath /home/sergio/MATLABCODE/CRIS_HiRes             %% for sergio_fill_ecmwf
+%addpath /home/strow/Git/rtp_prod2/grib                  %% for fill_ecm 
+%addpath /asl/rtp_prod2/grib/                           %% for fill_ecmwf
+
+%addpath  /asl/packages/rtp_prod2/grib
+%addpath  /home/sbuczko1/git/rtp_prod2/grib
+
+addpath /home/strow/git/rtp_prod2/grib
 addpath /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB
+addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS/Strow_humidity/convert_humidity/
 
 if iv5or6 == 5
   theinds = (1 : 2378)';
@@ -77,30 +79,15 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %%% set sarta exec
 
-code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = '/home/sergio/SARTA_CLOUDY/BinV201/xsarta_apr08_m140_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = '/home/chepplew/gitLib/sarta/bin/airs_l1c_2834_cloudy_may19_prod_v3';
-run_sarta.sartaclear_code = code1;
-run_sarta.sartacloud_code = code1;
-
 run_sarta.clear = +1;
 run_sarta.cloud = +1;
-run_sarta.cumsum = -1;    %% this is "closer" to MRO but since cliuds are at centroid, does not do too well with DCC
-run_sarta.cumsum = 9999;  %% larrabee likes this, puts clouds high so does well for DCC
-
-if iSlabCld_CumSumStrowORGeorge > 0
-  run_sarta.cumsum = 9999;  %% strow pick, cloud at PEAK of wgt fcn
-else
-  run_sarta.cumsum = -1;  %% aumann pick, cloud at wgt mean of profile
-end
+run_sarta.cumsum = 9999;
 
 codeX = 0; %% use default with A. Baran params
 codeX = 1; %% use new     with B. Baum, P. Yang params
 
 code0 = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
 code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = '/home/sergio/SARTA_CLOUDY/BinV201/xsarta_apr08_m140_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = '/home/chepplew/gitLib/sarta/bin/airs_l1c_2834_cloudy_may19_prod_v3';
 
 if codeX == 0
   icestr = '_sarta_baran_ice';
@@ -113,20 +100,17 @@ else
 end
 
 %icestr = ['NEWLANDFRAC/cloudy_airs_l1b_era' icestr '.'];
-%icestr = ['NEWLANDFRAC/cloudy_airs_l1b_era' icestr '.'];
+%icestr = ['interp_analysis_cloudy_airs_l1b_era' icestr '.'];
 if iv5or6 == 5
-  icestr = ['cloudy_airs_l1b_era' icestr '.'];
+  icestr = ['interp_analysis_cloudy_airs_l1b_era' icestr ];
 elseif iv5or6 == 6
-  icestr = ['cloudy_airs_l1c_era' icestr '.'];
+  icestr = ['interp_analysis_cloudy_airs_l1c_era' icestr ];
 end
+icestr = [icestr '_timeoffset_' num2str(iTimeOffset,'%04d') '_'];
 
-if iv5or6 == 5
-  nocldstr = ['clear_airs_l1b_era.'];
-elseif iv5or6 == 6
-  nocldstr = ['clear_airs_l1c_era.'];
-end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
+%% typically iaGList == JOB so this loop runs ONCE .. so you control muktiple files via the cluster
 
 for ixx = 1 : length(iaGlist)
   ix = iaGlist(ixx);
@@ -139,13 +123,6 @@ for ixx = 1 : length(iaGlist)
   dstr = num2str(yymmddgg(3),'%02d');
   gstr = num2str(yymmddgg(4),'%03d');
 
-  %fnameOUT = ['/asl/data/rtprod_airs/' ystr '/' mstr '/' dstr '/'];
-  %fnameOUT= [fnameOUT icestr ystr '.' mstr '.' dstr '.' gstr '.rtp'];
-
-  fdirOUT = ['/asl/data/rtprod_airs/' ystr '/' mstr '/' dstr '/'];
-  fdirOUT = ['/asl/rtp/rtprod_airs/' ystr '/' mstr '/' dstr '/'];
-  fdirOUT = ['/asl/s1/sergio/rtp/rtp_airibrad_v5/' ystr '/' mstr '/' dstr '/'];
-
   % fdirOUT = ['/asl/data/rtprod_airs/' ystr '/' mstr '/' dstr '/'];
   fdirOUT = ['/asl/rtp/rtprod_airs/' ystr '/' mstr '/' dstr '/'];
   if iv5or6 == 5
@@ -154,27 +131,25 @@ for ixx = 1 : length(iaGlist)
     fdirOUT = ['/asl/s1/sergio/rtp/rtp_airicrad_v6/' ystr '/' mstr '/' dstr '/'];  %% after 2018
   end
 
-  if ~exist(fdirOUT) & iSaveRTP > 0
-    mker = ['!/bin/mkdir -p ' fdirOUT];
-    fprintf(1,'mker = %s \n',mker);
-    eval(mker)
+  if ~exist(fdirOUT)
+    mker = ['!mkdir -p ' fdirOUT];
+    eval(mker);
+    fprintf(1,'made %s \n',fdirOUT)
   end
 
-  if iPertTCC ~= 0  
+  if iSlabCld_CumSumStrowORGeorge == 1
     fnameOUT= [fdirOUT icestr ystr '.' mstr '.' dstr '.' gstr '.rtp'];
   else
-    fnameOUT= [fdirOUT nocldstr ystr '.' mstr '.' dstr '.' gstr '.rtp'];
+    fnameOUT= [fdirOUT icestr ystr '.' mstr '.' dstr '.' gstr '_cumsum_-1.rtp'];
   end
 
   eeP = exist(fnameOUT);
 
   if eeP == 0
     fprintf(1,' making %s \n',fnameOUT);
-    if iSaveRTP > 0
-      toucher = ['!touch ' fnameOUT];
-      eval(toucher)
-    end
-
+    toucher = ['!touch ' fnameOUT];
+    eval(toucher)
+  
     year  = yymmddgg(1);
     month = yymmddgg(2);
     day   = yymmddgg(3);
@@ -202,31 +177,83 @@ for ixx = 1 : length(iaGlist)
       %% L1C
       filename = ['/asl/data/airs/L1C/' ystr '/'];
       filename = ['/asl/data/airs/L1C_v672/' ystr '/'];
-      filename = ['/asl/airs/l1c_v672/' ystr '/'];
+      if yymmddgg(1) <= 2021
+        if days_so_far <= 266
+          filename = ['/asl/airs/l1c_v672/' ystr '/'];
+        else
+          filename = ['/asl/airs/l1c_v674/' ystr '/'];
+        end
+      elseif yymmddgg(1) > 2021
+        filename = ['/asl/airs/l1c_v674/' ystr '/'];
+      end
       filename = [filename num2str(days_so_far,'%03d') '/'];
+
       dir0 = filename;
       filename = [filename 'AIRS.' ystr '.' mstr '.' dstr '.' gstr];
       filename = [filename '.L1C.AIRS_Rad.v6*.hdf'];
     end
 
     thedir = dir(filename);
+    iSimulateData = -1;
     if length(thedir) == 1
       fname = [dir0 thedir.name];
     else
       fprintf(1,'%s \n',filename);
       disp('file does not exist');
-      return
+
+      %% excess wet bulb, 2020_08_23
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_21.mat';
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_23.mat';  %% hmm, not as excessive as I thought!
+
+      %% excess wet bulb, 2020_08_20
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_20.mat';  %% this one looked better
+
+      %% excess wet bulb, 2019_06_23
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2019_06_23.mat';  
+
+      %% MLS by Werner say a big system and I am STRETCHING it
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2019_08_27.mat';
+
+      %% https://earthsky.org/earth/study-predicts-deadly-heat-in-persian-gulf/ hot day in the Persian Gulf
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2015_07_31.mat';
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2020_07_29.mat';
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2020_08_23.mat';
+
+      strjunk = ['load ' xjunk '  as needed ? ']; fprintf(1,'xjunk = %s \n',xjunk);
+      %iSimulateData = input(strjunk);
+      iSimulateData = 1
+
+      if iSimulateData < 0
+        return
+      end
     end
 
     if iv5or6 == 5
       [a,b,c] = sdload_quiet(fname);
     elseif iv5or6 == 6
       %% find v6_readl2cc.m  /asl/*/rtp_prod2/airs/readers
-      %addpath /asl/packages/rtp_prod2/airs/readers/
       addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/airs/readers
       addpath /asl/matlib/time
-      [eq_x_tai, f, gdata, attr, opt] = read_airicrad(fname);  % Steve
-      f0_2645 = f;
+
+      if iSimulateData > 0
+        fprintf(1,'loading %s \n',xjunk);
+        pjunk = load(xjunk); 
+
+        gdata.rtime = pjunk.p0.rtime;
+        gdata.rlat = pjunk.p0.rlat;
+        gdata.rlon = pjunk.p0.rlon;
+        gdata.solazi = ones(size(pjunk.p0.rlon)) * 00;
+        gdata.solzen = ones(size(pjunk.p0.rlon)) * 150;
+          gdata.solzen(1:364) = 40; 
+        gdata.satzen = ones(size(pjunk.p0.rlon)) * 22;
+        gdata.satazi = ones(size(pjunk.p0.rlon)) * 0;
+        gdata.robs1 = zeros(2645,length(gdata.rtime));
+       
+        [gdata.salti, gdata.landfrac] = usgs_deg10_dem(gdata.rlat, gdata.rlon);
+      else
+        [eq_x_tai, f, gdata, attr, opt] = read_airicrad(fname);  % Steve
+        f0_2645 = f;
+      end
 
 hdffile = '/home/sergio/MATLABCODE/airs_l1c_srf_tables_lls_20181205.hdf';   % what he gave in Dec 2018
 vchan2834 = hdfread(hdffile,'freq');
@@ -255,15 +282,8 @@ f2645 = f(ichan);
       p = gdata;
     end
 
-    %scatter_coast(p.rlon,p.rlat,10,p.rtime); error(';gslk')
+    p.rtime = p.rtime + iTimeOffset*60;  %% <<<<<<< add on timeoffset , convert to seconds >>>>>>>>>>
 
-%{
-% this is testing   driver_check_loop_make16day_tile_center_timestep261.m   and   check_loop_make16day_tile_center_timestep261_subset1939.m 
-% fprintf(1,'true rtime - fake rtime (in days) %8.6f \n',mean(p.rtime-1.769620174066747e+09)/86400)
-% disp('duplicating really high col water'); disp('ret to cintinue'); pause
-% p.rtime = ones(size(p.rtime)) * 1.769620174066747e+09;
-%}
-    
     p.pobs = zeros(size(p.solazi));
     p.upwell = ones(size(p.solazi));
     %p.irinst = AIRSinst*ones(1,nobs);
@@ -272,20 +292,13 @@ f2645 = f(ichan);
     plot(p.rlon,p.rlat,'.')
 
     pa = {{'profiles','rtime','seconds since 1993'}};
-    pa = {{'profiles','rtime','seconds since 1958'}};
     ha = {{'header','hdf file',filename}};
 
     h.pfields=5; % (1=prof + 4=IRobs);
 
-    if iv5or6 == 5
-      h.nchan = length(theinds);
-      h.ichan = 1:2378;
-      h.vchan = f(h.ichan);
-    else
-      h.nchan = length(theinds2645);
-      h.ichan = theinds2645;
-      h.vchan = f2645;
-    end
+    h.nchan = length(theinds);
+    h.ichan = theinds;;
+    h.vchan = f(h.ichan);;
 
     %%% this is NEW
     p.landfrac_fromL1B = p.landfrac;
@@ -298,11 +311,9 @@ f2645 = f(ichan);
     cldfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3',...
                  'CC','CIWC','CLWC'};
 
-    %[h,ha,p,pa] = rtpadd_era_data(h,ha,p,pa,cldfields); %%% add on era the OLD WAY, but it needs grid files
-    %[p,h] = fill_era(p,h);
-
-    %%% [p,h] = fill_era_interp(p,h);                           %%% add on era the NEW WAY
-    new_4_ERAfiles_interp_analysis                              %%% even better Oct 2022
+    %[h,ha,p,pa] = rtpadd_ecmwf_data(h,ha,p,pa,cldfields); %%% add on ecm
+    %[p,h] = sergio_fill_ecmwf(p,h,'/asl/data/ecmwf/',-1);
+    %save test_2002_09_08_g044_sergio.mat p h
 
 addpath /home/sergio/MATLABCODE/TIME
 [xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
@@ -311,77 +322,43 @@ co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
 p.co2ppm = co2ppm;
 fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),p.co2ppm(1));
 fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),p.co2ppm(end));
-    
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    new_4_ERAfiles_interp_analysis
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+
     p0 = p;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %[h,ha,p,pa] = rtpadd_emis_DanZhou2(h,ha,p,pa);
     %p = Prof_add_emis(p,yymmddgg(1),yymmddgg(2),yymmddgg(3));  %% broken crap by whoever
     %p = rtpadd_emis_DanZhou(h,ha,p,pa);   %% lso totally broken crap
     %[h,ha,p,pa] = rtpadd_emis_wis(h,ha,p,pa);
     %addpath /asl/rtp_prod2/emis/
-    %addpath /asl/rtp_prod2/util/
+    %addpath /asl/rtp_prod2/util/    
     %addpath /asl/packages/rtp_prod2/emis/
     %addpath /asl/packages/rtp_prod2/util/
+    %addpath /asl/rtp_prod2/emis/
+    %addpath /asl/rtp_prod2/util/
+ 
+    addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis/
+    addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/
 
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/time
-  p.rlon = wrapTo180(p.rlon);
-  [p,pa] = rtp_add_emis(p,pa);
+    p.rlon = wrapTo180(p.rlon);
+    [p,pa] = rtp_add_emis(p,pa);
 
     %figure(1)
     %scatter_coast(p.rlon,p.rlat,10,p.nemis); 
 
-    if length(iaFovList) < 12150
-     junk = p.xtrack + (p.atrack-1)*90;
-     [Y,iA,iB] = intersect(junk,iaFovList);
-     [h,p] = subset_rtp_allcloudfields(h,p,[],[],iA);
-    end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    if iPertTCC ~= 0
-      [p2] = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
+    [p2] = driver_sarta_cloud_rtp(hB2,ha,p,pa,run_sarta);
 
-      fnamex = fnameOUT;
-      [h,ha,p2x,pa] = rtptrim_sartacloud(h,ha,p2,pa);
-      if iSaveRTP == 1
-        fprintf(1,'saving to %s \n',fnamex)
-        rtpwrite(fnamex,h,ha,p2x,pa)
-
-rtpwrite('junk.ip.rtp',h,ha,p2x,pa);
-sss = ['!' klayers ' fin=junk.ip.rtp fout=junk.op.rtp >& ugh']; eval(sss)
-[hjunk,~,pjunk,~] = rtpread('junk.op.rtp');
-mmw = mmwater_rtp(hjunk,pjunk);
-scatter_coast(pjunk.rlon,pjunk.rlat,10,mmw)
-
-      end
-    else
-      p.cngwat   = 0 * p.stemp;
-      p.cngwat2  = 0 * p.stemp;
-
-      p.cfrac   = 0 * p.stemp;
-      p.cfrac2  = 0 * p.stemp;
-      p.cfrac12 = 0 * p.stemp;
-
-      fip = mktemp('fx.ip.rtp');
-      fop = mktemp('fx.op.rtp');
-      frp = mktemp('fx.rp.rtp');
-
-      rtpwrite(fip,h,ha,p,pa)
-      klayerser = ['!' klayers ' fin=' fip ' fout=' fop]; eval(klayerser);
-      sartaer   = ['!' sarta   ' fin=' fop ' fout=' frp]; eval(sartaer);
-      [hx,hax,p2x,pax] = rtpread(frp);
-
-      fnamex = fnameOUT;
-      p.rcalc = p2x.rcalc;
-      if iSaveRTP == +1
-        fprintf(1,'saving to %s \n',fnamex)
-        rtpwrite(fnamex,h,ha,p,pa)
-      end
-
-      rmer = ['!/bin/rm '  fip ' ' fop ' ' frp]; eval(rmer);
-    end
-
+    fnamex = fnameOUT;
+    [h,ha,p2x,pa] = rtptrim_sartacloud(h,ha,p2,pa);
+    rtpwrite(fnamex,h,ha,p2x,pa)
+    fprintf(1,'saved to %s \n',fnamex)
   else
     fprintf(1,' %s already exists \n',fnameOUT)
   end
