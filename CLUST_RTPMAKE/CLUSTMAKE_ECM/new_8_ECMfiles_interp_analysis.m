@@ -62,14 +62,24 @@ frac2 = 1-frac1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+disp('doing closest time (default) .. do we really need this???? its just for comparison!!!!')
 [pClosest,hClosest] = fill_ecmwf(p,h);
 
+disp('doing frac1')
 pB1 = p; pB1.rtime = ones(size(pB1.rtime)) .* tB1;
   [pB1,hB1] = fill_ecmwf(pB1,h);
+
+disp('doing frac2')
 pB2 = p; pB2.rtime = ones(size(pB1.rtime)) .* tB2;      
 [pB2,hB2] = fill_ecmwf(pB2,h);
 
-scatter_coast(pClosest.rlon,pClosest.rlat,30,pClosest.stemp-pB1.stemp);
+if exist('pClosest')
+  disp('linearly adding together frac1,frac2')
+  scatter_coast(pClosest.rlon,pClosest.rlat,30,pClosest.stemp-pB1.stemp);
+else
+  pClosest = pB1;
+end
+
 p = pClosest;
 p.sst   = frac1 .* pB1.sst + frac2 .* pB2.sst;
 p.spres = frac1 .* pB1.spres + frac2 .* pB2.spres;    

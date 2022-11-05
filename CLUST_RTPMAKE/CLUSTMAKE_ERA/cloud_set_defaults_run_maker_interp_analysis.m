@@ -219,6 +219,8 @@ for ixx = 1 : length(iaGlist)
       xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2020_07_29.mat';
       xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2020_08_23.mat';
 
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2015_07_31.mat';
+      
       strjunk = ['load ' xjunk '  as needed ? ']; fprintf(1,'xjunk = %s \n',xjunk);
       %iSimulateData = input(strjunk);
       iSimulateData = 1
@@ -244,7 +246,8 @@ for ixx = 1 : length(iaGlist)
         gdata.rlon = pjunk.p0.rlon;
         gdata.solazi = ones(size(pjunk.p0.rlon)) * 00;
         gdata.solzen = ones(size(pjunk.p0.rlon)) * 150;
-          gdata.solzen(1:364) = 40; 
+          wonk = length(gdata.solzen);
+          gdata.solzen(1:wonk/2) = 40; 
         gdata.satzen = ones(size(pjunk.p0.rlon)) * 22;
         gdata.satazi = ones(size(pjunk.p0.rlon)) * 0;
         gdata.robs1 = zeros(2645,length(gdata.rtime));

@@ -1,3 +1,5 @@
+function [prof, head, pattr] = fill_era5_monthly(prof, head, pattr)
+
 % fill_era5_monthly.m, copied from fill_era
 % 
 % % S.Machado - tweaks through the years
@@ -11,7 +13,6 @@ save /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA5/era5plevs.mat 
 NOTE era5plevs are from 1 to 1000 mb ie automatically already sorted from minimum to maximum
 %}
 
-function [prof, head, pattr] = fill_era5_monthly(prof, head, pattr)
 
 % Check args in and out to see if they conform to the new API and
 % aren't split between old and new styles
@@ -35,8 +36,10 @@ mtime = tai2dnum(prof.rtime);
 % enames = get_ecmwf_enames(mtime,profin.rtime);
 enames = get_era5_monthly_enames(mtime);
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Get a cell array of era grib files for each time
-% Round to get 4 forecast hours per day
+% Round to get 8 forecast hours per day
 rmtime = round(mtime*8)/8;
 timestr = datestr(rmtime,'yyyymmddhh');
 ystr = timestr(:,1:4);
@@ -44,16 +47,37 @@ mstr = timestr(:,5:6);
 dstr = timestr(:,7:8);
 hstr = timestr(:,9:10);
 yearindex = str2num(ystr);
+monthindex = str2num(mstr);
 dayindex = str2num(dstr);
 hourindex = str2num(hstr);
-  figure(1); hist(hourindex,25);
 
-%enames = [ystr mstr dstr];
-%enames = cellstr(enames);
-%[u_enames, ~, ic] = unique(enames);
-%n = length(u_enames); % Generally 2 names for 1 day's worth of data
-ic = ones(size(mtime));
-n = 1;
+%% hmmm ... oct 30, 2022
+[boo,~] = size(hstr);
+for ii = 1 : boo
+  hourindex(ii) = str2num(hstr(ii,:));  
+end
+figure(1); plot(yearindex);
+figure(2); plot(monthindex);
+figure(3); plot(dayindex);
+figure(4); plot(hourindex);
+figure(5); hist(hourindex,25); 
+
+%{ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% enames = [ystr mstr dstr];
+% enames = cellstr(enames);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%} 
+
+xnames = enames.fn;
+[u_enames, ~, ic] = unique(xnames);
+
+n = length(u_enames); % Generally 2 names for 1 day's worth of data
+
+% ic = ones(size(mtime));
+% n = 1;
+
+fprintf(1,'need to read in %3i ERA5 monthly files \n',n)
 
 load /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA5/era5plevs.mat
 
@@ -61,10 +85,12 @@ for i=1:n
    %fn = fullfile(fhdr,u_enames{i}(1:4),u_enames{i}(5:6),u_enames{i});
    %fn_lev = [fn '_lev.nc'];
    %fn_sfc = [fn '_sfc.nc'];
-   fn     = enames.fn;
-   fn_lev = enames.lev;
-   fn_sfc = enames.sfc;
-   fn_2m  = enames.twm;
+
+   fn     = u_enames{i};
+   fn_lev = [fn '_lev.nc'];
+   fn_sfc = [fn '_sfc.nc'];
+   fn_2m  = [fn '_2meter.nc'];
+
    fprintf(1,'era5 monthly file name fn = %s \n',[fn '_*.nc where * = sfc or lev or 2meter'])    
 
    % Does the netcdf files exist?
@@ -106,7 +132,10 @@ for i=1:n
    %   fhi = 0;   % this was new on Jul 20, 2015!
    u_hour = unique(hourindex);
    nn = length(u_hour);
+   fprintf(1,'  ERA file %3i of %3i --- %6i of %6i entries contained inside %3i unique hours \n',i,n,length(m),length(prof.rtime),nn);
+
    % Only loop over hours needed
+
    for jj = 1:nn
       % index for this hour (1:8);  u_hour = [0 3 6 9 12 15 18 21]
       fhi = (u_hour(jj)/3) + 1;

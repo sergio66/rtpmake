@@ -130,6 +130,9 @@ for i = 1:n
    rlon = prof.rlon;
    rlon(rlon<0) = rlon(rlon<0) + 360;
 
+   rlon = double(rlon);
+   rlat = double(rlat);
+
    prof.ptime   = ones(1,length(k)) * ptime;
    prof.sst     = F.sst.ig(rlat,rlon);
    prof.spres   = F.sp.ig(rlat,rlon);

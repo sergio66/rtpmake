@@ -50,7 +50,7 @@ pB2 = p; pB2.rtime = ones(size(pB1.rtime)) .* tB2;
 [pB2,hB2] = fill_era(pB2,h);
 
 scatter_coast(pClosest.rlon,pClosest.rlat,30,pClosest.stemp-pB1.stemp);
-p = pClosest
+p = pClosest;
 
 %p.sst   = frac1 .* pB1.sst + frac2 .* pB2.sst;
 p.spres = frac1 .* pB1.spres + frac2 .* pB2.spres;    

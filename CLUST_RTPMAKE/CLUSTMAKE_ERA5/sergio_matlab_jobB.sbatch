@@ -3,10 +3,13 @@
 # run this with sbatch -p high_mem --array=1-X --output='testslurm' sergio_matlab_jobB.sbatch
 # run this with sbatch -p high_mem --array=1-Y sergio_matlab_jobB.sbatch 1 for filelist
 # run this with sbatch -p high_mem --array=1-Z --output='/dev/null' sergio_matlab_jobB.sbatch 
-# run this with sbatch -p high_mem --array=1-240 sergio_matlab_jobB.sbatch 2    for loop over a day
-# run this with sbatch -p high_mem --array=1-228 sergio_matlab_jobB.sbatch 4    for tile center avg, desc, 19 yearsx12months/yr = 228
-# run this with sbatch -p high_mem --array=1-228 sergio_matlab_jobB.sbatch 5    for tile with 7x4=28 ERA grid points/tile, 16 days .. set quue to medium, time to 24 hours
-# run this with sbatch -p high_mem --array=1-240 sergio_matlab_jobB.sbatch 6    for clust_make_monthlyavg_2m.m
+# run this with sbatch -p high_mem --array=1-240  sergio_matlab_jobB.sbatch 2    for loop over a day
+# run this with sbatch -p high_mem --array=1-228  sergio_matlab_jobB.sbatch 4    for tile center avg, desc, 19 yearsx12months/yr = 228
+# run this with sbatch -p high_mem --array=1-228  sergio_matlab_jobB.sbatch 5    for tile with 7x4=28 ERA grid points/tile, 16 days .. set quue to medium, time to 24 hours
+# run this with sbatch -p high_mem --array=1-240  sergio_matlab_jobB.sbatch 6    for clust_make_monthlyavg_2m.m
+#
+# run this with sbatch -p high_mem --array=1-4608 sergio_matlab_jobB.sbatch 7    for clustmake_whole_12month_ERA5.m
+# run this with sbatch -p high_mem --array=1-64   sergio_matlab_jobB.sbatch 8    for cluster_driver_put_together_globalavg_profiles.m
 
 
 #  Name of the job:
@@ -68,4 +71,10 @@ elif [[ "$1" -eq "5" ]]; then
 elif [[ "$1" -eq "6" ]]; then
   echo "cmd line arg = 6, making tile ERA5 monthly averaged 2m data"
   srun matlab -nodisplay -r "clust_make_monthlyavg_2m; exit"
+elif [[ "$1" -eq "7" ]]; then
+  echo "cmd line arg = 7, making tile clustmake_whole_12month_ERA5.m"
+  srun matlab -nodisplay -r "clustmake_whole_12month_ERA5; exit"
+elif [[ "$1" -eq "8" ]]; then
+  echo "cmd line arg = 8, making tile cluster_driver_put_together_globalavg_profiles"
+  srun matlab -nodisplay -r "cluster_driver_put_together_globalavg_profiles; exit"
 fi

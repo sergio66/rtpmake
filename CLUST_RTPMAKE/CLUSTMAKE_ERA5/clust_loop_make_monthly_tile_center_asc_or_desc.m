@@ -1,4 +1,5 @@
 %% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
+%% one per month, 19 years of AIRS data so 20x12 = 240 sets of data
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 %JOB = 228
 

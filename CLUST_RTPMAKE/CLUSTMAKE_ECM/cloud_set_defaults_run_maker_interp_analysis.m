@@ -194,13 +194,6 @@ for ixx = 1 : length(iaGlist)
       fprintf(1,'%s \n',filename);
       disp('file does not exist');
 
-      %% excess wet bulb, 2020_08_23
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_21.mat';
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_23.mat';  %% hmm, not as excessive as I thought!
-
-      %% excess wet bulb, 2020_08_20
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_20.mat';  %% this one looked better
-
       %% excess wet bulb, 2019_06_23
       xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2019_06_23.mat';  
 
@@ -209,8 +202,21 @@ for ixx = 1 : length(iaGlist)
 
       %% https://earthsky.org/earth/study-predicts-deadly-heat-in-persian-gulf/ hot day in the Persian Gulf
       xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2015_07_31.mat';
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2020_07_29.mat';
       xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2020_08_23.mat';
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2020_07_29.mat';
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2020_07_29pm2.mat';
+
+      %% excess wet bulb, 2020_08_23
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_21.mat';
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_23.mat';    %% hmm, not as excessive as I thought!
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_20.mat';    %% this one looked better
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_23pm2.mat'; %% hmm, not as excessive as I thought!
+
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/india_2019_05_11.mat';
+      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/india_2019_05_11pm2.mat';
+
+
+      %%%%%%%%%%%%%%%%%%%%%%%%%
 
       strjunk = ['load ' xjunk '  as needed ? ']; fprintf(1,'xjunk = %s \n',xjunk);
       %iSimulateData = input(strjunk);
@@ -237,7 +243,8 @@ for ixx = 1 : length(iaGlist)
         gdata.rlon = pjunk.p0.rlon;
         gdata.solazi = ones(size(pjunk.p0.rlon)) * 00;
         gdata.solzen = ones(size(pjunk.p0.rlon)) * 150;
-          gdata.solzen(1:364) = 40; 
+          wonk = length(gdata.solzen);
+          gdata.solzen(1:wonk/2) = 40; 
         gdata.satzen = ones(size(pjunk.p0.rlon)) * 22;
         gdata.satazi = ones(size(pjunk.p0.rlon)) * 0;
         gdata.robs1 = zeros(2645,length(gdata.rtime));
