@@ -1,13 +1,16 @@
 %% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
 %% one per month, 19 years of AIRS data so 20x12 = 240 sets of data
 
-starttime = tic;
+%starttime = tic;
+ticcStart0 = clock;
+
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));  %% JOB = 1 : 4608
 %JOB = 11 + 72*0;
 %JOB = 11 + 72*3;
 %JOB = 11 + 72*32
 %JOB = 2710
 %JOB = 3620
+%JOB = 178
 
 if JOB > 4608
   error('JOB = 1 .. 4608')
@@ -332,5 +335,8 @@ if iDo > 0
 end
 
 disp('now do missinglist_whole_12month_ERA5.m  and then cluster_driver_put_together_globalavg_profiles.m and then master_driver_put_together_globalavg_profiles')
-stoptime = toc
-fprintf(1,'took %8.6f minutes to run \n',(stoptime-starttime)/60);
+%stoptime = toc;
+ticcEndF = clock;
+%fprintf(1,'took %8.6f minutes to run \n',(stoptime-starttime)/60);
+fprintf(1,'elapsed time : took %8.6f minutes to run \n',etime(ticcEndF,ticcStart0)/60);
+monitor_memory_whos;

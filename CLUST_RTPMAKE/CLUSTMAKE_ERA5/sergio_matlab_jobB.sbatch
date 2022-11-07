@@ -23,7 +23,8 @@
 #SBATCH --cpus-per-task 1
 
 #  Specify the desired partition develop/batch/prod
-#SBATCH --partition=batch
+##SBATCH --partition=batch
+#SBATCH --partition=cpu2021
 
 #  Specify the qos and run time (format:  dd-hh:mm:ss)
 # for all command line arguments 0,1,2,3,4 except selection 5
@@ -35,7 +36,8 @@
 ##SBATCH --time=23:59:00 
 
 #  This is in MB, very aggressive but I have been running outta memory
-#SBATCH --mem-per-cpu=12000
+##SBATCH --mem-per-cpu=12000
+#SBATCH --mem-per-cpu=15000
 
 ########################################################################
 ### check the number of input arguments

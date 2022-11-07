@@ -1,13 +1,17 @@
+addpath /home/sergio/MATLABCODE/
 addpath /home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/
 addpath /asl/matlab2012/rtptoolsV201/
 addpath /home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/
 
+system_slurm_stats
 simulateYear = 2012;
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));  %% JOB = 1 : 64
 % JOB = 32
 
 iOffSet = (JOB-1)*72;
+
+fprintf(1,'starting cluster_driver_put_together_globalavg_profiles.m : JOB = %2i iOffSet = %4i \n',JOB,iOffSet);
 
 for ii = 1 : 72
   fprintf(1,'.')
@@ -57,4 +61,5 @@ end
 comment = 'see ~/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA5/cluster_driver_put_together_globalavg_profiles.m';
 saver = ['save /asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/era5_full12months_latbin_' num2str(JOB,'%02d') '_tile_center_profilesQcumulative_1_11.mat hnew_op prof* comment'];
 eval(saver)
+fprintf(1,'%2i cluster_driver_put_together_globalavg_profiles.m finished \n',JOB)
 
