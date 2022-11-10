@@ -10,7 +10,7 @@
 #
 # run this with sbatch -p high_mem --array=1-4608 sergio_matlab_jobB.sbatch 7    for clustmake_whole_12month_ERA5.m
 # run this with sbatch -p high_mem --array=1-64   sergio_matlab_jobB.sbatch 8    for cluster_driver_put_together_globalavg_profiles.m
-
+# run this with sbatch -p high_mem --array=1-64   sergio_matlab_jobB.sbatch 9    for clustmake_fixNaNbug_2012_average_whole_12month_ERA5.m
 
 #  Name of the job:
 #SBATCH --job-name=CLUST_MAKE_ERA_RTP
@@ -26,18 +26,20 @@
 ##SBATCH --partition=batch
 #SBATCH --partition=cpu2021
 
+# for command line argument selection 5
+##SBATCH --qos=medium+
+##SBATCH --time=23:59:00 
+
 #  Specify the qos and run time (format:  dd-hh:mm:ss)
 # for all command line arguments 0,1,2,3,4 except selection 5
 #SBATCH --qos=short+
 #SBATCH --time=0:59:00 
 
-# for command line argument selection 5
-##SBATCH --qos=medium+
-##SBATCH --time=23:59:00 
-
 #  This is in MB, very aggressive but I have been running outta memory
 ##SBATCH --mem-per-cpu=12000
-#SBATCH --mem-per-cpu=15000
+##SBATCH --mem-per-cpu=15000
+## this is for fixing the ERA5 average booboo, command line 9
+#SBATCH --mem-per-cpu=7000
 
 ########################################################################
 ### check the number of input arguments
@@ -79,4 +81,7 @@ elif [[ "$1" -eq "7" ]]; then
 elif [[ "$1" -eq "8" ]]; then
   echo "cmd line arg = 8, making tile cluster_driver_put_together_globalavg_profiles"
   srun matlab -nodisplay -r "cluster_driver_put_together_globalavg_profiles; exit"
+elif [[ "$1" -eq "9" ]]; then
+  echo "cmd line arg = 9, making tile clustmake_fixNaNbug_2012_average_whole_12month_ERA5"
+  srun matlab -nodisplay -r "clustmake_fixNaNbug_2012_average_whole_12month_ERA5; exit"
 fi

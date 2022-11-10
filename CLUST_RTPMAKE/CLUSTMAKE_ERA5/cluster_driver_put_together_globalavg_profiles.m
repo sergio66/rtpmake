@@ -13,12 +13,39 @@ iOffSet = (JOB-1)*72;
 
 fprintf(1,'starting cluster_driver_put_together_globalavg_profiles.m : JOB = %2i iOffSet = %4i \n',JOB,iOffSet);
 
+iFixNaN = -1;
+if iFixNaN == -1
+  %% default
+  fnameOUT = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/era5_full12months_latbin_' num2str(JOB,'%02d') '_tile_center_profilesQcumulative_1_11.mat'];
+else
+  fnameOUT = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/fixedNANavgbug_era5_full12months_latbin_' num2str(JOB,'%02d') '_tile_center_profilesQcumulative_1_11.mat'];
+end
+
+if exist(fnameOUT)
+  fprintf(1,'output file %s already exists \n',fnameOUT);
+end
+
 for ii = 1 : 72
-  fprintf(1,'.')
+  if mod(ii,10) == 0
+    fprintf(1,'+')
+  else
+    fprintf(1,'.')
+  end
   iaProfile(ii) = ii + iOffSet;
-  fname = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/era5_full12months_tile_center_' num2str(ii + iOffSet,'%04d') '.mat'];
-  loader = ['load ' fname];
+  if iFixNaN == -1
+    %% default
+    fnameIN = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/era5_full12months_tile_center_' num2str(ii + iOffSet,'%04d') '.mat'];
+  else
+    fnameIN = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/fixedNANavgbug_era5_full12months_tile_center_' num2str(ii + iOffSet,'%04d') '.mat'];
+  end
+
+  loader = ['load ' fnameIN];
   eval(loader)
+
+  if isfield(globalavg,'cloudxtra')
+    globalavg = rmfield(globalavg,'cloudxtra');
+  end
+
   [~,junk01] = subset_rtp_allcloudfields(hnew_op,globalavg,[],[],01);
   [~,junk02] = subset_rtp_allcloudfields(hnew_op,globalavg,[],[],02);
   [~,junk03] = subset_rtp_allcloudfields(hnew_op,globalavg,[],[],03);
@@ -58,8 +85,17 @@ for ii = 1 : 72
   end
 end
 
+fprintf(1,'\n');
+
 comment = 'see ~/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA5/cluster_driver_put_together_globalavg_profiles.m';
-saver = ['save /asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/era5_full12months_latbin_' num2str(JOB,'%02d') '_tile_center_profilesQcumulative_1_11.mat hnew_op prof* comment'];
-eval(saver)
+
+saver = ['save ' fnameOUT ' hnew_op prof* comment'];
+if ~exist(fnameOUT)
+  fprintf(1,'saving %s \n',fnameOUT);
+  eval(saver)
+else
+  fprintf(1,'%s already exists \n',fnameOUT);
+end
+
 fprintf(1,'%2i cluster_driver_put_together_globalavg_profiles.m finished \n',JOB)
 

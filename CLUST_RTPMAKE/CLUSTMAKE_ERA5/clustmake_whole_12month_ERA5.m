@@ -27,6 +27,7 @@ addpath ../GRIB
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
 addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
 addpath /home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD
+addpath /home/sergio/MATLABCODE/COLORMAP
 
 system_slurm_stats
 
@@ -152,10 +153,10 @@ whos usethese
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% dirs used by /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries
 if iDorA > 0
-  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/era5_full12months_tile_center_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+  %fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/era5_full12months_tile_center_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
   fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/era5_full12months_tile_center_' num2str(JOB,'%04d') '.mat']; %%% NOTE THIS IS DESC
 elseif iDorA < 0
-  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/ASC/' num2str(simulateYear,'%04d') '/era5_full12months_tile_center_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+  %fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/ASC/' num2str(simulateYear,'%04d') '/era5_full12months_tile_center_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
   fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/ASC/' num2str(simulateYear,'%04d') '/era5_full12months_tile_center_' num2str(JOB,'%04d') '.mat']; %%% NOTE THIS IS DESC
 else
   iDorA
@@ -334,6 +335,7 @@ if iDo > 0
   figure(15); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,rad2bt(1231,pnew_ip.sarta_rclearcalc(1520,:))); title('clrsky calc');
 end
 
+disp('ooops 11/0/2022 found a NaN weighting bug in " ~/MATLABCODE/find_average_rtp.m" so redo the averaging using eg clustmake_fixNaNbug_2012_average_whole_12month_ERA5.m');
 disp('now do missinglist_whole_12month_ERA5.m  and then cluster_driver_put_together_globalavg_profiles.m and then master_driver_put_together_globalavg_profiles')
 %stoptime = toc;
 ticcEndF = clock;

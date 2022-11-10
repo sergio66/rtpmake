@@ -1,0 +1,1 @@
+while true; do ls /asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/2012/FixedNAN/fixedNANavgbug_era5_full12months_latbin*_tile_center_profilesQ* | wc -l ; sleep 15; done

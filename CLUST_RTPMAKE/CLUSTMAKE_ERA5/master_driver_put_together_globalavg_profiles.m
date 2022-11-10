@@ -2,6 +2,8 @@ addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS/
 addpath /asl/matlib/h4tools
 addpath /asl/matlib/rtptools
 
+iFixNaN = -1;
+
 simulateYear = 2012;
 
 if ~exist('allprof11')
@@ -11,7 +13,13 @@ if ~exist('allprof11')
     else
       fprintf(1,'.')
     end
-    fname = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/era5_full12months_latbin_' num2str(ii,'%02d') '_tile_center_profilesQcumulative_1_11.mat'];
+    if iFixNaN == -1
+      %% default
+      fname = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/era5_full12months_latbin_' num2str(ii,'%02d') '_tile_center_profilesQcumulative_1_11.mat'];
+    else
+      fname = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/fixedNANavgbug_era5_full12months_latbin_' num2str(ii,'%02d') '_tile_center_profilesQcumulative_1_11.mat'];
+    end
+
     a = load(fname);
     if ii == 1
       hnew_op = a.hnew_op;
@@ -42,18 +50,58 @@ if ~exist('allprof11')
   end
   clear a
   fprintf(1,'\n');
-  
-  rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative01.rtp'],hnew_op,[],allprof01,[]);
-  rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative02.rtp'],hnew_op,[],allprof02,[]);
-  rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative03.rtp'],hnew_op,[],allprof03,[]);
-  rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative04.rtp'],hnew_op,[],allprof04,[]);
-  rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative05.rtp'],hnew_op,[],allprof05,[]);
-  rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative06.rtp'],hnew_op,[],allprof06,[]);
-  rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative07.rtp'],hnew_op,[],allprof07,[]);
-  rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative08.rtp'],hnew_op,[],allprof08,[]);
-  rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative09.rtp'],hnew_op,[],allprof09,[]);
-  rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative10.rtp'],hnew_op,[],allprof10,[]);
-  rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative11.rtp'],hnew_op,[],allprof11,[]);
+
+  allprof01.zobs = ones(size(allprof01.zobs)) * 705000; allprof01.scanang = saconv(allprof01.satzen,allprof01.zobs);
+  allprof02.zobs = ones(size(allprof02.zobs)) * 705000; allprof02.scanang = saconv(allprof02.satzen,allprof02.zobs);
+  allprof03.zobs = ones(size(allprof03.zobs)) * 705000; allprof03.scanang = saconv(allprof03.satzen,allprof03.zobs);
+  allprof04.zobs = ones(size(allprof04.zobs)) * 705000; allprof04.scanang = saconv(allprof04.satzen,allprof04.zobs);
+  allprof05.zobs = ones(size(allprof05.zobs)) * 705000; allprof05.scanang = saconv(allprof05.satzen,allprof05.zobs);
+  allprof06.zobs = ones(size(allprof06.zobs)) * 705000; allprof06.scanang = saconv(allprof06.satzen,allprof06.zobs);
+  allprof07.zobs = ones(size(allprof07.zobs)) * 705000; allprof07.scanang = saconv(allprof07.satzen,allprof07.zobs);
+  allprof08.zobs = ones(size(allprof08.zobs)) * 705000; allprof08.scanang = saconv(allprof08.satzen,allprof08.zobs);
+  allprof09.zobs = ones(size(allprof09.zobs)) * 705000; allprof09.scanang = saconv(allprof09.satzen,allprof09.zobs);
+  allprof10.zobs = ones(size(allprof10.zobs)) * 705000; allprof10.scanang = saconv(allprof10.satzen,allprof10.zobs);
+  allprof11.zobs = ones(size(allprof11.zobs)) * 705000; allprof11.scanang = saconv(allprof11.satzen,allprof11.zobs);
+
+  allprof01 = check_spres_nlevs_plevs(hnew_op,allprof01);
+  allprof02 = check_spres_nlevs_plevs(hnew_op,allprof02);
+  allprof03 = check_spres_nlevs_plevs(hnew_op,allprof03);
+  allprof04 = check_spres_nlevs_plevs(hnew_op,allprof04);
+  allprof05 = check_spres_nlevs_plevs(hnew_op,allprof05);
+  allprof06 = check_spres_nlevs_plevs(hnew_op,allprof06);
+  allprof07 = check_spres_nlevs_plevs(hnew_op,allprof07);
+  allprof08 = check_spres_nlevs_plevs(hnew_op,allprof08);
+  allprof09 = check_spres_nlevs_plevs(hnew_op,allprof09);
+  allprof10 = check_spres_nlevs_plevs(hnew_op,allprof10);
+  allprof11 = check_spres_nlevs_plevs(hnew_op,allprof11);
+
+  if iFixNaN == -1
+    %% default
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative01.rtp'],hnew_op,[],allprof01,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative02.rtp'],hnew_op,[],allprof02,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative03.rtp'],hnew_op,[],allprof03,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative04.rtp'],hnew_op,[],allprof04,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative05.rtp'],hnew_op,[],allprof05,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative06.rtp'],hnew_op,[],allprof06,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative07.rtp'],hnew_op,[],allprof07,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative08.rtp'],hnew_op,[],allprof08,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative09.rtp'],hnew_op,[],allprof09,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative10.rtp'],hnew_op,[],allprof10,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/all4608_era5_full12months_Qcumulative11.rtp'],hnew_op,[],allprof11,[]);
+  else  
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/all4608_era5_full12months_Qcumulative01.rtp'],hnew_op,[],allprof01,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/all4608_era5_full12months_Qcumulative02.rtp'],hnew_op,[],allprof02,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/all4608_era5_full12months_Qcumulative03.rtp'],hnew_op,[],allprof03,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/all4608_era5_full12months_Qcumulative04.rtp'],hnew_op,[],allprof04,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/all4608_era5_full12months_Qcumulative05.rtp'],hnew_op,[],allprof05,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/all4608_era5_full12months_Qcumulative06.rtp'],hnew_op,[],allprof06,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/all4608_era5_full12months_Qcumulative07.rtp'],hnew_op,[],allprof07,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/all4608_era5_full12months_Qcumulative08.rtp'],hnew_op,[],allprof08,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/all4608_era5_full12months_Qcumulative09.rtp'],hnew_op,[],allprof09,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/all4608_era5_full12months_Qcumulative10.rtp'],hnew_op,[],allprof10,[]);
+    rtpwrite(['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center12months/DESC/' num2str(simulateYear,'%04d') '/FixedNAN/all4608_era5_full12months_Qcumulative11.rtp'],hnew_op,[],allprof11,[]);
+  end
+
 end
   
 RH01 = layeramt2RH(hnew_op,allprof01); co2ppmv01 = layers2ppmv(hnew_op,allprof01,1:length(allprof01.stemp),2);

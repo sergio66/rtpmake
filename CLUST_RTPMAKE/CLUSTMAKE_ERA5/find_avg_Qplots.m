@@ -1,3 +1,5 @@
+%for ii=1:13; figure(ii); colormap jet; end
+
 qqq0 = (1:length(quants));
 qqm1 = meanvaluebin(1:length(quants));
 
@@ -78,11 +80,15 @@ pcolor(qqq0,globalavg.plevs(1:97,:),globalavg.ptemp(1:97,:));  set(gca,'ydir','r
 pcolor(qqq0,globalavg.plevs(1:97,:),globalavg.ptemp(1:97,:)-globalavg.ptemp(1:97,length(quants)));  set(gca,'ydir','reverse'); ylim([10 1000]); shading flat; colorbar;
   caxis([-1 +1]*5)
 title('\int Q(x)->Q(1) T - T(hottest BT1231)')
+colormap(usa2);
+shading interp;
 
 figure(10)
 pcolor(qqq0,globalavg.plevs(1:97,:),log10(globalavg.gas_1(1:97,:)));  set(gca,'ydir','reverse'); ylim([10 1000]); shading flat; colorbar;
-pcolor(qqq0,globalavg.plevs(1:97,:),log10(globalavg.gas_1(1:97,:)) ./ log10(globalavg.gas_1(1:97,length(quants))));  set(gca,'ydir','reverse'); ylim([10 1000]); shading flat; colorbar;
+pcolor(qqq0,globalavg.plevs(1:97,:),globalavg.gas_1(1:97,:) ./ globalavg.gas_1(1:97,length(quants)));  set(gca,'ydir','reverse'); ylim([10 1000]); shading flat; colorbar;
 title('\int Q(x)->Q(1) Q / Q(hottest BT1231)')
+colormap(jet); 
+shading interp;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -93,18 +99,22 @@ if length(iPlotOther) == 0
 end
 
 if iPlotOther > 0
-  figure(9)
+  figure(11)
   pcolor(qqm1,globalQavg.plevs(1:97,:),globalQavg.ptemp(1:97,:));  set(gca,'ydir','reverse'); ylim([10 1000]); shading flat; colorbar;
   pcolor(qqm1,globalQavg.plevs(1:97,:),globalQavg.ptemp(1:97,:)-globalQavg.ptemp(1:97,length(quants)-1));  set(gca,'ydir','reverse'); ylim([10 1000]); shading flat; colorbar;
     caxis([-1 +1]*5)
   title('Q(x)->Q(x+1) T - T(hottest BT1231)')
-  
-  figure(10)
+  colormap(usa2);  
+  shading interp;
+
+  figure(12)
   pcolor(qqm1,globalQavg.plevs(1:97,:),log10(globalQavg.gas_1(1:97,:)));  set(gca,'ydir','reverse'); ylim([10 1000]); shading flat; colorbar;
-  pcolor(qqm1,globalQavg.plevs(1:97,:),log10(globalQavg.gas_1(1:97,:)) ./ log10(globalQavg.gas_1(1:97,length(quants)-1)));  
+  pcolor(qqm1,globalQavg.plevs(1:97,:),globalQavg.gas_1(1:97,:) ./ globalQavg.gas_1(1:97,length(quants)-1));  
     set(gca,'ydir','reverse'); ylim([10 1000]); shading flat; colorbar;
   title('Q(x)->Q(x+1) WV / WV(hottest BT1231)')
+  colormap(jet); 
+  shading interp;
 end
   
-figure(11);
+figure(13);
 scatter_coast(p2.rlon,p2.rlat,50,bt1231); title('BT1231 calculated')
