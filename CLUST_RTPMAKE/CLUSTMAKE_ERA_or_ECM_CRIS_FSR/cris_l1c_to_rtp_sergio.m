@@ -1,4 +1,4 @@
-function [hd0, hattr, pd0, pattr, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,rgrans,NWPmodel,iSNPPorJ1orJ2)
+function [hd0, hattr, pd0, pattr, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,rgrans,NWPmodel,iSNPPorJ1orJ2,iInterp)
 
 tstr = [];
 
@@ -40,11 +40,16 @@ if (nargin == 4)
   prod = 'sct';
   NWPmodel = 'era';
   iSNPPorJ1orJ2 = 0;    %SNPP
+  iInterp = +1;         %interp the analysis
 elseif (nargin == 5)
   % date and granule number so do allsky (sct = scattering)
   prod = 'sct';
   iSNPPorJ1orJ2 = 0;    %SNPP
+  iInterp = +1;         %interp the analysis
 elseif (nargin == 6)
+  prod = 'sct';
+  iInterp = +1;         %interp the analysis
+elseif (nargin == 7)
   prod = 'sct';
 end
   
@@ -63,9 +68,11 @@ elseif iSNPPorJ1orJ2 == 1
 elseif iSNPPorJ1orJ2 == 2
   SRC = {'J02','FSR'};
 end
+
 SRC = lower(SRC);
 if(~ismember(SRC{1},{'npp','j01'})); error('Invalid CrIS'); return; end
 if(~ismember(SRC{2},{'nsr','fsr'})); error('Invalid spec.res'); return; end
+
 switch SRC{1}
   case 'npp'
     switch SRC{2}
@@ -99,8 +106,8 @@ end
 d.home = [d.home sprintf('/%4d/%03d/',syear,jday)];
 
 % CCAST processing version and get file listing
-vers = 'v20a';  %% hmm for HALO  /asl/cris/ccast/sdr45_j01_HR//2019/115/  I only see v20a
 vers = 'v20d';  %% wot Chris H code has
+vers = 'v20a';  %% hmm for HALO  /asl/cris/ccast/sdr45_j01_HR//2019/115/  I only see v20a
 if (~ismember(vers,{'v20d'})) & (~ismember(vers,{'v20a'}))
   error('invalid ccast version'); 
   return; 
@@ -233,13 +240,13 @@ for fn=iign
   % <TBD>
   
   % Assign Header variables
-  head = struct;
-  head.pfields = 4;  % robs1, no calcs in file
-  head.ptype   = 0;
-  head.ngas    = 0;
-  % product_name_platform: "SS1330"
-  head.instid  = 800; % AIRS
-  head.pltfid  = -9999;
+  %h = struct;
+  %h.pfields = 4;  % robs1, no calcs in file
+  %h.ptype   = 0;
+  %h.ngas    = 0;
+  %% product_name_platform: "SS1330"
+  %h.instid  = 800; % AIRS
+  %h.pltfid  = -9999;
 
   % sanity check for ccast QC
   if exist ('L1a_err') ~= 1
@@ -254,40 +261,40 @@ for fn=iign
   %---------------
   % copy geo data
   %---------------
-  prof = struct;
-  prof.rlat = single(geo.Latitude(:)');
-  prof.rlon = single(geo.Longitude(:)');
+  p = struct;
+  p.rlat = single(geo.Latitude(:)');
+  p.rlon = single(geo.Longitude(:)');
 
-  prof.rlon = wrapTo180(prof.rlon);
+  p.rlon = wrapTo180(p.rlon);
 
-  %prof.rtime = reshape(ones(9,1) * (geo.FORTime(:)' * 1e-6 - tdif), 1, nobs);
-  prof.rtime = reshape(ones(9,1) * (geo.FORTime(:)' * 1e-6 ), 1, nobs);
-  prof.satzen = single(geo.SatelliteZenithAngle(:)');
-  prof.satazi = single(geo.SatelliteAzimuthAngle(:)');
-  prof.solzen = single(geo.SolarZenithAngle(:)');
-  prof.solazi = single(geo.SolarAzimuthAngle(:)');
+  %p.rtime = reshape(ones(9,1) * (geo.FORTime(:)' * 1e-6 - tdif), 1, nobs);
+  p.rtime = reshape(ones(9,1) * (geo.FORTime(:)' * 1e-6 ), 1, nobs);
+  p.satzen = single(geo.SatelliteZenithAngle(:)');
+  p.satazi = single(geo.SatelliteAzimuthAngle(:)');
+  p.solzen = single(geo.SolarZenithAngle(:)');
+  p.solazi = single(geo.SolarAzimuthAngle(:)');
   % Incorrect
-  %prof.zobs = single(geo.Height(:)');
+  %p.zobs = single(geo.Height(:)');
   % SatelliteRange is zobs for nadir
   temp = squeeze(geo.SatelliteRange(5,:,:));
   temp = (nanmean(temp(15,:),2) + nanmean(temp(16,:),2))/2;
-  prof.zobs = ones(1,nobs)*temp;
+  p.zobs = ones(1,nobs)*temp;
   clear temp;
 
 addpath /home/sergio/MATLABCODE/TIME
-[xyy,xmm,xdd,xhh] = tai2utcSergio(prof.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
+[xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
 time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
 co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
-prof.co2ppm = co2ppm;
-fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),prof.co2ppm(1));
-fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),prof.co2ppm(end));
+p.co2ppm = co2ppm;
+fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),p.co2ppm(1));
+fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),p.co2ppm(end));
 
   iobs = 1:nobs;
-  prof.atrack = int32( 1 + floor((iobs-1)/(nfov*nfor)) );
-  prof.xtrack = int32( 1 + mod(floor((iobs-1)/9),30) );
-  prof.ifov = int32( 1 + mod(iobs-1,9) );
-  %prof.udef      = [];
-  %prof.iudef     = [];
+  p.atrack = int32( 1 + floor((iobs-1)/(nfov*nfor)) );
+  p.xtrack = int32( 1 + mod(floor((iobs-1)/9),30) );
+  p.ifov = int32( 1 + mod(iobs-1,9) );
+  %p.udef      = [];
+  %p.iudef     = [];
   %--------------------
   % copy radiance data
   %--------------------
@@ -303,51 +310,51 @@ fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm
   nout = nLW + nMW + nSW + 6 * dg;
 
   % initialize radiance output
-  prof.robs1 = ones(nout, nobs, 'single') * NaN;
+  p.robs1 = ones(nout, nobs, 'single') * NaN;
 
   [si, di] = guard_ind(sg, dg, nLW);
   rtmp = reshape(rLW, length(vLW), [], nobs);
-  prof.robs1(di, :) = single(rtmp(si, :));
+  p.robs1(di, :) = single(rtmp(si, :));
 
   [si, di] = guard_ind(sg, dg, nMW);
   di = nLW + 2 * dg + di;
   rtmp = reshape(rMW, length(vMW), nobs);
-  prof.robs1(di, :) = single(rtmp(si, :));
+  p.robs1(di, :) = single(rtmp(si, :));
 
   [si, di] = guard_ind(sg, dg, nSW);
   di = nLW + nMW + 4 * dg + di;
   rtmp = reshape(rSW, length(vSW), nobs);
-  prof.robs1(di, :) = single(rtmp(si, :));
+  p.robs1(di, :) = single(rtmp(si, :));
 
   % set to 1, for now
-  prof.robsqual = zeros(1, nobs, 'single');
+  p.robsqual = zeros(1, nobs, 'single');
 
   % observer pressure
-  prof.pobs = zeros(1,nobs,'single');
+  p.pobs = zeros(1,nobs,'single');
 
   % upwelling radiances
-  prof.upwell = ones(1,nobs,'int32');
+  p.upwell = ones(1,nobs,'int32');
  
   %--------------------
-  % set the prof udefs
+  % set the p udefs
   %--------------------
-  prof.udef  = zeros(20, nobs, 'single');
-  prof.iudef = zeros(10, nobs, 'int32');
+  p.udef  = zeros(20, nobs, 'single');
+  p.iudef = zeros(10, nobs, 'int32');
 
   % iudef 3 is granule ID as an int32
   %t1 = str2double(cellstr(geo.Granule_ID(:,4:16)))';
   t2 = int32(ones(nobs,1) * gran.num);
-  prof.iudef(3,:) = t2(:)';
+  p.iudef(3,:) = t2(:)';
 
   % iudef 4 is ascending/descending flag
   t1 = geo.Asc_Desc_Flag';
   t2 = int32(ones(nfov*nfor,1) * t1);
-  prof.iudef(4,:) = t2(:)';
+  p.iudef(4,:) = t2(:)';
 
   % iudef 5 is orbit number
   t1 = geo.Orbit_Number';
   t2 = int32(ones(nfov*nfor,1) * t1);
-  prof.iudef(5,:) = t2(:)';
+  p.iudef(5,:) = t2(:)';
 
   %-------------------------------
   % trim output to a valid subset
@@ -358,23 +365,23 @@ fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm
   etmp = eLW | eMW | eSW;
   iok = find(~etmp(:)');
 
-  prof.rlat   = prof.rlat(:, iok);
-  prof.rlon   = prof.rlon(:, iok);
-  prof.rtime  = prof.rtime(:, iok);
-  prof.satzen = prof.satzen(:, iok);
-  prof.satazi = prof.satazi(:, iok);
-  prof.solzen = prof.solzen(:, iok);
-  prof.solazi = prof.solazi(:, iok);
-  prof.zobs   = prof.zobs(:, iok);
-  prof.pobs   = prof.pobs(:, iok);
-  prof.upwell = prof.upwell(:, iok);
-  prof.atrack = prof.atrack(:, iok);
-  prof.xtrack = prof.xtrack(:, iok);
-  prof.ifov   = prof.ifov(:, iok);
-  prof.robs1  = prof.robs1(:, iok);
-  prof.robsqual = prof.robsqual(:, iok);
-  prof.udef   = prof.udef(:, iok);
-  prof.iudef  = prof.iudef(:, iok);
+  p.rlat   = p.rlat(:, iok);
+  p.rlon   = p.rlon(:, iok);
+  p.rtime  = p.rtime(:, iok);
+  p.satzen = p.satzen(:, iok);
+  p.satazi = p.satazi(:, iok);
+  p.solzen = p.solzen(:, iok);
+  p.solazi = p.solazi(:, iok);
+  p.zobs   = p.zobs(:, iok);
+  p.pobs   = p.pobs(:, iok);
+  p.upwell = p.upwell(:, iok);
+  p.atrack = p.atrack(:, iok);
+  p.xtrack = p.xtrack(:, iok);
+  p.ifov   = p.ifov(:, iok);
+  p.robs1  = p.robs1(:, iok);
+  p.robsqual = p.robsqual(:, iok);
+  p.udef   = p.udef(:, iok);
+  p.iudef  = p.iudef(:, iok);
 
   % Assign attribute strings
   pattr = struct;
@@ -397,22 +404,23 @@ fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm
   %-------------------
   % set header values
   %-------------------
-  head = struct;
-  head.nchan = nout;
-  head.ichan = cris_ichan(nguard, 2, nLW, nMW, nSW);
-  head.vchan = cris_vchan(nguard, userLW, userMW, userSW);
-  head.ichan = head.ichan';
-  head.vchan = head.vchan';
-  head.pfields = 4; % 4 = IR obs
-  head.vcmax   = max(head.vchan);
-  head.vcmin   = min(head.vchan);
+  h = struct;
+  h.nchan = nout;
+  h.ichan = cris_ichan(nguard, 2, nLW, nMW, nSW);
+  h.vchan = cris_vchan(nguard, userLW, userMW, userSW);
+  h.ichan = h.ichan';
+  h.vchan = h.vchan';
+  h.pfields = 4; % 4 = IR obs
+  h.ptype   = 0;
+  h.vcmax   = max(h.vchan);
+  h.vcmin   = min(h.vchan);
 
  %% keyboard_nowindow
- %% plot(head.vchan,noise)
+ %% plot(h.vchan,noise)
 
-  [salti, landfrac] = usgs_deg10_dem(prof.rlat, prof.rlon);
-  prof.landfrac = landfrac;
-  prof.salti    = salti;
+  [salti, landfrac] = usgs_deg10_dem(p.rlat, p.rlon);
+  p.landfrac = landfrac;
+  p.salti    = salti;
 
   %-----------------------
   % set header attributes
@@ -422,51 +430,77 @@ fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm
           };
 
 
-i900 = find(head.vchan >= 900,1);
-figure(1); scatter_coast(prof.rlon,prof.rlat,25,rad2bt(900,prof.robs1(i900,:))); 
-if iSNPPorJ1orJ2 == 0
-  title('BT900 CRIS NPP FSR obs'); 
-elseif iSNPPorJ1orJ2 == 1
-  title('BT900 CRIS J1 FSR obs'); 
-elseif iSNPPorJ1orJ2 == 2
-  title('BT900 CRIS J2 FSR obs'); 
-end
-
-colormap jet
-%error('lklk')
-%disp('ret to continue'); pause
-pause(0.1);
+  i900 = find(h.vchan >= 900,1);
+  figure(1); scatter_coast(p.rlon,p.rlat,25,rad2bt(900,p.robs1(i900,:))); 
+  if iSNPPorJ1orJ2 == 0
+    title('BT900 CRIS NPP FSR obs'); 
+  elseif iSNPPorJ1orJ2 == 1
+    title('BT900 CRIS J1 FSR obs'); 
+  elseif iSNPPorJ1orJ2 == 2
+    title('BT900 CRIS J2 FSR obs'); 
+  end
+  
+  colormap jet
+  pause(0.1);
 
   % Add in model data ******************************
   fprintf(1, '>>> Add model: %s...', cfg.model)
   switch cfg.model
    case 'ecmwf'
-    [prof,head,pattr]  = fill_ecmwf(prof,head,pattr);
+     if iInterp <= 0
+       [p,h,pattr]  = fill_ecmwf(p,h,pattr);
+     else
+       new_8_ECMfiles_interp_analysis
+     end
+
    case 'era'
-    addpath /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB
-    %[prof,head,pattr]  = fill_era(prof,head,pattr);
-    [prof,head,pattr]  = fill_era_interp(prof,head,pattr);
+     addpath /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB
+     if iInterp <= 0
+       [p,h,pattr]  = fill_era(p,h,pattr);
+       %[p,h,pattr]  = fill_era_interp(p,h,pattr);
+     else
+       new_4_ERAfiles_interp_analysis
+     end
+
    case 'merra'
-    [prof,head,pattr]  = fill_merra(prof,head,pattr);
+     [p,h,pattr]  = fill_merra(p,h,pattr);
   end
 
-% add landfrac then emissivity
-  [~,~,prof,pattr] = rtpadd_usgs_10dem(head,hattr,prof,pattr);
-  [prof,pattr]     = rtp_add_emis(prof,pattr);
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  head.pfields = 5;  % robs, model
+  % add landfrac then emissivity
+  %[~,~,p,pattr] = rtpadd_usgs_10dem(h,hattr,p,pattr);
+  %[p,pattr]     = rtp_add_emis(p,pattr);
+
+  %[h,ha,p,pa] = rtpadd_emis_DanZhou2(h,ha,p,pa);
+  %p = Prof_add_emis(p,yymmddgg(1),yymmddgg(2),yymmddgg(3));  %% broken crap by whoever
+  %p = rtpadd_emis_DanZhou(h,ha,p,pa);   %% lso totally broken crap
+  %[h,ha,p,pa] = rtpadd_emis_wis(h,ha,p,pa);
+  %addpath /asl/rtp_prod2/emis/
+  %addpath /asl/rtp_prod2/util/    
+  %addpath /asl/packages/rtp_prod2/emis/
+  %addpath /asl/packages/rtp_prod2/util/
+  %addpath /asl/rtp_prod2/emis/
+  %addpath /asl/rtp_prod2/util/
+ 
+  addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis/
+  addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/
+
+  p.rlon = wrapTo180(p.rlon);
+  [p,pattr] = rtp_add_emis(p,pattr);
+
+  h.pfields = 5;  % robs, model
 
   % Save file and copy raw rtp data.
-  %rtpwrite(fn_rtp1,head,hattr,prof,pattr)
-
+  %rtpwrite(fn_rtp1,h,hattr,p,pattr)
 
   if(strcmp(prod,'clr'))
     % ================ clear Subset ===================
     % 1. Get uniform scene subset
     disp('clear subset calcs')
   
-    [iuni, amax_keep] = cris_find_uniform(head, prof, uniform_cfg);
-    %[dbtun, mbt, amax] = chirp_find_uniform(head, prof, uniform_cfg);
+    [iuni, amax_keep] = cris_find_uniform(h, p, uniform_cfg);
+    %[dbtun, mbt, amax] = chirp_find_uniform(h, p, uniform_cfg);
   
     %iuniform = find(abs(dbtun) < 1.0);   % my version
     %iuniform = find(abs(mbt) < 1.0);      % slb version
@@ -478,9 +512,9 @@ pause(0.1);
     end
   
     fprintf(1, '>> Uniform obs found: %d/12150\n', nuni);
-    pdu = rtp_sub_prof(prof,iuni);
+    pdu = rtp_sub_prof(p,iuni);
   
-    rtpwrite(fn_rtp1,head,hattr,pdu,pattr)
+    rtpwrite(fn_rtp1,h,hattr,pdu,pattr)
   
     % Now run klayers
     unix(klayers_run);
@@ -493,11 +527,10 @@ pause(0.1);
     %stFileInfo = dir(fn_rtp3);
     [hd3,~,pd3,~] = rtpread(fn_rtp3);
     pdu.rclr  = pd3.rcalc;
-    %prof = rmfield(prof,'rcalc');
+    %p = rmfield(p,'rcalc');
     %clear p3;
     hd3.pfields = 7;        % includes model, obs & calc
     hd3.ptype   = 0;        % back to model levels (pre-klayers)
-  
   
     % save a copy for comparison later
     %sav_dir = '/home/chepplew/data/rtp/chirp_AQ/clear/2018/';
@@ -505,7 +538,7 @@ pause(0.1);
     %rtpwrite([sav_dir sav_fn],hd3,hattr,pdu,pattr)
   
     %nuniform = length(pdu.rtime);
-    %[iflagsc, bto1232, btc1232] = xfind_clear_loANDhires(head, prof, 1:nobs);
+    %[iflagsc, bto1232, btc1232] = xfind_clear_loANDhires(h, p, 1:nobs);
     [iflagsc, bto1232, btc1232] = xfind_clear_hires(hd3, pdu, 1:nuni);
     %[iflagsc, bto1232, btc1232] = chirp_find_clear(hd3, pdu, clear_cfg);    % 
     %[iflagsc, btoc, btcc]       = chirp_find_clear(hd3, pdu, clear_cfg); % slb version
@@ -522,14 +555,14 @@ pause(0.1);
       continue;
     end
   
-    prof_clr = rtp_sub_prof(pdu, iclear);
+    p_clr = rtp_sub_prof(pdu, iclear);
   
     if isfirst
-      pd0  = prof_clr;
+      pd0  = p_clr;
       hd0  = hd3;
     else
       % concatenate new random rtp data into running random rtp structure
-      [hd0, pd0] = cat_rtp_clh(hd0, pd0, hd3, prof_clr);
+      [hd0, pd0] = cat_rtp_clh(hd0, pd0, hd3, p_clr);
     end
   
   end      % end if(prod == 'clr')
@@ -537,30 +570,30 @@ pause(0.1);
   if(strcmp(prod,'sct'))
     disp('allsky calcs')
 
-run_sarta.co2ppm = prof.co2ppm;
-run_sarta.clear = +1;
-run_sarta.cloud = +1;
-run_sarta.cumsum = -1;    %% this is "closer" to MRO but since cliuds are at centroid, does not do too well with DCC
-run_sarta.cumsum = 9999;  %% larrabee likes this, puts clouds high so does well for DCC
-
-iSlabCld_CumSumStrowORGeorge = -1;
-if iSlabCld_CumSumStrowORGeorge > 0
-  run_sarta.cumsum = 9999;  %% strow pick, cloud at PEAK of wgt fcn
-else
-  run_sarta.cumsum = -1;  %% aumann pick, cloud at wgt mean of profile
-end
-run_sarta.sartaclear_code = sartaclr_bin.fsr;
-run_sarta.sartacloud_code = sartasct_bin.fsr;
-
-run_sarta
-
-    if ~isfield(prof,'scanang')
-      prof.scanang = saconv(prof.satzen,prof.zobs);
+   run_sarta.co2ppm = p.co2ppm;
+   run_sarta.clear = +1;
+   run_sarta.cloud = +1;
+   run_sarta.cumsum = -1;    %% this is "closer" to MRO but since cliuds are at centroid, does not do too well with DCC
+   run_sarta.cumsum = 9999;  %% larrabee likes this, puts clouds high so does well for DCC
+   
+   iSlabCld_CumSumStrowORGeorge = -1;
+   if iSlabCld_CumSumStrowORGeorge > 0
+     run_sarta.cumsum = 9999;  %% strow pick, cloud at PEAK of wgt fcn
+   else
+     run_sarta.cumsum = -1;  %% aumann pick, cloud at wgt mean of profile
+   end
+   run_sarta.sartaclear_code = sartaclr_bin.fsr;
+   run_sarta.sartacloud_code = sartasct_bin.fsr;
+   
+   run_sarta
+   
+    if ~isfield(p,'scanang')
+      p.scanang = saconv(p.satzen,p.zobs);
     end
 
-    [p2] = driver_sarta_cloud_rtp(head,hattr,prof,pattr,run_sarta);
-    [head,hattr,p2x,pattr] = rtptrim_sartacloud(head,hattr,p2,pattr);
-    hd0 = head;
+    [p2] = driver_sarta_cloud_rtp(h,hattr,p,pattr,run_sarta);
+    [h,hattr,p2x,pattr] = rtptrim_sartacloud(h,hattr,p2,pattr);
+    hd0 = h;
     pd0 = p2x;
   end      % end if(prod == 'sct')
   % =====================================================

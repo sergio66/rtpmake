@@ -99,7 +99,11 @@ if iv5or6 == 5
 elseif iv5or6 == 6
   icestr = ['interp_analysis_cloudy_airs_l1c_ecm' icestr ];
 end
-icestr = [icestr '_timeoffset_' num2str(iTimeOffset,'%04d') '_'];
+
+%% this if-then added Dec 2022; else it automatically added on the offset
+if iTimeOffset ~= 0
+  icestr = [icestr '_timeoffset_' num2str(iTimeOffset,'%04d') '_'];
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

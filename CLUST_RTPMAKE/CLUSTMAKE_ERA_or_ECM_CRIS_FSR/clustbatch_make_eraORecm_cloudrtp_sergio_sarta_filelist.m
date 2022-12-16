@@ -17,6 +17,10 @@ addpath /home/sergio/MATLABCODE/matlib/clouds/sarta/
 
 set_filelist
 
+if ~exist('iInterp')
+  iInterp = +1;
+end
+
 if ~exist('iERAorECM')
   iERAorECM = +1; %% till June 2019
   iERAorECM = -1; %% after June 2019
@@ -65,33 +69,39 @@ if ~exist(dout)
   eval(mker)
 end
 
-if iERAorECM == 1
-  fout = ['fsr_allfov_era_' num2str(gg,'%03d') '*.rtp'];
-  fout = ['cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr '*.rtp'];
-  fout = ['cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
-elseif iERAorECM == -1
-  fout = ['fsr_allfov_ecm_' num2str(gg,'%03d') '*.rtp'];
-  fout = ['cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr '*.rtp'];
-  fout = ['cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
+if iInterp <= 0
+  if iERAorECM == 1
+    fout = ['fsr_allfov_era_' num2str(gg,'%03d') '*.rtp'];
+    fout = ['cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr '*.rtp'];
+    fout = ['cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
+  elseif iERAorECM == -1
+    fout = ['fsr_allfov_ecm_' num2str(gg,'%03d') '*.rtp'];
+    fout = ['cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr '*.rtp'];
+    fout = ['cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
+  end
+else
+  if iERAorECM == 1
+    fout = ['interp_analysis_fsr_allfov_era_' num2str(gg,'%03d') '*.rtp'];
+    fout = ['interp_analysis_cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr '*.rtp'];
+    fout = ['interp_analysis_cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
+  elseif iERAorECM == -1
+    fout = ['interp_analysis_fsr_allfov_ecm_' num2str(gg,'%03d') '*.rtp'];
+    fout = ['interp_analysis_cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr '*.rtp'];
+    fout = ['interp_analysis_cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
+  end
 end
-
+  
 ee = dir([dout '/' fout]);
 if length(ee) == 0
   if iERAorECM == 1
-    [hd0, ha0, pd0, pa0, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,gg,'era',iSNPPorJ1orJ2);
+    [hd0, ha0, pd0, pa0, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,gg,'era',iSNPPorJ1orJ2,iInterp);
   elseif iERAorECM == -1  
-    [hd0, ha0, pd0, pa0, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,gg,'ecmwf',iSNPPorJ1orJ2);
+    [hd0, ha0, pd0, pa0, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,gg,'ecmwf',iSNPPorJ1orJ2,iInterp);
   end
 
-  %if iERAorECM == 1
-  %  fout = ['fsr_allfov_era_' num2str(gg,'%03d') '_' tstr '.rtp'];
-  %  fout = ['cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '_' tstr '.rtp'];
-  %elseif iERAorECM == -1
-  %  fout = ['fsr_allfov_ecm_' num2str(gg,'%03d') '_' tstr '.rtp'];
-  %  fout = ['cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '_' tstr '.rtp'];
-  %end
-
   rtpwrite([dout '/' fout],hd0, ha0, pd0, pa0);
+  fprintf(1,'wrote out %s \n',[dout '/' fout]);
+
   i900 = find(hd0.vchan >= 900,1);
   tobs = rad2bt(900,pd0.robs1(i900,:));
   tclr = rad2bt(900,pd0.sarta_rclearcalc(i900,:));

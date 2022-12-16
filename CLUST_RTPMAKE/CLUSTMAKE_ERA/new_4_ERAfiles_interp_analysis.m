@@ -73,3 +73,8 @@ p.plevs = frac1matr .* pB1.plevs + frac2matr .* pB2.plevs;
 
 %p.nlevs = frac1 .* pB1.nlevs + frac2 .* pB2.nlevs;
 p.nlevs = pB1.nlevs;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+h.ngas = 2;
+h.gunit = [21 21]';
+h.glist = [01 03]';

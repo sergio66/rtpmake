@@ -5,6 +5,7 @@
 # run this with   sbatch --exclude=cnode[225,267] --array=1-240 sergio_matlab_jobB.sbatch 2   for loop over a day
 # run this with   sbatch -p cpu2021               --array=1-48  sergio_matlab_jobB.sbatch 1   for filelist
 # run this with   sbatch -p cpu2021               --array=1-240 sergio_matlab_jobB.sbatch 2   for loop over a day
+# run this with   sbatch -p cpu2021               --array=1-240 sergio_matlab_jobB.sbatch 3   for filelist, with interp analysis
 
 #  Name of the job:
 #SBATCH --job-name=CLUST_MAKE_ECM_RTP
@@ -48,4 +49,7 @@ elif [[ "$1" -eq "1" ]]; then
 elif [[ "$1" -eq "2" ]]; then
   echo "cmd line arg = 2, loop over day"
   srun matlab -nodisplay -r "clust_make_ecmcloudrtp_sergio_sarta_YYMMDD_loopGG_2834; exit"
+elif [[ "$1" -eq "3" ]]; then
+  echo "cmd line arg = 3, filelist run, but interp over EMC 3hour files"
+  srun matlab -nodisplay -r "clustbatch_make_ecmcloudrtp_sergio_sarta_filelist_interp; exit"
 fi
