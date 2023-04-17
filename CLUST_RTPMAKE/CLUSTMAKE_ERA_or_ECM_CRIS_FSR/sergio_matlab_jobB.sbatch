@@ -39,10 +39,6 @@ elif [ $# -eq 0 ]; then
 fi
 ########################################################################
 
--rw-rw-r-- 1 sergio pi_strow  5235 Dec 15 22:59 clustbatch_make_eraORecm_cloudrtp_sergio_sarta_filelist.m
--rw-rw-r-- 1 sergio pi_strow  5314 Dec 15 22:58 clustbatch_make_eraORecm_cloudrtp_sergio_sarta_YYMMDD_loopGG.m
-
-
 if [[ "$1" -eq "" ]]; then
   echo "cmd line arg = DNE, filelist run, no Interp"
   srun matlab -nodisplay -r "iInterp = 0; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_filelist;exit"

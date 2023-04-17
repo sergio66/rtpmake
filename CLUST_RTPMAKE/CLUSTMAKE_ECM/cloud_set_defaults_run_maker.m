@@ -180,6 +180,7 @@ for ixx = 1 : length(iaGlist)
       elseif yymmddgg(1) > 2021
         filename = ['/asl/airs/l1c_v674/' ystr '/'];
       end
+      filename = ['/asl/airs/l1c_v672/' ystr '/'];
       filename = [filename num2str(days_so_far,'%03d') '/'];
 %filename = ['/asl/ftp/incoming/L1c/']; %AIRS.2020.06.20.037.L1C.AIRS_Rad.v6.7.2.0.G20172225834.hdf’
 
@@ -206,19 +207,19 @@ for ixx = 1 : length(iaGlist)
       [eq_x_tai, f, gdata, attr, opt] = read_airicrad(fname);  % Steve
       f0_2645 = f;
 
-hdffile = '/home/sergio/MATLABCODE/airs_l1c_srf_tables_lls_20181205.hdf';   % what he gave in Dec 2018
-vchan2834 = hdfread(hdffile,'freq');
-f = vchan2834;
-load sarta_chans_for_l1c.mat
-theinds2645 = ichan;
-f2645 = f(ichan);
-
-%      a = read_airs_l1c(fname);   %% Chris Hepplewhite
-%      theinds2645 = cell2mat(a.chanID); theinds2645 = theinds2645';
-%      f2645   = cell2mat(a.freq);   f2645   = f2645';
-% plot(f2645)
-% plot(chanID)
-
+      hdffile = '/home/sergio/MATLABCODE/airs_l1c_srf_tables_lls_20181205.hdf';   % what he gave in Dec 2018
+      vchan2834 = hdfread(hdffile,'freq');
+      f = vchan2834;
+      load sarta_chans_for_l1c.mat
+      theinds2645 = ichan;
+      f2645 = f(ichan);
+      
+      %      a = read_airs_l1c(fname);   %% Chris Hepplewhite
+      %      theinds2645 = cell2mat(a.chanID); theinds2645 = theinds2645';
+      %      f2645   = cell2mat(a.freq);   f2645   = f2645';
+      % plot(f2645)
+      % plot(chanID)
+      
     end
 
     if iv5or6 == 5
@@ -243,7 +244,8 @@ f2645 = f(ichan);
     pa = {{'profiles','rtime','seconds since 1993'}};
     ha = {{'header','hdf file',filename}};
 
-    h.pfields=5; % (1=prof + 4=IRobs);
+    h.pfields = 5; % (1=prof + 4=IRobs);
+    h.ptype   = 0;
 
     if iv5or6 == 5
       h.nchan = length(theinds);

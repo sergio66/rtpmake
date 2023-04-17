@@ -1,5 +1,5 @@
 %% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
-%% one per month, 19 years of AIRS data so 20x12 = 240 sets of data
+%% one per month, 20 years of AIRS data so 20x12 = 240 sets of data
 
 %starttime = tic;
 ticcStart0 = clock;

@@ -57,6 +57,8 @@ addpath /asl/matlib/time
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
 addpath /home/sergio/MATLABCODE
 addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
+addpath /home/sergio/MATLABCODE/TIME/
+addpath /home/sergio/MATLABCODE/PLOTTER
 
 % addpath /home/strow/cress/Work/Rtp
 % addpath /home/strow/Matlab/Grib     WARNING /home/strow/Matlab/Grib/rtpadd_grib_data.m DIFFERENT than /asl/matlib/gribtools/rtpadd_era_data.m
@@ -348,11 +350,15 @@ addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/time
         fprintf(1,'saving to %s \n',fnamex)
         rtpwrite(fnamex,h,ha,p2x,pa)
 
+%{
 rtpwrite('junk.ip.rtp',h,ha,p2x,pa);
 sss = ['!' klayers ' fin=junk.ip.rtp fout=junk.op.rtp >& ugh']; eval(sss)
 [hjunk,~,pjunk,~] = rtpread('junk.op.rtp');
 mmw = mmwater_rtp(hjunk,pjunk);
-scatter_coast(pjunk.rlon,pjunk.rlat,10,mmw)
+scatter_coast(pjunk.rlon,pjunk.rlat,10,mmw); title('column water (mmw)')
+rmer = ['!/bin/rm junk.ip.rtp junk.op.rtp ugh'];
+eval(rmer)
+%}
 
       end
     else

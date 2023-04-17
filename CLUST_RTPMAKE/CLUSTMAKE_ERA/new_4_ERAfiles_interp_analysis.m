@@ -78,3 +78,4 @@ p.nlevs = pB1.nlevs;
 h.ngas = 2;
 h.gunit = [21 21]';
 h.glist = [01 03]';
+h.ptype = 0;

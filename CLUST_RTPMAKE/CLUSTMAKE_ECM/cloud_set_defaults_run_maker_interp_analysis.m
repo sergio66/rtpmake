@@ -103,6 +103,8 @@ end
 %% this if-then added Dec 2022; else it automatically added on the offset
 if iTimeOffset ~= 0
   icestr = [icestr '_timeoffset_' num2str(iTimeOffset,'%04d') '_'];
+else
+  icestr = [icestr '.'];
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -257,21 +259,24 @@ for ixx = 1 : length(iaGlist)
       else
         [eq_x_tai, f, gdata, attr, opt] = read_airicrad(fname);  % Steve
         f0_2645 = f;
-      end
 
-hdffile = '/home/sergio/MATLABCODE/airs_l1c_srf_tables_lls_20181205.hdf';   % what he gave in Dec 2018
-vchan2834 = hdfread(hdffile,'freq');
-f = vchan2834;
-load sarta_chans_for_l1c.mat
-theinds2645 = ichan;
-f2645 = f(ichan);
-
-%      a = read_airs_l1c(fname);   %% Chris Hepplewhite
-%      theinds2645 = cell2mat(a.chanID); theinds2645 = theinds2645';
-%      f2645   = cell2mat(a.freq);   f2645   = f2645';
-% plot(f2645)
-% plot(chanID)
-
+        hdffile = '/home/sergio/MATLABCODE/airs_l1c_srf_tables_lls_20181205.hdf';   % what he gave in Dec 2018
+        vchan2834 = hdfread(hdffile,'freq');
+        f = vchan2834;
+        load sarta_chans_for_l1c.mat
+        theinds2645 = ichan;
+        f2645 = f(ichan);
+      
+        f = f2645;
+        theinds = theinds2645;
+        
+        %      a = read_airs_l1c(fname);   %% Chris Hepplewhite
+        %      theinds2645 = cell2mat(a.chanID); theinds2645 = theinds2645';
+        %      f2645   = cell2mat(a.freq);   f2645   = f2645';
+        % plot(f2645)
+        % plot(chanID)
+  
+      end  
     end
 
     if iv5or6 == 5
@@ -298,11 +303,18 @@ f2645 = f(ichan);
     pa = {{'profiles','rtime','seconds since 1993'}};
     ha = {{'header','hdf file',filename}};
 
-    h.pfields=5; % (1=prof + 4=IRobs);
+    h.pfields = 5; % (1=prof + 4=IRobs);
+    h.ptype   = 0;
 
-    h.nchan = length(theinds);
-    h.ichan = theinds;;
-    h.vchan = f(h.ichan);;
+    if iv5or6 == 5
+      h.nchan = length(theinds);
+      h.ichan = 1:2378;
+      h.vchan = f(h.ichan);
+    else
+      h.nchan = length(theinds2645);
+      h.ichan = theinds2645;;
+      h.vchan = f2645;
+    end
 
     %%% this is NEW
     p.landfrac_fromL1B = p.landfrac;

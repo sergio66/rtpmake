@@ -1,3 +1,5 @@
+addpath /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB
+
 [xyyh,xmmh,xddh,xhhh] = tai2utcSergio(mean(p.rtime));
 fprintf(1,'mean rtime in AIRS L1B/C data corresponds to following : %4i %2i %2i %6.3f \n',xyyh,xmmh,xddh,xhhh);
 
@@ -80,15 +82,21 @@ else
   pClosest = pB1;
 end
 
+%mama = load('/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/h2645structure.mat')
+%plot(sort(double(hB2.vchan)) - sort(double(mama.h.vchan)))
+%plot(sort(double(hB2.ichan)) - sort(double(mama.h.ichan)))
+%disp('difference in h.ichan ... ret to continue'); pause
+
 p = pClosest;
-p.sst   = frac1 .* pB1.sst + frac2 .* pB2.sst;
-p.spres = frac1 .* pB1.spres + frac2 .* pB2.spres;    
-p.stemp = frac1 .* pB1.stemp + frac2 .* pB2.stemp;
-p.wspeed = frac1 .* pB1.wspeed + frac2 .* pB2.wspeed;
+p.sst     = frac1 .* pB1.sst + frac2 .* pB2.sst;
+p.spres   = frac1 .* pB1.spres + frac2 .* pB2.spres;    
+p.stemp   = frac1 .* pB1.stemp + frac2 .* pB2.stemp;
+p.wspeed  = frac1 .* pB1.wspeed + frac2 .* pB2.wspeed;
 p.wsource = frac1 .* pB1.wsource + frac2 .* pB2.wsource;
-p.tcc = frac1 .* pB1.tcc + frac2 .* pB2.tcc;
-p.plat = frac1 .* pB1.plat + frac2 .* pB2.plat;
-p.plon = frac1 .* pB1.plon + frac2 .* pB2.plon;
+p.tcc     = frac1 .* pB1.tcc + frac2 .* pB2.tcc;
+p.plat    = frac1 .* pB1.plat + frac2 .* pB2.plat;
+p.plon    = frac1 .* pB1.plon + frac2 .* pB2.plon;
+p.ptime   = frac1 .* pB1.ptime + frac2 .* pB2.ptime;
 
 frac1matr = ones(mean(pB1.nlevs),1) * frac1;
 frac2matr = ones(mean(pB1.nlevs),1) * frac2;        
@@ -107,3 +115,4 @@ p.nlevs = pB1.nlevs;
 h.ngas = 2;
 h.gunit = [21 21]';
 h.glist = [01 03]';
+h.ptype = 0;
