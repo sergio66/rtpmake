@@ -41,8 +41,9 @@ sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
 klayers = '/asl/packages/klayers/Bin/klayers_airs';
 sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
 
-klayers = '/asl/packages/klayersV205/BinV201/klayers_airs';
-sarta   = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
+klayers  = '/asl/packages/klayersV205/BinV201/klayers_airs';
+sartaClr = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
+sartaCld = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_may19_prod';
 
 addpath /asl/matlab2012/airs/readers
 addpath /asl/matlib/aslutil
@@ -88,6 +89,7 @@ codeX = 1; %% use new     with B. Baum, P. Yang params
 
 code0 = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
 code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
+code1 = sartaCld;
 
 if codeX == 0
   icestr = '_sarta_baran_ice';
@@ -110,7 +112,7 @@ icestr = [icestr '_timeoffset_' num2str(iTimeOffset,'%04d') '_'];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% typically iaGList == JOB so this loop runs ONCE .. so you control muktiple files via the cluster
+%% typically iaGList == JOB so this loop runs ONCE .. so you control multiple files via the cluster
 
 for ixx = 1 : length(iaGlist)
   ix = iaGlist(ixx);
@@ -164,6 +166,7 @@ for ixx = 1 : length(iaGlist)
       days_so_far = sum(mos(1:month-1));
     end
     days_so_far = days_so_far + day;
+    fprintf(1,'days_so_far = %3i \n',days_so_far)
 
     if iv5or6 == 5
       %% L1B
@@ -182,6 +185,7 @@ for ixx = 1 : length(iaGlist)
           filename = ['/asl/airs/l1c_v672/' ystr '/'];
         else
           filename = ['/asl/airs/l1c_v674/' ystr '/'];
+          filename = ['/asl/airs/l1c_v672/' ystr '/'];
         end
       elseif yymmddgg(1) > 2021
         filename = ['/asl/airs/l1c_v674/' ystr '/'];
@@ -198,8 +202,7 @@ for ixx = 1 : length(iaGlist)
     if length(thedir) == 1
       fname = [dir0 thedir.name];
     else
-      fprintf(1,'%s \n',filename);
-      disp('file does not exist');
+      fprintf(1,'%s L1B/LiC file does not exist \n',filename);
 
       %% excess wet bulb, 2020_08_23
       xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_21.mat';

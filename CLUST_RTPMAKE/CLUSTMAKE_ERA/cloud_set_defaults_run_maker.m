@@ -41,8 +41,9 @@ iv5or6 = 6;   %% AIRS L1C
 %klayers = '/asl/packages/klayers/Bin/klayers_airs';
 %sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
 
-klayers = '/asl/packages/klayersV205/BinV201/klayers_airs';
-sarta   = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
+klayers  = '/asl/packages/klayersV205/BinV201/klayers_airs';
+sartaClr = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
+sartaCld = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_may19_prod';
 
 addpath /home/sergio/MATLABCODE
 addpath /asl/matlab2012/airs/readers
@@ -82,6 +83,8 @@ end
 code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
 code1 = '/home/sergio/SARTA_CLOUDY/BinV201/xsarta_apr08_m140_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
 code1 = '/home/chepplew/gitLib/sarta/bin/airs_l1c_2834_cloudy_may19_prod_v3';
+code1 = sartaCld;
+
 run_sarta.sartaclear_code = code1;
 run_sarta.sartacloud_code = code1;
 

@@ -54,3 +54,5 @@ filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/wetbulbmax.txt';
 filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/pbl_briancaroll_AMT.txt';
 %
 filelist = 'onetime.txt';
+%
+filelist = '/home/sergio/MATLABCODE_Git/AI_cloud_retrievals/training_test.txt'
