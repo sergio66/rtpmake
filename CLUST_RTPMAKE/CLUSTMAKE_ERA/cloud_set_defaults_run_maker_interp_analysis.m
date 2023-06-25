@@ -19,6 +19,10 @@ HDFSW will be removed in a future release. Use MATLAB.IO.HDFEOS.SW instead.
 
 addpath /home/sergio/MATLABCODE
 
+if ~exist('iRandomMMDDGG')
+  iRandomMMDDGG = -1;
+end
+
 if ~exist('iSaveRTP')
   iSaveRTP = +1;
 end
@@ -125,12 +129,20 @@ for ixx = 1 : length(iaGlist)
   dstr = num2str(yymmddgg(3),'%02d');
   gstr = num2str(yymmddgg(4),'%03d');
 
-  % fdirOUT = ['/asl/data/rtprod_airs/' ystr '/' mstr '/' dstr '/'];
-  fdirOUT = ['/asl/rtp/rtprod_airs/' ystr '/' mstr '/' dstr '/'];
-  if iv5or6 == 5
-    fdirOUT = ['/asl/s1/sergio/rtp/rtp_airibrad_v5/' ystr '/' mstr '/' dstr '/'];  %% till 2018
-  elseif iv5or6 == 6
-    fdirOUT = ['/asl/s1/sergio/rtp/rtp_airicrad_v6/' ystr '/' mstr '/' dstr '/'];  %% after 2018
+  if iRandomMMDDGG == -1
+    % fdirOUT = ['/asl/data/rtprod_airs/' ystr '/' mstr '/' dstr '/'];
+    fdirOUT = ['/asl/rtp/rtprod_airs/' ystr '/' mstr '/' dstr '/'];
+    if iv5or6 == 5
+      fdirOUT = ['/asl/s1/sergio/rtp/rtp_airibrad_v5/' ystr '/' mstr '/' dstr '/'];  %% till 2018
+    elseif iv5or6 == 6
+      fdirOUT = ['/asl/s1/sergio/rtp/rtp_airicrad_v6/' ystr '/' mstr '/' dstr '/'];  %% after 2018
+    end
+  else
+    if iv5or6 == 5
+      fdirOUT = ['/asl/s1/sergio/rtp/rtp_airibrad_v5/' ystr '/RANDOM/'];  %% till 2018
+    elseif iv5or6 == 6
+      fdirOUT = ['/asl/s1/sergio/rtp/rtp_airicrad_v6/' ystr '/RANDOM/'];  %% after 2018
+    end
   end
 
   if ~exist(fdirOUT)
@@ -144,7 +156,7 @@ for ixx = 1 : length(iaGlist)
   else
     fnameOUT= [fdirOUT icestr ystr '.' mstr '.' dstr '.' gstr '_cumsum_-1.rtp'];
   end
-
+  
   eeP = exist(fnameOUT);
 
   if eeP == 0
@@ -166,115 +178,8 @@ for ixx = 1 : length(iaGlist)
       days_so_far = sum(mos(1:month-1));
     end
     days_so_far = days_so_far + day;
-    fprintf(1,'days_so_far = %3i \n',days_so_far)
 
-    if iv5or6 == 5
-      %% L1B
-      % filename = ['/strowdataN/data/airs/Aqua_AIRS_Level1/AIRIBRAD.005/' ystr '/'];
-      filename = ['/asl/data/airs/AIRIBRAD/' ystr '/'];
-      filename = [filename num2str(days_so_far,'%03d') '/'];
-      dir0 = filename;
-      filename = [filename 'AIRS.' ystr '.' mstr '.' dstr '.' gstr];
-      filename = [filename '.L1B.AIRS_Rad.v5*.hdf'];
-    elseif iv5or6 == 6
-      %% L1C
-      filename = ['/asl/data/airs/L1C/' ystr '/'];
-      filename = ['/asl/data/airs/L1C_v672/' ystr '/'];
-      if yymmddgg(1) <= 2021
-        if days_so_far <= 266
-          filename = ['/asl/airs/l1c_v672/' ystr '/'];
-        else
-          filename = ['/asl/airs/l1c_v674/' ystr '/'];
-          filename = ['/asl/airs/l1c_v672/' ystr '/'];
-        end
-      elseif yymmddgg(1) > 2021
-        filename = ['/asl/airs/l1c_v674/' ystr '/'];
-      end
-      filename = [filename num2str(days_so_far,'%03d') '/'];
-
-      dir0 = filename;
-      filename = [filename 'AIRS.' ystr '.' mstr '.' dstr '.' gstr];
-      filename = [filename '.L1C.AIRS_Rad.v6*.hdf'];
-    end
-
-    thedir = dir(filename);
-    iSimulateData = -1;
-    if length(thedir) == 1
-      fname = [dir0 thedir.name];
-    else
-      fprintf(1,'%s L1B/LiC file does not exist \n',filename);
-
-      %% excess wet bulb, 2020_08_23
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_21.mat';
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_23.mat';  %% hmm, not as excessive as I thought!
-
-      %% excess wet bulb, 2020_08_20
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2020_08_20.mat';  %% this one looked better
-
-      %% excess wet bulb, 2019_06_23
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2019_06_23.mat';  
-
-      %% MLS by Werner say a big system and I am STRETCHING it
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/usa_2019_08_27.mat';
-
-      %% https://earthsky.org/earth/study-predicts-deadly-heat-in-persian-gulf/ hot day in the Persian Gulf
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2015_07_31.mat';
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2020_07_29.mat';
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2020_08_23.mat';
-
-      xjunk = '/home/sergio/MATLABCODE/WetBulbTemperatures/middle_east_2015_07_31.mat';
-      
-      strjunk = ['load ' xjunk '  as needed ? ']; fprintf(1,'xjunk = %s \n',xjunk);
-      %iSimulateData = input(strjunk);
-      iSimulateData = 1
-
-      if iSimulateData < 0
-        return
-      end
-    end
-
-    if iv5or6 == 5
-      [a,b,c] = sdload_quiet(fname);
-    elseif iv5or6 == 6
-      %% find v6_readl2cc.m  /asl/*/rtp_prod2/airs/readers
-      addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/airs/readers
-      addpath /asl/matlib/time
-
-      if iSimulateData > 0
-        fprintf(1,'loading %s \n',xjunk);
-        pjunk = load(xjunk); 
-
-        gdata.rtime = pjunk.p0.rtime;
-        gdata.rlat = pjunk.p0.rlat;
-        gdata.rlon = pjunk.p0.rlon;
-        gdata.solazi = ones(size(pjunk.p0.rlon)) * 00;
-        gdata.solzen = ones(size(pjunk.p0.rlon)) * 150;
-          wonk = length(gdata.solzen);
-          gdata.solzen(1:wonk/2) = 40; 
-        gdata.satzen = ones(size(pjunk.p0.rlon)) * 22;
-        gdata.satazi = ones(size(pjunk.p0.rlon)) * 0;
-        gdata.robs1 = zeros(2645,length(gdata.rtime));
-       
-        [gdata.salti, gdata.landfrac] = usgs_deg10_dem(gdata.rlat, gdata.rlon);
-      else
-        [eq_x_tai, f, gdata, attr, opt] = read_airicrad(fname);  % Steve
-        f0_2645 = f;
-      end
-
-hdffile = '/home/sergio/MATLABCODE/airs_l1c_srf_tables_lls_20181205.hdf';   % what he gave in Dec 2018
-vchan2834 = hdfread(hdffile,'freq');
-f = vchan2834;
-load sarta_chans_for_l1c.mat
-theinds2645 = ichan;
-f2645 = f(ichan);
-
-%      a = read_airs_l1c(fname);   %% Chris Hepplewhite
-%      theinds2645 = cell2mat(a.chanID); theinds2645 = theinds2645';
-%      f2645   = cell2mat(a.freq);   f2645   = f2645';
-% plot(f2645)
-% plot(chanID)
-
-    end
+    read_in_L1B_or_L1C
 
     if iv5or6 == 5
       p.rlat = [a.Latitude(:)'];
@@ -302,10 +207,16 @@ f2645 = f(ichan);
 
     h.pfields=5; % (1=prof + 4=IRobs);
 
-    h.nchan = length(theinds);
-    h.ichan = theinds;;
-    h.vchan = f(h.ichan);;
-
+    if iv5or6 == 5
+      h.nchan = length(theinds);
+      h.ichan = theinds;;
+      h.vchan = f(h.ichan);;
+    else
+      h.nchan = length(theinds2645);
+      h.ichan = theinds2645;
+      h.vchan = f2645;
+    end
+      
     %%% this is NEW
     p.landfrac_fromL1B = p.landfrac;
     p.salti_fromL1B = p.salti;
@@ -321,13 +232,13 @@ f2645 = f(ichan);
     %[p,h] = sergio_fill_ecmwf(p,h,'/asl/data/ecmwf/',-1);
     %save test_2002_09_08_g044_sergio.mat p h
 
-addpath /home/sergio/MATLABCODE/TIME
-[xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
-time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
-co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
-p.co2ppm = co2ppm;
-fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),p.co2ppm(1));
-fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),p.co2ppm(end));
+    addpath /home/sergio/MATLABCODE/TIME
+    [xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
+    time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
+    co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
+    p.co2ppm = co2ppm;
+    fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),p.co2ppm(1));
+    fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),p.co2ppm(end));
 
     %%%%%%%%%%%%%%%%%%%%%%%%%
     new_4_ERAfiles_interp_analysis

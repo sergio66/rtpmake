@@ -3,25 +3,55 @@
 %% sbatch --array=1-48 sergio_matlab_jobB.sbatch 
 %% N1 = 1, N2 = number of files to be processed
 
-JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-%JOB = 2
+JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));    %% this is irrelevent since I assign MM DD GG randomly
+
 warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% specify text file which has YY MM DD GG lst that needs to be processed 
-set_filelist
+%% specify text file which has YY MM DD GG lst that needs to be processed
+%% set_filelist
+
+%% thefilelist = load(filelist);
+
+rng('shuffle')
+pause(floor(JOB/10))
+anana = clock; rng(ceil(anana(6)*10000000));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+yy = 2004;  %%%%%%%%%%%%%%%%%%%%%%%%% >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-thefilelist = load(filelist);
-thefilelist = thefilelist(JOB,:)
+mm = floor(rand(1,1)*12); 
+if mm < 1
+  mm = 1;
+elseif mm > 12
+  mm = 12;
+end
 
-% thefilelist = [2016 10 14 032]
-% thefilelist = [2004 06 15 199]
+daysINmonth = [31 28 31 30 31 30 31 31 30 31 30 31];
+if mod(yy,4) == 0
+  daysINmonth(2) = 29;
+end
+daysINmonth = daysINmonth(mm);
+dd = floor(rand(1,1)*daysINmonth); 
+if dd < 1
+  dd = 1;
+elseif dd > daysINmonth
+  dd = daysINmonth;
+end
 
-yymmdd0  = thefilelist(1:3); %% YY MM DD
-iaGlist  = thefilelist(4);   %% granule
+gg = floor(rand(1,1)*240); 
+if gg < 1
+  gg = 1;
+elseif gg > 240
+  gg = 240;
+end
+
+yymmdd0  = [yy mm dd];
+iaGlist  = gg;
+
+fprintf(1,'will be making data for this random MM YY GG = %4i/%2i/%2i G%3i \n',[yymmdd0 iaGlist])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -32,6 +62,8 @@ iPertTCC = -1;  %% use default tcc in ECMWF  <<<<<<<<<<<<<<<<< DEFAULT >>>>>>>>>
 
 iSlabCld_CumSumStrowORGeorge = +1; %% strow,  cumsum 9999, cloud at PEAK of wgt fcn <<<< DEFAULT >>>>>>>
 iSlabCld_CumSumStrowORGeorge = -1; %% aumann, cumsum -1,   cloud at mean of cld profile
+
+iRandomMMDDGG = +1;
 
 if iPertTCC <= 0
   iTimeOffset = 060;     %% time offset in minutes

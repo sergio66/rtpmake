@@ -7,6 +7,7 @@
 # run this with sbatch -p high_mem --array=1-415 sergio_matlab_jobB.sbatch 4    for tile center avg
 # run this with sbatch -p high_mem --array=1-415 sergio_matlab_jobB.sbatch 5    for tile with 7x4=28 ERA grid points/tile, 16 days .. set quue to medium, time to 24 hours
 # run this with sbatch -p high_mem --array=1-240 sergio_matlab_jobB.sbatch 6    for loop over a day, interp ERA
+# run this with sbatch -p high_mem --array=1-240 sergio_matlab_jobB.sbatch 7    for randomly generate 240 granules spanning specifiled year
 
 #  Name of the job:
 #SBATCH --job-name=CLUST_MAKE_ERA_RTP
@@ -63,6 +64,9 @@ elif [[ "$1" -eq "5" ]]; then
   echo "cmd line arg = 5, making tile 16day individiual days/ERA grid points"
   srun matlab -nodisplay -r "clust_loop_make16day_tile_28points; exit"
 elif [[ "$1" -eq "6" ]]; then
-  echo "cmd line arg = 6, making one whole day"
+  echo "cmd line arg = 6, making one whole day interp ERA"
   srun matlab -nodisplay -r "clustbatch_eracloudrtp_sarta_filelist_interp_YYMMDD_loopGG; exit"
+elif [[ "$1" -eq "7" ]]; then
+  echo "cmd line arg = 7, making randowm data through year!!!"
+  srun matlab -nodisplay -r "clustbatch_make_eracloudrtp_sarta_filelist_interp_YY_randMMDDGG; exit"
 fi
