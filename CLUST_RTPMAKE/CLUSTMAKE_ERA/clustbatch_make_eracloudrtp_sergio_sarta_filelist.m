@@ -2,6 +2,9 @@
 %% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_jobB.sbatch
 %% N1 = 1, N2 = number of files to be processed
 
+addpath /home/sergio/MATLABCODE
+system_slurm_stats
+
 %% specify text file which has YY MM DD GG lst that needs to be processed 
 set_filelist
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

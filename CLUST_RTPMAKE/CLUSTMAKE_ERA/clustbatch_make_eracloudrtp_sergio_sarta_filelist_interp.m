@@ -3,6 +3,9 @@
 %% sbatch --array=1-48 sergio_matlab_jobB.sbatch 
 %% N1 = 1, N2 = number of files to be processed
 
+addpath /home/sergio/MATLABCODE
+system_slurm_stats
+
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 %JOB = 2
 warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
@@ -16,9 +19,6 @@ set_filelist
 
 thefilelist = load(filelist);
 thefilelist = thefilelist(JOB,:)
-
-% thefilelist = [2016 10 14 032]
-% thefilelist = [2004 06 15 199]
 
 yymmdd0  = thefilelist(1:3); %% YY MM DD
 iaGlist  = thefilelist(4);   %% granule

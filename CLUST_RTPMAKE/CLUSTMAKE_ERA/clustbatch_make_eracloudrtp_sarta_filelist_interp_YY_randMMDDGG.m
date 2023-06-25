@@ -3,6 +3,9 @@
 %% sbatch --array=1-48 sergio_matlab_jobB.sbatch 
 %% N1 = 1, N2 = number of files to be processed
 
+addpath /home/sergio/MATLABCODE
+system_slurm_stats
+
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));    %% this is irrelevent since I assign MM DD GG randomly
 
 warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
@@ -20,6 +23,7 @@ anana = clock; rng(ceil(anana(6)*10000000));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 yy = 2004;  %%%%%%%%%%%%%%%%%%%%%%%%% >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+yy = 2005;  %%%%%%%%%%%%%%%%%%%%%%%%% >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 mm = floor(rand(1,1)*12); 

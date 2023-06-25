@@ -157,7 +157,7 @@ for ixx = 1 : length(iaGlist)
     fnameOUT= [fdirOUT icestr ystr '.' mstr '.' dstr '.' gstr '_cumsum_-1.rtp'];
   end
   
-  eeP = exist(fnameOUT);
+  eeP = existOldvsNew(fnameOUT);
 
   if eeP == 0
     fprintf(1,' making %s \n',fnameOUT);

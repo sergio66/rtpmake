@@ -171,7 +171,7 @@ for ixx = 1 : length(iaGlist)
     fnameOUT= [fdirOUT nocldstr ystr '.' mstr '.' dstr '.' gstr '.rtp'];
   end
 
-  eeP = exist(fnameOUT);
+  eeP = existOldvsNew(fnameOUT);
 
   if eeP == 0
     fprintf(1,' making %s \n',fnameOUT);

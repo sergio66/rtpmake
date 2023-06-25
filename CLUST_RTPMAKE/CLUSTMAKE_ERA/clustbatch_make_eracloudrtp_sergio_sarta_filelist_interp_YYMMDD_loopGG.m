@@ -3,8 +3,12 @@
 %% sbatch --array=1-48 sergio_matlab_jobB.sbatch 
 %% N1 = 1, N2 = number of files to be processed
 
+addpath /home/sergio/MATLABCODE
+system_slurm_stats
+
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 %JOB = 1
+
 warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
