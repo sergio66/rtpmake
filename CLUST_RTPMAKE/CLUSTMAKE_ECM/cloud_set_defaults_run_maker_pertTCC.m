@@ -208,18 +208,18 @@ for ixx = 1 : length(iaGlist)
     %[p,h] = sergio_fill_ecmwf(p,h,'/asl/data/ecmwf/',-1);
     %save test_2002_09_08_g044_sergio.mat p h
 
-which fill_ecmwf
-disp('calling fill_ecmwf')
+    which fill_ecmwf
+    disp('calling fill_ecmwf')
 
     [p,h] = fill_ecmwf(p,h);
 
-addpath /home/sergio/MATLABCODE/TIME
-[xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
-time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
-co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
-p.co2ppm = co2ppm;
-fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),p.co2ppm(1));
-fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),p.co2ppm(end));
+    addpath /home/sergio/MATLABCODE/TIME
+    [xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
+    time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
+    co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
+    p.co2ppm = co2ppm;
+    fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),p.co2ppm(1));
+    fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),p.co2ppm(end));
 
     p0 = p;
 

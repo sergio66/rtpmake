@@ -231,9 +231,9 @@ for ixx = 1 : length(iaGlist)
     frac1(frac1 > 1) = 1;    
     frac2 = 1-frac1;
     
-% keyboard_nowindow
-% which fill_ecmwf
-% disp('calling fill_ecmwf')
+    % keyboard_nowindow
+    % which fill_ecmwf
+    % disp('calling fill_ecmwf')
 
     [pClosest,hClosest] = fill_ecmwf(p,h);
     pB1 = p; pB1.rtime = ones(size(pB1.rtime)) * tB1;
@@ -264,6 +264,15 @@ for ixx = 1 : length(iaGlist)
     
     %p.nlevs = frac1 .* pB1.nlevs + frac2 .* pB2.nlevs;
     p.nlevs = pB1.nlevs;
+
+    addpath /home/sergio/MATLABCODE/TIME
+    [xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
+    time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
+    co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
+    p.co2ppm = co2ppm;
+    fprintf(1,'CLIMATOLOGY co2ppm for FIRST %4i/%2i/%2i = %8.6f ppmv\n',xyy(1),xmm(1),xdd(1),p.co2ppm(1));
+    fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm(end),xdd(end),p.co2ppm(end));
+
     p0 = p;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
