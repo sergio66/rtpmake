@@ -11,7 +11,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-%JOB = 215
+%JOB = 44
 
 %% March 11, 2011 is my good example
 %yymmdd0  = input('Enter [YYYY MM DD] : ');
@@ -25,6 +25,8 @@ yymmdd0  = [2022 01 15];  ddLoop = [13 14 15 16 17 18 19 20 21 22];  %% <<<<<<<<
 
 yymmdd0  = [2018 10 31];  ddLoop = [];  %% for Alan Geer set 1
 yymmdd0  = [2018 11 01];  ddLoop = [];  %% for Alan Geer set 2
+
+yymmdd0  = [2002 09 06];  ddLoop = [];  %% for Eric Maddy; contains the 044 granule with the hurricane
 
 if length(ddLoop) == 0
   ddLoop = yymmdd0(3);
@@ -41,9 +43,10 @@ for iiddloop = 1 : length(ddLoop)
   
   iSlabCld_CumSumStrowORGeorge = +1; %% strow,  cumsum 9999, cloud at PEAK of wgt fcn <<<< DEFAULT >>>>>>>
   iSlabCld_CumSumStrowORGeorge = -1; %% aumann, cumsum -1,   cloud at mean of cld profile
-  
+
   if iPertTCC <= 0
-    cloud_set_defaults_run_maker
+    %cloud_set_defaults_run_maker
+    iTimeOffset = 0;  cloud_set_defaults_run_maker_interp_analysis
   else
     cloud_set_defaults_run_maker_pertTCC
   end

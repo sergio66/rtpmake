@@ -36,6 +36,7 @@ sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
 
 klayers = '/asl/packages/klayersV205/BinV201/klayers_airs';
 sarta   = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
+sartaCld = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_may19_prod';
 
 addpath /asl/matlab2012/airs/readers
 addpath /asl/matlib/aslutil
@@ -81,6 +82,7 @@ codeX = 1; %% use new     with B. Baum, P. Yang params
 
 code0 = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
 code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
+code1 = sartaCld;
 
 if codeX == 0
   icestr = '_sarta_baran_ice';

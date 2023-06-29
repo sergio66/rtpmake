@@ -19,7 +19,8 @@
 #SBATCH --cpus-per-task 1
 
 #  Specify the desired partition develop/batch/prod
-#SBATCH --partition=batch
+##SBATCH --partition=batch
+#SBATCH --partition=high_mem
 
 #  Specify the qos and run time (format:  dd-hh:mm:ss)
 ##SBATCH --qos=medium
