@@ -11,9 +11,12 @@
 addpath /asl/matlib/h4tools
 addpath /asl/matlib/rtptools
 addpath /asl/matlib/aslutil
+addpath /home/sergio/MATLABCODE
 addpath /home/sergio/MATLABCODE/TIME
 addpath /home/sergio/MATLABCODE/PLOTTER
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta/
+
+system_slurm_stats
 
 set_filelist
 

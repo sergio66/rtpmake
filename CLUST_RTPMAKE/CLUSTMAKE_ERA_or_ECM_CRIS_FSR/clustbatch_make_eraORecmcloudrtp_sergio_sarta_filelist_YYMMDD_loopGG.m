@@ -1,24 +1,23 @@
 %% run with
 %% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_jobB.sbatch
+%% sbatch --array=1-48 sergio_matlab_jobB.sbatch 
 %% N1 = 1, N2 = number of files to be processed
 
-%% specify text file which has YY MM DD GG lst that needs to be processed 
-%% see eg https://www.ssec.wisc.edu/datacenter/NOAA20/GLOBAL2021_01_25_025.gif for NOAA20
-%%        https://www.ssec.wisc.edu/datacenter/polar_orbit_tracks/
-%%        https://www.ssec.wisc.edu/datacenter/polar_orbit_tracks/data/JPSS-1/
-%%        https://www.ssec.wisc.edu/datacenter/polar_orbit_tracks/data/NPP/    ------------------->>>>>>
+%% note sergio_matlab_jobB.sbatch reminds you that
+%% echo cmd line arg = 6, making one whole day interp ERA, SYMBOLIC LINK to clustbatch_make_eracloudrtp_sergio_sarta_filelist_interp_YYMMDD_loopGG.m
+%% ie 
+%% ls -lt clustbatch_eracloudrtp_sarta_filelist_interp_YYMMDD_loopGG.m
+%%     clustbatch_eracloudrtp_sarta_filelist_interp_YYMMDD_loopGG.m -> clustbatch_make_eracloudrtp_sergio_sarta_filelist_interp_YYMMDD_loopGG.m
 
 addpath /asl/matlib/h4tools
 addpath /asl/matlib/rtptools
 addpath /asl/matlib/aslutil
+addpath /home/sergio/MATLABCODE
 addpath /home/sergio/MATLABCODE/TIME
 addpath /home/sergio/MATLABCODE/PLOTTER
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta/
 
-addpath /home/sergio/MATLABCODE
 system_slurm_stats
-
-%set_filelist
 
 if ~exist('iInterp')
   iInterp = +1;
@@ -37,25 +36,27 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-%JOB = 53
+%JOB = 20
 
-yymmdd0  = [2022 01 13]; ddLoop = [];  %% ECMWF says ATMS shows gravity waves from Tonga
-yymmdd0  = [2022 01 15]; ddLoop = [14 : 22];  %% ECMWF says ATMS shows gravity waves from Tonga
+warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
 
-if length(ddLoop) == 0
-  ddLoop = yymmdd0(3);
-end
+
+%% specify text file which has YY MM DD GG lst that needs to be processed
+set_filelist
+
+thefilelist = load(filelist);
+thefilelist = thefilelist(JOB,1:3);
+
+iaGlist = 001 : 240;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-for iiddloop = 1 : length(ddLoop)
-  yymmdd0 = [yymmdd0(1:2) ddLoop(iiddloop)]
-
-  thefilelist = yymmdd0;
-  iaGlist  = 001 : 240;
-  iaGlist = iaGlist(JOB);
-  gg = iaGlist;
+for ggx = 1 : length(iaGlist)
+  gg = iaGlist(ggx);
   
+  yymmdd0 = thefilelist;
   yymmdddggstr = ['.' num2str(thefilelist(1),'%04d') '.' num2str(thefilelist(2),'%02d') '.' num2str(thefilelist(3),'%02d') '.'];
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -65,7 +66,7 @@ for iiddloop = 1 : length(ddLoop)
   iSlabCld_CumSumStrowORGeorge = +1; %% strow,  cumsum 9999, cloud at PEAK of wgt fcn <<<< DEFAULT >>>>>>>
   iSlabCld_CumSumStrowORGeorge = -1; %% aumann, cumsum -1,   cloud at mean of cld profile
   
-  yy = yymmdd0(1); mm = yymmdd0(2); dd = yymmdd0(3); gg = iaGlist;
+  yy = yymmdd0(1); mm = yymmdd0(2); dd = yymmdd0(3); gg = iaGlist(ggx);
   
   if iSNPPorJ1orJ2 == 0
     NONONOdout = ['/asl/rtp/cris/npp_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
@@ -106,7 +107,7 @@ for iiddloop = 1 : length(ddLoop)
   ee = dir([dout '/' fout]);
   if length(ee) == 0
     if iERAorECM == 1
-      [hd0, ha0, pd0, pa0, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,gg,'era',iSNPPorJ1orJ2,iInterp);
+      [hd0, ha0, pd0, pa0, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,gg,'era',  iSNPPorJ1orJ2,iInterp);
     elseif iERAorECM == -1  
       [hd0, ha0, pd0, pa0, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,gg,'ecmwf',iSNPPorJ1orJ2,iInterp);
     end

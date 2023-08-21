@@ -117,6 +117,8 @@ icestr = [icestr '_timeoffset_' num2str(iTimeOffset,'%04d') '_'];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% typically iaGList == JOB so this loop runs ONCE .. so you control multiple files via the cluster
+%% but for example clustbatch_make_eracloudrtp_sergio_sarta_filelist_interp_YYMMDD_loopGG.m sets iaGlist = 1:240
+%% while others would set iaGlist = JOB
 
 for ixx = 1 : length(iaGlist)
   ix = iaGlist(ixx);

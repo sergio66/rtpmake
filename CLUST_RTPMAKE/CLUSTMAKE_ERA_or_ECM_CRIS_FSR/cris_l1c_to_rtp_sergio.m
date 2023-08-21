@@ -106,8 +106,15 @@ end
 d.home = [d.home sprintf('/%4d/%03d/',syear,jday)];
 
 % CCAST processing version and get file listing
-vers = 'v20d';  %% wot Chris H code has
-vers = 'v20a';  %% hmm for HALO  /asl/cris/ccast/sdr45_j01_HR//2019/115/  I only see v20a
+daysSince2002_0 = change2days(2019,03,31,2002);
+daysSince2002_x = change2days(yy,mm,dd,2002);
+if daysSince2002_x > daysSince2002_0
+  vers = 'v20d';  %% wot Chris H code has
+else
+  vers = 'v20a';  %% hmm for HALO  /asl/cris/ccast/sdr45_j01_HR//2019/115/  I only see v20a
+end
+fprintf(1,' daysSince2002_x = %4i so use %s \n',daysSince2002_x,vers);
+
 if (~ismember(vers,{'v20d'})) & (~ismember(vers,{'v20a'}))
   error('invalid ccast version'); 
   return; 
@@ -123,7 +130,7 @@ if(length(d.dir) <= 1)
   fpattern
   error('Insufficient SDR granules found'); 
 return; end 
-
+  
 % reorder the listing into granule order (shouldn't be needed)
 gnum = [];
 for fn=1:length(d.dir) 

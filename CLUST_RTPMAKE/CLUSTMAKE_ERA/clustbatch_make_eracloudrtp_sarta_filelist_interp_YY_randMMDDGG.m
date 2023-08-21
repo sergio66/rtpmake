@@ -3,6 +3,8 @@
 %% sbatch --array=1-48 sergio_matlab_jobB.sbatch 
 %% N1 = 1, N2 = number of files to be processed
 
+%% this is for TESTING ERIC MADY AI using a randomly made set of FOVS
+
 addpath /home/sergio/MATLABCODE
 system_slurm_stats
 
@@ -12,7 +14,7 @@ warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% specify text file which has YY MM DD GG lst that needs to be processed
+%% specify text file which has YY MM DD GG list that needs to be processed
 %% set_filelist
 
 %% thefilelist = load(filelist);
