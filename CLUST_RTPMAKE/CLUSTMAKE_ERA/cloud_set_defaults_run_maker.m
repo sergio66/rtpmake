@@ -241,6 +241,10 @@ for ixx = 1 : length(iaGlist)
       h.vchan = f2645;
     end
 
+%%%  could replace following lines with  %%%
+%%%    [h,ha,p,pa] = make_generic_ERA_rtp(h,ha,p,pa);      
+%%%%  could replace following lines with  %%%
+
     %%% this is NEW
     p.landfrac_fromL1B = p.landfrac;
     p.salti_fromL1B = p.salti;
@@ -253,10 +257,9 @@ for ixx = 1 : length(iaGlist)
                  'CC','CIWC','CLWC'};
 
     %[h,ha,p,pa] = rtpadd_era_data(h,ha,p,pa,cldfields); %%% add on era the OLD WAY, but it needs grid files
-    %[p,h] = fill_era(p,h);
-
+    [p,h] = fill_era(p,h);
     %%% [p,h] = fill_era_interp(p,h);                           %%% add on era the NEW WAY
-    new_4_ERAfiles_interp_analysis                              %%% even better Oct 2022
+    %%%% new_4_ERAfiles_interp_analysis                     %%% even better Oct 2022 but this is covered by "interp" suite
 
     addpath /home/sergio/MATLABCODE/TIME
     [xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
@@ -292,6 +295,10 @@ addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/time
      [h,p] = subset_rtp_allcloudfields(h,p,[],[],iA);
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%  stop could replace following lines with  %%%
+%%%    [h,ha,p,pa] = make_generic_ERA_rtp(h,ha,p,pa);    
+%%%%  stop could replace following lines with  %%%
 
     if iPertTCC ~= 0
       [p2] = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);

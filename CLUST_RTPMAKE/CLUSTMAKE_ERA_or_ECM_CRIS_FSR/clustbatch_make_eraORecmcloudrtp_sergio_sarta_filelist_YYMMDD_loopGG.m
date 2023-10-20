@@ -40,7 +40,6 @@ JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 
 warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
 
-
 %% specify text file which has YY MM DD GG lst that needs to be processed
 set_filelist
 

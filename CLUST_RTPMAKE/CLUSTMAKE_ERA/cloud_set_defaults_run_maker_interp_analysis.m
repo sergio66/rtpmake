@@ -218,7 +218,11 @@ for ixx = 1 : length(iaGlist)
       h.ichan = theinds2645;
       h.vchan = f2645;
     end
-      
+
+%%%  could replace following lines with  %%%
+%%%    [h,ha,p,pa] = make_generic_interp_ERA_rtp(h,ha,p,pa);      
+%%%%  could replace following lines with  %%%
+
     %%% this is NEW
     p.landfrac_fromL1B = p.landfrac;
     p.salti_fromL1B = p.salti;
@@ -248,7 +252,7 @@ for ixx = 1 : length(iaGlist)
 
     p0 = p;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %[h,ha,p,pa] = rtpadd_emis_DanZhou2(h,ha,p,pa);
     %p = Prof_add_emis(p,yymmddgg(1),yymmddgg(2),yymmddgg(3));  %% broken crap by whoever
@@ -272,7 +276,11 @@ for ixx = 1 : length(iaGlist)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    [p2] = driver_sarta_cloud_rtp(hB2,ha,p,pa,run_sarta);
+%%%  stop could replace following lines with  %%%
+%%%    [h,ha,p,pa] = make_generic_interp_ERA_rtp(h,ha,p,pa,run_sarta);      
+%%%  stop could replace following lines with  %%%
+
+    [p2] = driver_sarta_cloud_rtp(hB2,ha,p,pa);
 
     fnamex = fnameOUT;
     [h,ha,p2x,pa] = rtptrim_sartacloud(h,ha,p2,pa);

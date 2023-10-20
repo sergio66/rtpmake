@@ -14,6 +14,19 @@ if nargin ~= nargout
            '[p,h,pa]=fill_era(p,h,pa) (preferred)\n\tTerminating'], '\n')
 end
 
+[mm,nn] = size(prof.rlon);
+if mm > 1 & nn == 1
+  error('size(prof.rlon) = mm x 1   instead of 1 x nn');
+end
+[mm,nn] = size(prof.rlat);
+if mm > 1 & nn == 1
+  error('size(prof.rlat) = mm x 1   instead of 1 x nn');
+end
+[mm,nn] = size(prof.rtime);
+if mm > 1 & nn == 1
+  error('size(prof.rtime) = mm x 1   instead of 1 x nn');
+end
+
 addpath /asl/matlib/aslutil
 addpath /asl/packages/time
 
@@ -47,24 +60,24 @@ for i=1:n
    fn_lev = [fn '_lev.nc'];
    fn_sfc = [fn '_sfc.nc'];
    fprintf(1,'era file name fn = %s \n',[fn '_*.nc where * = sfc or lev'])   
-% Do the netcdf files exist?
+   % Do the netcdf files exist?
    if exist(fn_sfc,'file') == 0 || exist(fn_lev,'file') == 0 
       disp(['Netcdf grib files missing for root: ' fn])
       break % Go to next partition
    end
-% If the filename has changed, re-load F   
+   % If the filename has changed, re-load F   
    if ~strcmp(ename,fn) 
       clear F  % Probably not needed
-%      disp('New file'); for debugging
+      %      disp('New file'); for debugging
       F(1) = grib_interpolate_era(fn_sfc,fn_lev,1);
       F(2) = grib_interpolate_era(fn_sfc,fn_lev,2);
       F(3) = grib_interpolate_era(fn_sfc,fn_lev,3);
       F(4) = grib_interpolate_era(fn_sfc,fn_lev,4);
       ename = fn;
    end   
-% Fill rtp fields
+   % Fill rtp fields
    m = find( ic == i );  % indices of first era file
-%   fhi = 0;   % this was new on Jul 20, 2015!
+   %   fhi = 0;   % this was new on Jul 20, 2015!
    u_hour = unique(hourindex);
    nn = length(u_hour);
    % Only loop over hours needed
@@ -73,9 +86,11 @@ for i=1:n
       fhi = (u_hour(jj)/6) + 1;
       l = find( hourindex == u_hour(jj));
       k = intersect(l,m);
-%      sfhi(k,:) = fhi;   % Debug, showed that fhi changes properly
+      % sfhi(k,:) = fhi;   % Debug, showed that fhi changes properly
+      %whos k l m
+      %keyboard_nowindow
       if k > 0         
-% Assume rtp lat/lon are +-180??  Need to be 0-360 for grib interpolation
+         % Assume rtp lat/lon are +-180??  Need to be 0-360 for grib interpolation
          rlat = prof.rlat(k);
          rlon = prof.rlon(k);
          rlon(rlon<0) = rlon(rlon<0) + 360;
@@ -90,7 +105,7 @@ for i=1:n
          ci_udef = 1;
          prof.udef(ci_udef,k) = F(fhi).ci.ig(rlat,rlon);
 
-% Estimate model grid centers used
+         % Estimate model grid centers used
          gdlat = abs(nanmean(diff(F(fhi).h_latitude)));  % lat spacing
          gdlon = abs(nanmean(diff(F(fhi).h_longitude))); % lon spacing
          prof.plat(k) = floor(rlat/gdlat)*gdlat + gdlat/2;
@@ -110,7 +125,7 @@ for i=1:n
             prof.clwc(l,k)  = F(fhi).clwc(j(l)).ig(rlat,rlon);
             prof.ciwc(l,k)  = F(fhi).ciwc(j(l)).ig(rlat,rlon);
          end
-% Only want pressure levels in grib file, in order
+         % Only want pressure levels in grib file, in order
          xtemp = p60_ecmwf(prof.spres(k));  % all 137 pressure levels
          prof.plevs(:,k) = xtemp(b,:);  % subset to ones in grib file
          prof.nlevs(k) = length(F(fhi).levid);
@@ -138,16 +153,16 @@ if isfield(prof,'gas_1')
   nbad = length(ibad);
   if (nbad > 0)
     prof.gas_1(ibad) = min_H2O_gg;
-%    say(['Replaced ' int2str(nbad) ' negative/zero H2O mixing ratios'])
+    %    say(['Replaced ' int2str(nbad) ' negative/zero H2O mixing ratios'])
   end
 end
-%
+
 if isfield(prof,'gas_3')
   ibad = find(prof.gas_3 <= 0);
   nbad = length(ibad);
   if (nbad > 0)
     prof.gas_3(ibad) = min_O3_gg;
-%    say(['Replaced ' int2str(nbad) ' negative/zero O3 mixing ratios'])
+    %    say(['Replaced ' int2str(nbad) ' negative/zero O3 mixing ratios'])
   end
 end
 %  fix any cloud frac
@@ -156,7 +171,7 @@ if isfield(prof,'tcc')
   nbad = length(ibad);
   if (nbad > 0)
     prof.tcc(ibad) = 1;
-%    say(['Replaced ' int2str(nbad) ' TCC > 1 fields'])
+    %    say(['Replaced ' int2str(nbad) ' TCC > 1 fields'])
   end
 end
 

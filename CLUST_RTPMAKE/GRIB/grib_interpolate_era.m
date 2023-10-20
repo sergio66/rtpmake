@@ -36,6 +36,13 @@ try
   F.d2m.ig  = griddedInterpolant(iX,iY,flipud(single(ncread(fn_s,'d2m',[1 1 hindex],[Inf Inf 1]))'),'linear');
 end
 
+%% for when the OLR stuff is available
+try
+  %% olr and olr_clr
+  F.olr.ig     = griddedInterpolant(iX,iY,flipud(single(ncread(fn_s,'mtnlwrf',[1 1 hindex],[Inf Inf 1]))'),'linear');
+  F.olr_clr.ig = griddedInterpolant(iX,iY,flipud(single(ncread(fn_s,'mtnlwrfcs',[1 1 hindex],[Inf Inf 1]))'),'linear');
+end
+
 %% from ~/MATLABCODE/matlib/rtp_prod2/grib/grib_interpolate_era.m
 %% need to check here for existence of ci vs si and read accordingly
 try

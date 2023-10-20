@@ -1,4 +1,4 @@
-function [prof, head, pattr] = fill_era5_monthly(prof, head, pattr)
+function [prof, head, pattr, iOLR] = fill_era5_monthly(prof, head, pattr, iOLR)
 
 % fill_era5_monthly.m, copied from fill_era
 % 
@@ -13,13 +13,16 @@ save /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA5/era5plevs.mat 
 NOTE era5plevs are from 1 to 1000 mb ie automatically already sorted from minimum to maximum
 %}
 
+if nargin < 3
+  iOLR = -1;
+end
 
 % Check args in and out to see if they conform to the new API and
 % aren't split between old and new styles
 if nargin ~= nargout
     error(['>>> ERROR: mismatch between fill_era5_monthly inputs and ' ...
            'outputs.\n\tUse either [p,h]=fill_era5_monthly(p,h) or ' ...
-           '[p,h,pa]=fill_era5_monthly(p,h,pa) (preferred)\n\tTerminating'], '\n')
+           '[p,h,pa]=fill_era5_monthly(p,h,pa) (preferred)\n\tTerminating or also include iOLR'], '\n')
 end
 
 addpath /asl/matlib/aslutil
@@ -152,6 +155,13 @@ for i=1:n
            %% 2m air and dewpoint temperatures
            prof.d2m(k)   = F(fhi).d2m.ig(rlat,rlon);
            prof.t2m(k)   = F(fhi).t2m.ig(rlat,rlon);
+         end
+
+         if iOLR > 0
+           try
+             prof.olr(k)     = F(fhi).olr.ig(rlat,rlon);
+             prof.olr_clr(k) = F(fhi).olr_clr.ig(rlat,rlon);
+           end
          end
 
          prof.spres(k)   = F(fhi).sp.ig(rlat,rlon);

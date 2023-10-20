@@ -1,7 +1,7 @@
 %% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
-%% one per month, 19 years of AIRS data so 20x12 = 240 sets of data
+%% one per month, 29 years of AIRS data so 20x12 = 240 sets of data
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-%JOB = 228
+JOB = 1
 
 addpath /asl/matlib/rtptools/
 addpath /asl/matlib/aslutil
@@ -29,6 +29,8 @@ thedateS(1,:) = [yy0 mm0 dd0];
 dd1 = 15;
 thedateE(1,:) = [yy1 mm1 dd1];
 
+iOLR = +1;
+
 for ii = 2 : JOB
   yy0 = yy1; mm0 = mm1; dd0 = dd1;
   thedateS(ii,:) = [yy0 mm0 dd0];  
@@ -39,6 +41,8 @@ for ii = 2 : JOB
 
   fprintf(1,'ii=%4i   Start %4i/%2i/%2i  End %4i/%2i/%2i \n',ii,thedateS(ii,:),thedateE(ii,:))
 end  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [thedateS thedateE]
 [yyM,mmM,ddM] = addNdays(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),8,firstORend,iPrint);
@@ -107,8 +111,14 @@ figure(6); scatter_coast(rlon,rlat,50,rlat-p.rlat); title('rlat-p.rlat'); colorm
 %% dirs used by /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries
 if iDorA > 0
   fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+  if iOLR > 0
+    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+  end
 elseif iDorA < 0
   fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+  if iOLR > 0
+    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+  end
 else
   iDorA
   error('need iDorA = +/- 1')
@@ -166,11 +176,15 @@ if iDo > 0
   pnew_ip = rmfield(pnew_ip,'sarta_rclearcalc');
 
   clrfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3'};
-  cldfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3',...
-                   'CC','CIWC','CLWC'};
+  cldfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3','CC','CIWC','CLWC'};
+
+  if iOLR > 0
+    clrfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3','OLR','OLRCS'};
+    cldfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3','CC','CIWC','CLWC','OLR','OLRCS'};
+  end
 
   pnew_ip0 = pnew_ip;
-  [pnew_ip,hnew_ip] = fill_era5_monthly(pnew_ip,hnew_ip);
+  [pnew_ip,hnew_ip,~,iOLR] = fill_era5_monthly(pnew_ip,hnew_ip,[],iOLR);
 
   [xyy,xmm,xdd,xhh] = tai2utcSergio(pnew_ip.rtime);        % <<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
   time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
