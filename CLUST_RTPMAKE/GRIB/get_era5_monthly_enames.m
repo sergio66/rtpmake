@@ -1,7 +1,7 @@
 function enames = get_era5_monthly_enames(mtime,iType);
 
-iDebugINCOMING = -1;
 iDebugINCOMING = +1;
+iDebugINCOMING = -1;
 
 if nargin == 1
   iType = 1;
@@ -50,12 +50,14 @@ else
     enames.sfc{ii} = ['/asl/models/era5_avg/' datestr(mtime1(ii),'yyyy') '/' datestr(mtime1(ii),'yyyy') '-' datestr(mtime1(ii),'mm') '_sfc.nc'];
     enames.lev{ii} = ['/asl/models/era5_avg/' datestr(mtime1(ii),'yyyy') '/' datestr(mtime1(ii),'yyyy') '-' datestr(mtime1(ii),'mm') '_lev.nc'];
     enames.twm{ii} = ['/asl/models/era5_avg/' datestr(mtime1(ii),'yyyy') '/' datestr(mtime1(ii),'yyyy') '-' datestr(mtime1(ii),'mm') '_2meter.nc'];
+    enames.olr{ii} = ['/asl/models/era5_avg/' datestr(mtime1(ii),'yyyy') '/' datestr(mtime1(ii),'yyyy') '-' datestr(mtime1(ii),'mm') '_rad.nc'];
 
     if iDebugINCOMING > 0
       enames.fn{ii}  = ['/asl/models/era5_avg/INCOMING/'  datestr(mtime1(ii),'yyyy') '-' datestr(mtime1(ii),'mm') ];
       enames.sfc{ii} = ['/asl/models/era5_avg/INCOMING/'  datestr(mtime1(ii),'yyyy') '-' datestr(mtime1(ii),'mm') '_sfc.nc'];
       enames.lev{ii} = ['/asl/models/era5_avg/INCOMING/'  datestr(mtime1(ii),'yyyy') '-' datestr(mtime1(ii),'mm') '_lev.nc'];
       enames.twm{ii} = ['/asl/models/era5_avg/INCOMING/'  datestr(mtime1(ii),'yyyy') '-' datestr(mtime1(ii),'mm') '_2meter.nc'];
+      enames.olr{ii} = ['/asl/models/era5_avg/INCOMING/'  datestr(mtime1(ii),'yyyy') '-' datestr(mtime1(ii),'mm') '_rad.nc'];
     end
 
   end

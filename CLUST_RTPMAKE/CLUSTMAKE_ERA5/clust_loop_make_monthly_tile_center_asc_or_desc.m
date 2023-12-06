@@ -1,7 +1,9 @@
+%% check success using eg iaFound = check_all_jobs_done('/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/era5_tile_center_monthly_',252); for 21 years
+
 %% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
 %% one per month, 29 years of AIRS data so 20x12 = 240 sets of data
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-JOB = 1
+%JOB = 235
 
 addpath /asl/matlib/rtptools/
 addpath /asl/matlib/aslutil
@@ -16,7 +18,7 @@ addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
 system_slurm_stats
 
 iDorA = -1;  %% asc
-iDorA = +1;  %% desc
+iDorA = +1;  %% desc, default
 
 N = 29; N1 = 1;
 firstORend = 0;
@@ -213,6 +215,11 @@ if iDo > 0
   run_sarta.sartacloud_code = code1;
   run_sarta.co2ppm = co2ppm;
 
+  if isfield(pnew_ip,'olr_clr')
+    pnew_ip.olr_clr = abs(pnew_ip.olr_clr);
+    pnew_ip.olr     = abs(pnew_ip.olr);
+  end
+
   [p2] = driver_sarta_cloud_rtp(hnew_ip,ha,pnew_ip,pa,run_sarta);
   %pnew_ip.rcalc = p2.rcalc;
   %pnew_ip.sarta_rclearcalc = p2.sarta_rclearcalc;
@@ -237,6 +244,13 @@ if iDo > 0
   pnew_op.TdewSurf = TdewSurf;
   pnew_op.RHSurf   = RHSurf;
 
+  if isfield(pnew_ip,'olr_clr')
+    pnew_op.olr_clr = pnew_ip.olr_clr;
+    pnew_op.olr     = pnew_ip.olr;
+    figure(6); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_ip.olr);     title('allsky OLR');
+    figure(7); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_ip.olr_clr); title('clrsky OLR');
+  end
+
   thedateS = thedateS(JOB,:);
   comment = 'see /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA5ERA5/clust_loop_make_monthly_tile_center.m';
   saver = ['save ' fout ' comment        hnew_ip ha pnew_ip pa     hnew_op ha2 pnew_op pa2 thedateS'];
@@ -245,4 +259,6 @@ if iDo > 0
   %figure(3); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,rad2bt(1231,pnew_ip.robs1(1520,:)))
   figure(4); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,rad2bt(1231,pnew_ip.rcalc(1520,:)));            title('allsky calc');
   figure(5); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,rad2bt(1231,pnew_ip.sarta_rclearcalc(1520,:))); title('clrsky calc');
+
+  fprintf(1,'saved to %s \n',fout)
 end

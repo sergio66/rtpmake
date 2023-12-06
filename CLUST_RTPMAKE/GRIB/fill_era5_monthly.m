@@ -93,8 +93,16 @@ for i=1:n
    fn_lev = [fn '_lev.nc'];
    fn_sfc = [fn '_sfc.nc'];
    fn_2m  = [fn '_2meter.nc'];
+   fn_OLR = [fn '_rad.nc'];
+
+%   kapoo = findstr(fn_OLR,'_avg');
+%   kamoo = fn_OLR(kapoo+4:kapoo+9);
+%   fn_OLR = strrep(fn_OLR,kamoo,'/INCOMING/')
+%   %% fn_OLR = '/asl/models/era5_avg/INCOMING/2002-09_rad.nc';
+%   %% keyboard_nowindow
 
    fprintf(1,'era5 monthly file name fn = %s \n',[fn '_*.nc where * = sfc or lev or 2meter'])    
+   fprintf(1,'  eg fn_sfc = %s fn_lev = %s fn_OLR = %s  \n',fn_sfc,fn_lev,fn_OLR)
 
    % Does the netcdf files exist?
    if exist(fn_sfc,'file') == 0 || exist(fn_lev,'file') == 0 
@@ -104,8 +112,8 @@ for i=1:n
    % If the filename has changed, re-load F   
    if ~strcmp(ename,fn) 
       clear F  % Probably not needed
-      if ~exist(fn_2m,'file')
-        disp('did not find 2m file ....')
+      if ~exist(fn_2m,'file') & ~exist(fn_OLR,'file')
+        disp('did not find 2m file OR olr ....')
         %disp('New ERA5 monthly file'); %for debugging
         F(1) = grib_interpolate_era(fn_sfc,fn_lev,1);
         F(2) = grib_interpolate_era(fn_sfc,fn_lev,2);
@@ -116,16 +124,38 @@ for i=1:n
         F(7) = grib_interpolate_era(fn_sfc,fn_lev,7);
         F(8) = grib_interpolate_era(fn_sfc,fn_lev,8);
         ename = fn;
-      else
-        disp('yay, did find 2m file ....')
-        F(1) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,1);
-        F(2) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,2);
-        F(3) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,3);
-        F(4) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,4);
-        F(5) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,5);
-        F(6) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,6);
-        F(7) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,7);
-        F(8) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,8);
+      elseif exist(fn_2m,'file') & ~exist(fn_OLR,'file')
+        disp('yay, did find 2m file but not OLR ....')
+        F(1) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,1,+1);
+        F(2) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,2,+1);
+        F(3) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,3,+1);
+        F(4) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,4,+1);
+        F(5) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,5,+1);
+        F(6) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,6,+1);
+        F(7) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,7,+1);
+        F(8) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,8,+1);
+        ename = fn;
+      elseif ~exist(fn_2m,'file') & exist(fn_OLR,'file')
+        disp('yay, did NOT find 2m file but found OLR ....')
+        F(1) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,1,-1);
+        F(2) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,2,-1);
+        F(3) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,3,-1);
+        F(4) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,4,-1);
+        F(5) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,5,-1);
+        F(6) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,6,-1);
+        F(7) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,7,-1);
+        F(8) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,8,-1);
+        ename = fn;
+      elseif exist(fn_2m,'file') & exist(fn_OLR,'file')
+        disp('yay, found 2m file and found OLR ....')
+        F(1) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,1,0);
+        F(2) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,2,0);
+        F(3) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,3,0);
+        F(4) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,4,0);
+        F(5) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,5,0);
+        F(6) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,6,0);
+        F(7) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,7,0);
+        F(8) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,fn_OLR,8,0);
         ename = fn;
       end
    end   

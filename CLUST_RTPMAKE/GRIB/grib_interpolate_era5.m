@@ -1,6 +1,6 @@
-function F = grib_interpolate_era5(fn_s,fn_h,fn_2m,hindex);
+function F = grib_interpolate_era5(fn_s,fn_h,fn_2m,fn_olr,hindex,iWhich);
 % 
-% Inputs: fn_s, fn_h, hindex
+% Inputs: fn_s, fn_h, fn_2m, fn_olr, hindex, iWhich 
 %         Netcdf files containing grib1 and grib2 
 %         data respectively.  This code assumes the grib1 data
 %         is surface data, and the grib2 data is hybrid ecmwf data.
@@ -39,10 +39,22 @@ F.u10.ig  = griddedInterpolant(iX,iY,flipud(single(ncread(fn_s,'u10',[1 1 hindex
 F.tcc.ig  = griddedInterpolant(iX,iY,flipud(single(ncread(fn_s,'tcc',[1 1 hindex],[Inf Inf 1]))'),'linear');
 
 %% for when the 2m stuff is available
-try
-  %% 2m air and dewpoint temperatures
-  F.t2m.ig  = griddedInterpolant(iX,iY,flipud(single(ncread(fn_2m,'t2m',[1 1 hindex],[Inf Inf 1]))'),'linear');
-  F.d2m.ig  = griddedInterpolant(iX,iY,flipud(single(ncread(fn_2m,'d2m',[1 1 hindex],[Inf Inf 1]))'),'linear');
+if iWhich == 0 | iWhich == +1
+  try
+    %% 2m air and dewpoint temperatures
+    F.t2m.ig  = griddedInterpolant(iX,iY,flipud(single(ncread(fn_2m,'t2m',[1 1 hindex],[Inf Inf 1]))'),'linear');
+    F.d2m.ig  = griddedInterpolant(iX,iY,flipud(single(ncread(fn_2m,'d2m',[1 1 hindex],[Inf Inf 1]))'),'linear');
+  end
+end
+
+%% for when the OLR stuff is available
+if iWhich == 0 | iWhich == -1
+%% for when the OLR stuff is available
+  try
+    %% olr and olr_clr
+    F.olr.ig     = griddedInterpolant(iX,iY,flipud(single(ncread(fn_olr,'mtnlwrf',[1 1 hindex],[Inf Inf 1]))'),'linear');
+    F.olr_clr.ig = griddedInterpolant(iX,iY,flipud(single(ncread(fn_olr,'mtnlwrfcs',[1 1 hindex],[Inf Inf 1]))'),'linear');
+  end
 end
 
 %% from ~/MATLABCODE/matlib/rtp_prod2/grib/grib_interpolate_era.m
