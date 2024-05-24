@@ -107,7 +107,9 @@ for i=1:n
    % Only loop over hours needed
    for jj = 1:nn
       % index for this hour (1:8);  u_hour = [0 3 6 9 12 15 18 21]
-      fhi = (u_hour(jj)/3) + 1;
+      fhi = floor(u_hour(jj)/3) + 1;
+%% fhi = floor([0:23]/3) + 1
+%% fhi =      1     1     1     2     2     2     3     3     3     4     4     4     5     5     5     6     6     6     7     7     7     8     8     8
       l = find( hourindex == u_hour(jj));
       k = intersect(l,m);
       % sfhi(k,:) = fhi;   % Debug, showed that fhi changes properly

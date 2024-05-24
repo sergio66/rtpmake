@@ -1,22 +1,11 @@
 %% check success using eg iaFound = check_all_jobs_done('/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/era5_tile_center_monthly_',252); for 21 years
 
-%% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
-%% one per month, 20 years of AIRS data so 20x12 = 240 sets of data
+%% this is set for one year, choose the month
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 if length(JOB) == 0
-  disp('no input JOB; being set to 12')
-  JOB = 12;
+  disp('no input JOB; being set to 8')
+  JOB = 8;
 end
-
-%{
-liststr = '/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/era5_tile_center_monthly_';
-iaFound = check_all_jobs_done(liststr,252);
-liststr = '/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/era5_tile_center_monthly_';
-iaFound = check_all_jobs_done(liststr,252);
-%}
-
-%JOB = 235
-%JOB = 009
 
 addpath /asl/matlib/rtptools/
 addpath /asl/matlib/aslutil
@@ -38,107 +27,18 @@ N = 29; N1 = 1;
 firstORend = 0;
 iPrint = -1;
 
-yy0 = 2002; mm0 = 09; dd0 = 15;
-thedateS(1,:) = [yy0 mm0 dd0];
-
-[yy1,mm1,dd1] = addNdays(yy0,mm0,dd0,N,firstORend,iPrint);
-dd1 = 15;
-thedateE(1,:) = [yy1 mm1 dd1];
-
-iOLR = +1;
-
-for ii = 2 : JOB
-  yy0 = yy1; mm0 = mm1; dd0 = dd1;
-  thedateS(ii,:) = [yy0 mm0 dd0];  
-
-  [yy1,mm1,dd1] = addNdays(yy0,mm0,dd0,N,firstORend,iPrint);
-  dd1 = 15;
-  thedateE(ii,:) = [yy1 mm1 dd1];
-
-  fprintf(1,'ii=%4i   Start %4i/%2i/%2i  End %4i/%2i/%2i \n',ii,thedateS(ii,:),thedateE(ii,:))
-end  
+yy0 = 1993; mm0 = JOB; dd0 = 15;
+thedateS = [yy0 mm0 dd0];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[thedateS thedateE]
-[yyM,mmM,ddM] = addNdays(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),8,firstORend,iPrint);
-rtimeM = utc2taiSergio(yyM,mmM,ddM,12);
-
-fprintf(1,'JOB = %3i spans %4i/%2i/%2i to %4i/%2i/%2i both ends inclusive \n',JOB,[thedateS(JOB,:) thedateE(JOB,:)]);
-fprintf(1,'          midpoint %4i/%2i/%2i \n',yyM,mmM,ddM);
+rtimeM = utc2taiSergio(yy0,mm0,dd0,12);
 
 [h,ha,p,pa] = rtpread('/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp');
-
-%% now we need to get overpass times and solzen angles, just set scanang to 22 deg, 
-%% but remeber this code is for monthly (so 12 sets/year while this file is 16 day so 23 sets/year ... and I only got stuff till 2019 ... so do some averaging!!!!
-load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_412_64x72.mat');
-rtime_desc = squeeze(nanmean(squeeze(nanmean(thedata.rtime_desc,1)),1)); [yy_desc,mm_desc,dd_desc] = tai2utcSergio(rtime_desc);
-rtime_asc  = squeeze(nanmean(squeeze(nanmean(thedata.rtime_asc,1)),1));  [yy_asc, mm_asc, dd_asc ] = tai2utcSergio(rtime_asc);
-
-if iDorA > 0
-  if rtimeM >= min(rtime_desc) & rtimeM <= max(rtime_desc)
-    junk = abs(rtime_desc - rtimeM)/1e7;
-    CJOB = find(junk == min(junk));
-  else
-    junk = find(mm_desc == mmM); 
-    CJOB = junk(end);
-  end
-else
-  if rtimeM >= min(rtime_asc) & rtimeM <= max(rtime_asc)
-    junk = abs(rtime_asc - rtimeM)/1e7;
-    CJOB = find(junk == min(junk));
-  else
-    junk = find(mm_asc == mmM); 
-    CJOB = junk(end);
-  end
-end
-
-fprintf(1,'JOB = %3i (20 yrs x 12 month/year) ----> CJOB = %3i (20 yrs x 23 sixteenday steps/year) \n',JOB,CJOB)
 
 monitor_memory_whos;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% from comment, see 
-%%  /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/driver_loop_get_asc_desc_solzen_time.m
-if iDorA > 0
-  rlon   = thedata.rlon_desc(:,:,CJOB);     rlon = rlon(:)';
-  rlat   = thedata.rlat_desc(:,:,CJOB);     rlat = rlat(:)';
-  solzen = thedata.solzen_desc(:,:,CJOB);   solzen = solzen(:)';
-  satzen = thedata.satzen_desc(:,:,CJOB);   satzen = satzen(:)';
-  hour   = thedata.hour_desc(:,:,CJOB);     hour = hour(:)';
-  bt1231 = thedata.bt1231_desc(:,:,CJOB,2); bt1231 = bt1231(:)';
-  
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-  rtime  = thedata.rtime_desc(:,:,CJOB);    rtime = rtime(:)';
-    [mooY,mooM,mooD,mooH] = tai2utcSergio(rtime);
-    rtime0 = utc2taiSergio(mooY(1),mooM(1),mooD(1),0.00);  drtime =  (rtime-rtime0);
-  
-    rtimex = utc2taiSergio(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),0.00) + drtime;
-    [xmooY,xmooM,xmooD,xmooH] = tai2utcSergio(rtimex);
-  
-  rtime = rtimex;
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-
-elseif iDorA < 0
-  rlon   = thedata.rlon_asc(:,:,CJOB);     rlon = rlon(:)';
-  rlat   = thedata.rlat_asc(:,:,CJOB);     rlat = rlat(:)';
-  solzen = thedata.solzen_asc(:,:,CJOB);   solzen = solzen(:)';
-  satzen = thedata.satzen_asc(:,:,CJOB);   satzen = satzen(:)';
-  hour   = thedata.hour_asc(:,:,CJOB);     hour = hour(:)';
-  bt1231 = thedata.bt1231_asc(:,:,CJOB,2); bt1231 = bt1231(:)';
-  
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-  rtime  = thedata.rtime_asc(:,:,CJOB);    rtime = rtime(:)';
-    [mooY,mooM,mooD,mooH] = tai2utcSergio(rtime);
-    rtime0 = utc2taiSergio(mooY(1),mooM(1),mooD(1),0.00);  drtime =  (rtime-rtime0);
-  
-    rtimex = utc2taiSergio(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),0.00) + drtime;
-    [xmooY,xmooM,xmooD,xmooH] = tai2utcSergio(rtimex);
-  
-  rtime = rtimex;
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-end
 
 rlon = wrapTo180(rlon);
 
@@ -152,14 +52,14 @@ figure(6); scatter_coast(rlon,rlat,50,rlat-p.rlat); title('rlat-p.rlat'); colorm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% dirs used by /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries
 if iDorA > 0
-  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC/era5_tile_center_' num2str(YY0) '_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
   if iOLR > 0
-    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/era5_tile_center_' num2str(YY0) '_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
   end
 elseif iDorA < 0
-  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC/era5_tile_center_' num2str(YY0) '_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
   if iOLR > 0
-    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/era5_tile_center_' num2str(YY0) '_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
   end
 else
   iDorA
@@ -339,7 +239,7 @@ if iDo > 0
   end
 
   thedateS = thedateS(JOB,:);
-  comment = 'see /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA5ERA5/clust_loop_make_monthly_tile_center.m';
+  comment = 'see /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA5ERA5/clust_loop_make_monthly_tile_asc_or_desc_1963_1993.m';
   saver = ['save ' fout ' comment        hnew_ip ha pnew_ip pa     hnew_op ha2 pnew_op pa2 thedateS'];
 
   eval(saver)

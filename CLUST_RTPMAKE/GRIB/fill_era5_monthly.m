@@ -29,7 +29,8 @@ addpath /asl/matlib/aslutil
 addpath /asl/packages/time
 
 % Location of grib files
-fhdr = '/asl/models/era5_avg/';     %% from July 2021
+fhdr = '/asl/models/era5_avg/';         %% from July 2021
+fhdr = '/asl/models/era5_monthly/';     %% from Jan 2024
 
 ename = '';  % This should be placed outside a rtp file loop
 mtime = tai2dnum(prof.rtime);
@@ -37,7 +38,8 @@ mtime = tai2dnum(prof.rtime);
 % Get a cell array of ecmwf grib files for each time
 % I think this will be BROKEN if using datetime above!!
 % enames = get_ecmwf_enames(mtime,profin.rtime);
-enames = get_era5_monthly_enames(mtime);
+%enames = get_era5_monthly_enames(mtime);
+enames = get_era5_monthly_enames(mtime,1,fhdr);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -92,8 +94,9 @@ for i=1:n
    fn     = u_enames{i};
    fn_lev = [fn '_lev.nc'];
    fn_sfc = [fn '_sfc.nc'];
-   fn_2m  = [fn '_2meter.nc'];
    fn_OLR = [fn '_rad.nc'];
+   fn_2m  = [fn '_2meter.nc'];
+     fn_2m = fn_sfc;
 
 %   kapoo = findstr(fn_OLR,'_avg');
 %   kamoo = fn_OLR(kapoo+4:kapoo+9);
@@ -171,7 +174,9 @@ for i=1:n
 
    for jj = 1:nn
       % index for this hour (1:8);  u_hour = [0 3 6 9 12 15 18 21]
-      fhi = (u_hour(jj)/3) + 1;
+      fhi = floor(u_hour(jj)/3) + 1;
+%% fhi = floor([0:23]/3) + 1
+%% fhi =      1     1     1     2     2     2     3     3     3     4     4     4     5     5     5     6     6     6     7     7     7     8     8     8
       l = find( hourindex == u_hour(jj));
       k = intersect(l,m);
       % sfhi(k,:) = fhi;   % Debug, showed that fhi changes properly
@@ -191,6 +196,8 @@ for i=1:n
            try
              prof.olr(k)     = F(fhi).olr.ig(rlat,rlon);
              prof.olr_clr(k) = F(fhi).olr_clr.ig(rlat,rlon);
+             prof.ilr(k)     = F(fhi).ilr.ig(rlat,rlon);
+             prof.ilr_clr(k) = F(fhi).ilr_clr.ig(rlat,rlon);
            end
          end
 

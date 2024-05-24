@@ -1,9 +1,3 @@
-JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-
-%% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
-%JOB = 06  %% 2003/02
-%JOB = 14  %% 2003/08
-
 addpath /asl/matlib/rtptools/
 addpath /asl/matlib/aslutil
 addpath /asl/matlib/h4tools
@@ -14,93 +8,27 @@ addpath ../GRIB
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
 addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
 
+%% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
+%% one per month, 20 years of AIRS data so 19x12 = 240 sets of data
+%% one per month, 21 years of AIRS data so 19x12 = 252 sets of data
+%JOB = 06  %% 2003/02
+%JOB = 14  %% 2003/08
+
+%% 23 per year so about 460 in 20 years .....
+JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
+if length(JOB) == 0
+  JOB = 240;
+  JOB = 120;
+end
+
 system_slurm_stats
 
 iDorA = +1;  %% desc
 iDorA = -1;  %% asc
 
-N = 29; N1 = 1;
-firstORend = 0;
-iPrint = -1;
-
-yy0 = 2002; mm0 = 09; dd0 = 15;
-thedateS(1,:) = [yy0 mm0 dd0];
-
-[yy1,mm1,dd1] = addNdays(yy0,mm0,dd0,N,firstORend,iPrint);
-dd1 = 15;
-thedateE(1,:) = [yy1 mm1 dd1];
-
-for ii = 2 : JOB
-  yy0 = yy1; mm0 = mm1; dd0 = dd1;
-  thedateS(ii,:) = [yy0 mm0 dd0];  
-
-  [yy1,mm1,dd1] = addNdays(yy0,mm0,dd0,N,firstORend,iPrint);
-  dd1 = 15;
-  thedateE(ii,:) = [yy1 mm1 dd1];
-
-  fprintf(1,'ii=%4i   Start %4i/%2i/%2i  End %4i/%2i/%2i \n',ii,thedateS(ii,:),thedateE(ii,:))
-end  
-
-[thedateS thedateE]
-[yyM,mmM,ddM] = addNdays(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),8,firstORend,iPrint);
-
-fprintf(1,'JOB = %3i spans %4i/%2i/%2i to %4i/%2i/%2i both ends inclusive \n',JOB,[thedateS(JOB,:) thedateE(JOB,:)]);
-fprintf(1,'          midpoint %4i/%2i/%2i \n',yyM,mmM,ddM);
-
 [h,ha,p,pa] = rtpread('/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp');
 
-%% now we need to get overpass times and solzen angles, just set scanang to 22 deg
-load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_412_64x72.mat');
-monitor_memory_whos;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% from comment, see /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/driver_loop_get_asc_desc_solzen_time.m
-if iDorA > 0
-  rlon   = thedata.rlon_desc(:,:,JOB);     rlon = rlon(:)';
-  rlat   = thedata.rlat_desc(:,:,JOB);     rlat = rlat(:)';
-  solzen = thedata.solzen_desc(:,:,JOB);   solzen = solzen(:)';
-  satzen = thedata.satzen_desc(:,:,JOB);   satzen = satzen(:)';
-  hour   = thedata.hour_desc(:,:,JOB);     hour = hour(:)';
-  bt1231 = thedata.bt1231_desc(:,:,JOB,2); bt1231 = bt1231(:)';
-  
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-  rtime  = thedata.rtime_desc(:,:,JOB);    rtime = rtime(:)';
-    [mooY,mooM,mooD,mooH] = tai2utcSergio(rtime);
-    rtime0 = utc2taiSergio(mooY(1),mooM(1),mooD(1),0.00);  drtime =  (rtime-rtime0);
-  
-    rtimex = utc2taiSergio(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),0.00) + drtime;
-    [xmooY,xmooM,xmooD,xmooH] = tai2utcSergio(rtimex);
-  
-  rtime = rtimex;
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-
-elseif iDorA < 0
-  rlon   = thedata.rlon_asc(:,:,JOB);     rlon = rlon(:)';
-  rlat   = thedata.rlat_asc(:,:,JOB);     rlat = rlat(:)';
-  solzen = thedata.solzen_asc(:,:,JOB);   solzen = solzen(:)';
-  satzen = thedata.satzen_asc(:,:,JOB);   satzen = satzen(:)';
-  hour   = thedata.hour_asc(:,:,JOB);     hour = hour(:)';
-  bt1231 = thedata.bt1231_asc(:,:,JOB,2); bt1231 = bt1231(:)';
-  
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-  rtime  = thedata.rtime_asc(:,:,JOB);    rtime = rtime(:)';
-    [mooY,mooM,mooD,mooH] = tai2utcSergio(rtime);
-    rtime0 = utc2taiSergio(mooY(1),mooM(1),mooD(1),0.00);  drtime =  (rtime-rtime0);
-  
-    rtimex = utc2taiSergio(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),0.00) + drtime;
-    [xmooY,xmooM,xmooD,xmooH] = tai2utcSergio(rtimex);
-  
-  rtime = rtimex;
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-end
-
-figure(1); scatter_coast(rlon,rlat,50,solzen); colormap jet
-figure(2); scatter_coast(rlon,rlat,50,satzen); colormap jet
-figure(3); scatter_coast(rlon,rlat,50,hour); colormap jet
-figure(4); scatter_coast(rlon,rlat,50,bt1231); colormap jet
-figure(5); scatter_coast(rlon,rlat,50,rlon-p.rlon); colormap jet
-figure(6); scatter_coast(rlon,rlat,50,rlat-p.rlat); colormap jet
+get_dates_loop_make_monthly2m_tile_center_asc_or_desc
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% dirs used by /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries

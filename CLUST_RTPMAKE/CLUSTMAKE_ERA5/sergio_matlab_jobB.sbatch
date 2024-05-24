@@ -4,7 +4,7 @@
 # run this with sbatch -p high_mem --array=1-Y sergio_matlab_jobB.sbatch 1 for filelist
 # run this with sbatch -p high_mem --array=1-Z --output='/dev/null' sergio_matlab_jobB.sbatch 
 # run this with sbatch -p high_mem --array=1-240  sergio_matlab_jobB.sbatch 2    for loop over a day
-# run this with sbatch -p high_mem --array=1-240  sergio_matlab_jobB.sbatch 4    for tile center avg, desc, 20 yearsx12months/yr = 240
+# run this with sbatch -p high_mem --array=1-240  sergio_matlab_jobB.sbatch 4    for tile center avg, desc, 20 yearsx12months/yr = 240 : note you need to set iDorA before hand
 # run this with sbatch -p high_mem --array=1-240  sergio_matlab_jobB.sbatch 5    for tile with 7x4=28 ERA grid points/tile, 16 days .. set quue to medium, time to 24 hours
 # run this with sbatch -p high_mem --array=1-240  sergio_matlab_jobB.sbatch 6    for clust_make_monthlyavg_2m.m
 #
