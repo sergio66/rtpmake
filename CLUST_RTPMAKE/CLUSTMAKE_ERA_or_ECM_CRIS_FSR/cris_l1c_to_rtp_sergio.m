@@ -450,6 +450,9 @@ fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm
   colormap jet
   pause(0.1);
 
+  %% /umbc/xfs2/strow/asl/s1/sbuczko1/git/rtp_prod2/grib/fill_ecmwf.m cn mess up p.plon (needs wrapTo180)
+  addpath /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB
+
   % Add in model data ******************************
   fprintf(1, '>>> Add model: %s...', cfg.model)
   switch cfg.model
@@ -461,7 +464,6 @@ fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm
      end
 
    case 'era'
-     addpath /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB
      if iInterp <= 0
        [p,h,pattr]  = fill_era(p,h,pattr);
        %[p,h,pattr]  = fill_era_interp(p,h,pattr);

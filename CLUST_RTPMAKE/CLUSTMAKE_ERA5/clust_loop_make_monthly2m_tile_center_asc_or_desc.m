@@ -15,6 +15,7 @@ addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
 %JOB = 14  %% 2003/08
 
 %% 23 per year so about 460 in 20 years .....
+%% but this is montly ERA5 so 240 in 20 years
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 if length(JOB) == 0
   JOB = 240;
@@ -23,8 +24,14 @@ end
 
 system_slurm_stats
 
-iDorA = +1;  %% desc
-iDorA = -1;  %% asc
+iDorA = +1;  %% desc, use 1.30 am for all, 
+iDorA = -1;  %% asc,  use 1.30 pm for all, 
+iDorA = -10;  %% asc,  use 1.30 pm for all, random pt about tile center
+iDorA = +10;  %% desc, use 1.30 am for all, random pt about tile center
+
+iDo2m = -1;
+
+iOLR = +1;
 
 [h,ha,p,pa] = rtpread('/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp');
 
@@ -32,19 +39,24 @@ get_dates_loop_make_monthly2m_tile_center_asc_or_desc
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% dirs used by /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries
-if iDorA > 0
+if iDorA == +1
   fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC/era5_tile_center_monthly2m_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
-elseif iDorA < 0
+elseif iDorA == +10
+  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC/randomptera5_tile_center_monthly2m_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+elseif iDorA == -1
   fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC/era5_tile_center_monthly2m_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS ASC
+elseif iDorA == -10
+  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC/randomptera5_tile_center_monthly2m_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS ASC
 else
   iDorA
-  error('need iDorA = +/- 1')
+  error('need iDorA = +/- 1, +/- 10')
 end
 
 iDo = +1;
 if exist(fout)
   fprintf(1,'JOB %3i : avg era5 timeseries file %s already exists \n',JOB,fout);
   iDo = -1;
+  error('output file exists')
 end
 
 %iDo = +1;  %% forgot to add wet bulb temp and RH
@@ -55,6 +67,13 @@ if iDo > 0
   hnew_ip = rmfield(hnew_ip,'ngas');
   hnew_ip = rmfield(hnew_ip,'glist');
   hnew_ip = rmfield(hnew_ip,'gunit');
+
+  if abs(iDorA) == 10 | iDorA == 100
+    pnew_ip.rlon0 = rlon;
+    pnew_ip.rlat0 = rlat;
+    pnew_ip.rlon  = rlon + (rand(size(rlon))-0.5)*2.50*2;  %% since all  tiles are 5 deg wide, should get nice uniform distribution                  hist(pnew_ip.rlon0 - pnew_ip.rlon)
+    pnew_ip.rlat  = rlat + (rand(size(rlat))-0.5)*1.50*2;  %% since most tiles are 3 deg wide, some 5 deg wide, will get mostly uniform distribution hist(pnew_ip.rlat0 - pnew_ip.rlat) but with noticeable tails
+  end
 
   pnew_ip.solzen = solzen;
   pnew_ip.satzen = satzen;
@@ -98,7 +117,8 @@ if iDo > 0
 
   pnew_ip0 = pnew_ip;
   [pnew_ip,hnew_ip] = fill_era5_monthly(pnew_ip,hnew_ip);
-  if ~isfield(pnew_ip,'rh_2m') | ~isfield(pnew_ip,'ta_2m') | ~isfield(pnew_ip,'td_2m')
+
+  if (~isfield(xpnew_ip,'rh_2m') | ~isfield(xpnew_ip,'ta_2m') | ~isfield(xpnew_ip,'td_2m')) & iDo2m > 0
     [pnew_ip,hnew_ip] = fill_era5_monthly2m_mat(pnew_ip,hnew_ip,yyM,mmM);
     addpath /home/sergio/MATLABCODE/PLOTTER/
     addpath /home/sergio/MATLABCODE/COLORMAP
@@ -160,11 +180,13 @@ if iDo > 0
   pnew_op.TdewSurf = TdewSurf;
   pnew_op.RHSurf   = RHSurf;
   
-  pnew_op.d2m  = pnew_ip.d2m;
-  pnew_op.t2m  = pnew_ip.t2m;
-  pnew_op.rh2m = pnew_ip.rh2m;
-  if isfield(pnew_ip,'skt_2m')
-    pnew_op.skt_2m = pnew_ip.skt_2m; %% BIZARRE but remember that this comes from montly averages over all days in a month, see clust_make_monthlyavg_2m.m
+  if iDo2m > 0
+    pnew_op.d2m  = pnew_ip.d2m;
+    pnew_op.t2m  = pnew_ip.t2m;
+    pnew_op.rh2m = pnew_ip.rh2m;
+    if isfield(pnew_ip,'skt_2m')
+      pnew_op.skt_2m = pnew_ip.skt_2m; %% BIZARRE but remember that this comes from montly averages over all days in a month, see clust_make_monthlyavg_2m.m
+    end
   end
 
   thedateS = thedateS(JOB,:);
@@ -178,10 +200,11 @@ if iDo > 0
   figure(5); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,rad2bt(1231,pnew_ip.sarta_rclearcalc(1520,:))); title('clrsky calc');
 
   figure(6); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_op.RHSurf); caxis([0 120])
-  figure(6); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_op.RHSurf-pnew_op.rh2m); caxis([-20 +20]); colormap(usa2); title('RH : mycalc-ERA5sfc = RHsurf-rh2m')
-
-  if isfield(pnew_ip,'skt_2m')
-    figure(7); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_op.stemp-pnew_op.skt_2m); caxis([-0.1 +0.1]); colormap(usa2); title('Seeing effects of daily avg on stemp')
+  if iDo2m > 0
+    figure(6); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_op.RHSurf-pnew_op.rh2m); caxis([-20 +20]); colormap(usa2); title('RH : mycalc-ERA5sfc = RHsurf-rh2m')
+    if isfield(pnew_ip,'skt_2m')
+      figure(7); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_op.stemp-pnew_op.skt_2m); caxis([-0.1 +0.1]); colormap(usa2); title('Seeing effects of daily avg on stemp')
+    end
   end
 
 end

@@ -20,14 +20,15 @@
 #SBATCH --cpus-per-task 1
 
 #  Specify the desired partition develop/batch/prod
-#SBATCH --partition=batch
+##SBATCH --partition=batch
+#SBATCH --partition=high_mem
 
 #  Specify the qos and run time (format:  dd-hh:mm:ss)
-#SBATCH --qos=medium+
-#SBATCH --time=23:59:00 
+##SBATCH --qos=medium+
+##SBATCH --time=23:59:00 
 
-##SBATCH --qos=short+
-##SBATCH --time=0:59:00 
+#SBATCH --qos=short+
+#SBATCH --time=0:59:00 
 
 #  This is in MB, very aggressive but I have been running outta memory
 #SBATCH --mem-per-cpu=12000
@@ -58,6 +59,7 @@ elif [[ "$1" -eq "4" ]]; then
   srun matlab -nodisplay -r "iInterp = 1; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_YYMMDD_loopGG; exit"
 elif [[ "$1" -eq "5" ]]; then
   echo "cmd line arg = 5, filelist sets the day, loop over all granules in the day, yes Interp"
+  #srun matlab -nodisplay -r "iInterp = 1; clustbatch_make_eraORecmcloudrtp_sergio_sarta_filelist_YYMMDD_loopGG; exit"   NAME TOO LONG
   srun matlab -nodisplay -r "iInterp = 1; clustbatch_make_eraORecmcloudrtp_filelist_YYMMDD_loopGG; exit"
 elif [[ "$1" -eq "6" ]]; then
   echo "cmd line arg = 6, making uniform clear from allfov"

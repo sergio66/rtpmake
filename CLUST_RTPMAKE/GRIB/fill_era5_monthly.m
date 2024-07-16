@@ -299,3 +299,30 @@ switch nargin
     pattr = set_attr(pattr,'model','era5_monthly');
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% fix plat,plon
+bad = find(prof.plat < -89.9999); 
+if length(bad) > 0
+  prof.plat(bad) = -89.999999;
+  fprintf(1,'fill_era5_monthly.m : found %5i profile with plat < -90, fixed \n',length(bad))
+end
+
+bad = find(prof.plat > +89.9999); 
+if length(bad) > 0
+  prof.plat(bad) = +89.999999;
+  fprintf(1,'fill_era5_monthly.m : found %5i profile with plat > +90, fixed \n',length(bad))
+end
+
+bad = find(prof.plon < -179.9999); 
+if length(bad) > 0
+  prof.plon(bad) = wrapTo180(prof.plon(bad));
+  %%prof.plon(bad) = -179.999999;
+  fprintf(1,'fill_era5_monthly.m : found %5i profile with plon < -180, fixed \n',length(bad))
+end
+
+bad = find(prof.plon > +179.9999); 
+if length(bad) > 0
+  prof.plon(bad) = wrapTo180(prof.plon(bad));
+  %%prof.plon(bad) = +179.999999;
+  fprintf(1,'fill_era5_monthly.m : found %5i profile with plon > +180, fixed \n',length(bad))
+end

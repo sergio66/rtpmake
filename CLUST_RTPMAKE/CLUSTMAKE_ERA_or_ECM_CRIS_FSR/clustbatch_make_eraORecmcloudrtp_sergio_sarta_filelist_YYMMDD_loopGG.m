@@ -36,6 +36,9 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
+if length(JOB) == 0
+  JOB = 1;
+end
 %JOB = 20
 
 warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
@@ -47,6 +50,16 @@ thefilelist = load(filelist);
 thefilelist = thefilelist(JOB,1:3);
 
 iaGlist = 001 : 240;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%% this is for /home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/tonga_volcano_jan2022_jpss.txt : 
+%%  if JOB = 1:6 then this will do HungaTonga days 14 + (1:6) = 15-20, those 6 missing granules
+%%  iInterp = -1;
+%%  thefilelist = [2022 01 JOB+14];
+%%  iaGlist = [52 53 54 55 56 240];
+%%  thefilelist = [2022 01 JOB+14];
+%%  iaGlist = [52 240];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

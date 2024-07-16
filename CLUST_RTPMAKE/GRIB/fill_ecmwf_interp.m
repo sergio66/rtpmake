@@ -214,3 +214,29 @@ figure(6); caxis([-1 +1]); colormap(usa2);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% fix plat,plon
+bad = find(p.plat < -89.9999); 
+if length(bad) > 0
+  p.plat(bad) = -89.999999;
+  fprintf(1,'fill_ecmwf_interp.m : found %5i profile with plat < -90, fixed \n',length(bad))
+end
+
+bad = find(p.plat > +89.9999); 
+if length(bad) > 0
+  p.plat(bad) = +89.999999;
+  fprintf(1,'fill_ecmwf_interp.m : found %5i profile with plat > +90, fixed \n',length(bad))
+end
+
+bad = find(p.plon < -179.9999); 
+if length(bad) > 0
+  p.plon(bad) = wrapTo180(p.plon(bad));
+  %p.plon(bad) = -179.999999;
+  fprintf(1,'fill_ecmwf_interp.m : found %5i profile with plon < -180, fixed \n',length(bad))
+end
+
+bad = find(p.plon > +179.9999); 
+if length(bad) > 0
+  p.plon(bad) = wrapTo180(p.plon(bad));
+  %p.plon(bad) = +179.999999;
+  fprintf(1,'fill_ecmwf_interp.m : found %5i profile with plon > +180, fixed \n',length(bad))
+end

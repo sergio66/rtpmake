@@ -1,4 +1,14 @@
-%% check success using eg iaFound = check_all_jobs_done('/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/era5_tile_center_monthly_',252); for 21 years
+addpath /asl/matlib/rtptools/
+addpath /asl/matlib/aslutil
+addpath /asl/matlib/h4tools
+addpath /home/sergio/MATLABCODE
+addpath /home/sergio/MATLABCODE/TIME
+addpath /home/sergio/MATLABCODE/PLOTTER
+addpath ../GRIB
+addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
+addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
+
+%% check success using eg iaFound = check_all_jobs_done('/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/randomptera5_tile_center_monthly_',240,'.mat');
 
 %% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
 %% one per month, 20 years of AIRS data so 20x12 = 240 sets of data
@@ -18,158 +28,66 @@ iaFound = check_all_jobs_done(liststr,252);
 %JOB = 235
 %JOB = 009
 
-addpath /asl/matlib/rtptools/
-addpath /asl/matlib/aslutil
-addpath /asl/matlib/h4tools
-addpath /home/sergio/MATLABCODE
-addpath /home/sergio/MATLABCODE/TIME
-addpath /home/sergio/MATLABCODE/PLOTTER
-addpath /home/sergio/MATLABCODE/COLORMAP
-addpath ../GRIB
-addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
-addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
-
 system_slurm_stats
 
-iDorA = +1;  %% desc, default
-iDorA = -1;  %% asc
+%%% iDorA = -90;  %% asc,  use 1.30 pm for all, use hottest 10% CANNOT DO, see clust_loop_make_monthly_tile_273points.m instead
+%%% iDorA = +90;  %% desc, use 1.30 am for all, use hottest 10% CANNOT DO, see clust_loop_make_monthly_tile_273points.m instead
 
-N = 29; N1 = 1;
-firstORend = 0;
-iPrint = -1;
+iDorA = +1;  %% desc, use 1.30 am for all, 
+iDorA = -1;  %% asc,  use 1.30 pm for all, 
+iDorA = -10;  %% asc,  use 1.30 pm for all, random pt about tile center
+iDorA = +10;  %% desc, use 1.30 am for all, random pt about tile center  DONE THIS
 
-yy0 = 2002; mm0 = 09; dd0 = 15;
-thedateS(1,:) = [yy0 mm0 dd0];
-
-[yy1,mm1,dd1] = addNdays(yy0,mm0,dd0,N,firstORend,iPrint);
-dd1 = 15;
-thedateE(1,:) = [yy1 mm1 dd1];
-
-iOLR = +1;
-
-for ii = 2 : JOB
-  yy0 = yy1; mm0 = mm1; dd0 = dd1;
-  thedateS(ii,:) = [yy0 mm0 dd0];  
-
-  [yy1,mm1,dd1] = addNdays(yy0,mm0,dd0,N,firstORend,iPrint);
-  dd1 = 15;
-  thedateE(ii,:) = [yy1 mm1 dd1];
-
-  fprintf(1,'ii=%4i   Start %4i/%2i/%2i  End %4i/%2i/%2i \n',ii,thedateS(ii,:),thedateE(ii,:))
-end  
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-[thedateS thedateE]
-[yyM,mmM,ddM] = addNdays(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),8,firstORend,iPrint);
-rtimeM = utc2taiSergio(yyM,mmM,ddM,12);
-
-fprintf(1,'JOB = %3i spans %4i/%2i/%2i to %4i/%2i/%2i both ends inclusive \n',JOB,[thedateS(JOB,:) thedateE(JOB,:)]);
-fprintf(1,'          midpoint %4i/%2i/%2i \n',yyM,mmM,ddM);
+iDo2m = -1;
 
 [h,ha,p,pa] = rtpread('/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp');
 
-%% now we need to get overpass times and solzen angles, just set scanang to 22 deg, 
-%% but remeber this code is for monthly (so 12 sets/year while this file is 16 day so 23 sets/year ... and I only got stuff till 2019 ... so do some averaging!!!!
-load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_412_64x72.mat');
-rtime_desc = squeeze(nanmean(squeeze(nanmean(thedata.rtime_desc,1)),1)); [yy_desc,mm_desc,dd_desc] = tai2utcSergio(rtime_desc);
-rtime_asc  = squeeze(nanmean(squeeze(nanmean(thedata.rtime_asc,1)),1));  [yy_asc, mm_asc, dd_asc ] = tai2utcSergio(rtime_asc);
+get_dates_loop_make_monthly2m_tile_center_asc_or_desc
 
-if iDorA > 0
-  if rtimeM >= min(rtime_desc) & rtimeM <= max(rtime_desc)
-    junk = abs(rtime_desc - rtimeM)/1e7;
-    CJOB = find(junk == min(junk));
-  else
-    junk = find(mm_desc == mmM); 
-    CJOB = junk(end);
-  end
-else
-  if rtimeM >= min(rtime_asc) & rtimeM <= max(rtime_asc)
-    junk = abs(rtime_asc - rtimeM)/1e7;
-    CJOB = find(junk == min(junk));
-  else
-    junk = find(mm_asc == mmM); 
-    CJOB = junk(end);
-  end
-end
-
-fprintf(1,'JOB = %3i (20 yrs x 12 month/year) ----> CJOB = %3i (20 yrs x 23 sixteenday steps/year) \n',JOB,CJOB)
-
-monitor_memory_whos;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% from comment, see 
-%%  /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/driver_loop_get_asc_desc_solzen_time.m
-if iDorA > 0
-  rlon   = thedata.rlon_desc(:,:,CJOB);     rlon = rlon(:)';
-  rlat   = thedata.rlat_desc(:,:,CJOB);     rlat = rlat(:)';
-  solzen = thedata.solzen_desc(:,:,CJOB);   solzen = solzen(:)';
-  satzen = thedata.satzen_desc(:,:,CJOB);   satzen = satzen(:)';
-  hour   = thedata.hour_desc(:,:,CJOB);     hour = hour(:)';
-  bt1231 = thedata.bt1231_desc(:,:,CJOB,2); bt1231 = bt1231(:)';
-  
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-  rtime  = thedata.rtime_desc(:,:,CJOB);    rtime = rtime(:)';
-    [mooY,mooM,mooD,mooH] = tai2utcSergio(rtime);
-    rtime0 = utc2taiSergio(mooY(1),mooM(1),mooD(1),0.00);  drtime =  (rtime-rtime0);
-  
-    rtimex = utc2taiSergio(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),0.00) + drtime;
-    [xmooY,xmooM,xmooD,xmooH] = tai2utcSergio(rtimex);
-  
-  rtime = rtimex;
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-
-elseif iDorA < 0
-  rlon   = thedata.rlon_asc(:,:,CJOB);     rlon = rlon(:)';
-  rlat   = thedata.rlat_asc(:,:,CJOB);     rlat = rlat(:)';
-  solzen = thedata.solzen_asc(:,:,CJOB);   solzen = solzen(:)';
-  satzen = thedata.satzen_asc(:,:,CJOB);   satzen = satzen(:)';
-  hour   = thedata.hour_asc(:,:,CJOB);     hour = hour(:)';
-  bt1231 = thedata.bt1231_asc(:,:,CJOB,2); bt1231 = bt1231(:)';
-  
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-  rtime  = thedata.rtime_asc(:,:,CJOB);    rtime = rtime(:)';
-    [mooY,mooM,mooD,mooH] = tai2utcSergio(rtime);
-    rtime0 = utc2taiSergio(mooY(1),mooM(1),mooD(1),0.00);  drtime =  (rtime-rtime0);
-  
-    rtimex = utc2taiSergio(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),0.00) + drtime;
-    [xmooY,xmooM,xmooD,xmooH] = tai2utcSergio(rtimex);
-  
-  rtime = rtimex;
-  %%%%%%%%%%%%%%%%%%%%%%%%%
-end
-
-rlon = wrapTo180(rlon);
-
-figure(1); scatter_coast(rlon,rlat,50,solzen); title('solzen'); colormap jet; 
-figure(2); scatter_coast(rlon,rlat,50,satzen); title('satzen'); colormap jet
-figure(3); scatter_coast(rlon,rlat,50,hour);   title('hour'); colormap jet
-figure(4); scatter_coast(rlon,rlat,50,bt1231); title('BT1231'); colormap jet
-figure(5); scatter_coast(rlon,rlat,50,rlon-p.rlon); title('rlon-p.rlon'); colormap jet
-figure(6); scatter_coast(rlon,rlat,50,rlat-p.rlat); title('rlat-p.rlat'); colormap jet
+iOLR = +1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% dirs used by /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries
-if iDorA > 0
+if iDorA == +1
   fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
   if iOLR > 0
     fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
   end
-elseif iDorA < 0
+elseif iDorA == -1
   fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
   if iOLR > 0
     fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
   end
+elseif iDorA == +10
+  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC/randomptera5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+  if iOLR > 0
+    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/randomptera5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC      DONE THIS DONE THIS
+  end
+elseif iDorA == -10
+  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC/randomptera5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+  if iOLR > 0
+    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/randomptera5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+  end
+%elseif iDorA == +90
+%  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+5  if iOLR > 0
+%    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+%  end
+%elseif iDorA == -90
+%  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+%  if iOLR > 0
+%    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+%  end
 else
   iDorA
-  error('need iDorA = +/- 1')
+  error('need iDorA = +/- 1, +/- 10')
 end
 
 iDo = +1;
 if exist(fout)
   fprintf(1,'JOB %3i : avg era timeseries file %s already exists \n',JOB,fout);
   iDo = -1;
+  error('output file exists')
 end
 
 iDo = +1;  %% forgot to add RH and wet bulb temp, temp at 2m
@@ -180,6 +98,13 @@ if iDo > 0
   hnew_ip = rmfield(hnew_ip,'ngas');
   hnew_ip = rmfield(hnew_ip,'glist');
   hnew_ip = rmfield(hnew_ip,'gunit');
+
+  if abs(iDorA) == 10 | iDorA == 100
+    pnew_ip.rlon0 = rlon;
+    pnew_ip.rlat0 = rlat;
+    pnew_ip.rlon  = rlon + (rand(size(rlon))-0.5)*2.50*2;  %% since all  tiles are 5 deg wide, should get nice uniform distribution                  hist(pnew_ip.rlon0 - pnew_ip.rlon)
+    pnew_ip.rlat  = rlat + (rand(size(rlat))-0.5)*1.50*2;  %% since most tiles are 3 deg wide, some 5 deg wide, will get mostly uniform distribution hist(pnew_ip.rlat0 - pnew_ip.rlat) but with noticeable tails
+  end
 
   pnew_ip.solzen = solzen;
   pnew_ip.satzen = satzen;
@@ -316,7 +241,7 @@ if iDo > 0
                          %% Global atmospheric downward longwave radiation at the surface from ground-based observations, satellite retrievals, and reanalyses, 
   end
 
-  if isfield(pnew_ip,'d2m')
+  if isfield(pnew_ip,'d2m') & iDo2m > 0
     pnew_op.d2m = pnew_ip.d2m;
     pnew_op.t2m = pnew_ip.t2m;
     figure(10); scatter_coast(pnew_ip.rlon,pnew_ip.rlat,50,pnew_op.d2m);      title('ERA5   dew point 2m (K)'); colormap jet; caxis([200 320])

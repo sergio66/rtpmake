@@ -43,16 +43,16 @@ filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/LookAtHurricanes/2017_09
 filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/LookAtHurricanes/HurricaneDorian_AugSept2019/hurricane_dorian.txt';
 filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/LookAtHurricanes/HurricaneEyes/hurricane_eyes.txt';
 %
-%
-filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/tonga_volcano_jan2022.txt';
-filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/tonga_volcano_jan2022_jpss.txt';
-filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/mls_dcc_aug2019.txt';
-filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/ambae_volcano_july2018.txt';
-%
 filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/wetbulbmax.txt';
-%
-filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/pbl_briancaroll_AMT.txt';
 %
 filelist = 'onetime.txt';
 %
 filelist = '/home/sergio/MATLABCODE_Git/AI_cloud_retrievals/training_test.txt'
+%
+filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/pbl_briancaroll_AMT.txt';
+%
+%
+filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/tonga_volcano_jan2022.txt';
+filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/mls_dcc_aug2019.txt';
+filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/ambae_volcano_july2018.txt';
+filelist = '/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/tonga_volcano_jan2022_jpss.txt';
