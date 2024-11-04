@@ -7,15 +7,21 @@ addpath /home/sergio/MATLABCODE/PLOTTER
 addpath ../GRIB
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
 addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
+addpath /home/sergio/MATLABCODE/COLORMAP
 
-%% check success using eg iaFound = check_all_jobs_done('/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/randomptera5_tile_center_monthly_',240,'.mat');
+%% run with                  sbatch -p cpu2021 --exclude=  --array=220-240 sergio_matlab_jobB.sbatch 4
+%% run with                  sbatch -p cpu2021 --exclude=  --array=241-264 sergio_matlab_jobB.sbatch 4
+%% check success using eg    iaFound = check_all_jobs_done('/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/randomptera5_tile_center_monthly_',240,'.mat');  %% 20 years 2002/09-2022/08
+%% check success using eg    iaFound = check_all_jobs_done('/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/randomptera5_tile_center_monthly_',264,'.mat');  %% 22 years 2002/09-2024/08
+%% check success using eg    iaFound = check_all_jobs_done('/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/era5_tile_center_monthly_',264,'.mat');           %% 22 years 2002/09-2024/08
+%% check success using eg    iaFound = check_all_jobs_done('/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/era5_tile_center_monthly_',264,'.mat');          %% 22 years 2002/09-2024/08
 
 %% one per month, 19 years of AIRS data so 19x12 = 228 sets of data
 %% one per month, 20 years of AIRS data so 20x12 = 240 sets of data
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 if length(JOB) == 0
-  disp('no input JOB; being set to 12')
-  JOB = 12;
+  disp('no input JOB; being set to 25281/121')
+  JOB = 263;
 end
 
 %{
@@ -33,12 +39,13 @@ system_slurm_stats
 %%% iDorA = -90;  %% asc,  use 1.30 pm for all, use hottest 10% CANNOT DO, see clust_loop_make_monthly_tile_273points.m instead
 %%% iDorA = +90;  %% desc, use 1.30 am for all, use hottest 10% CANNOT DO, see clust_loop_make_monthly_tile_273points.m instead
 
-iDorA = +1;  %% desc, use 1.30 am for all, 
-iDorA = -1;  %% asc,  use 1.30 pm for all, 
 iDorA = -10;  %% asc,  use 1.30 pm for all, random pt about tile center
 iDorA = +10;  %% desc, use 1.30 am for all, random pt about tile center  DONE THIS
+iDorA = -1;   %% asc,  use 1.30 pm for all, tile center
+iDorA = +1;   %% desc, use 1.30 am for all, tile center
 
 iDo2m = -1;
+iDo2m = +1;
 
 [h,ha,p,pa] = rtpread('/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp');
 
@@ -68,16 +75,16 @@ elseif iDorA == -10
   if iOLR > 0
     fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/randomptera5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
   end
-%elseif iDorA == +90
-%  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
-5  if iOLR > 0
-%    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
-%  end
-%elseif iDorA == -90
-%  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
-%  if iOLR > 0
-%    fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
-%  end
+% elseif iDorA == +90
+%   fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+%   if iOLR > 0
+%     fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+%   end
+% elseif iDorA == -90
+%   fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+%   if iOLR > 0
+%     fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/ASC_WithOLR/hottest_10percent_era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
+%   end
 else
   iDorA
   error('need iDorA = +/- 1, +/- 10')

@@ -16,12 +16,16 @@ addpath /home/sergio/MATLABCODE/PLOTTER
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta/
 
 addpath /home/sergio/MATLABCODE
+
+%%  check_all_jobs_done('/asl/s1/sergio/rtp/j1_ccast_hires/allfov/2019/04/25//cloudy_airs_l1c_ecm_sarta_baum_ice.2019.04.25.',240,'.rtp');
+
 system_slurm_stats
 
 %set_filelist
 
 if ~exist('iInterp')
   iInterp = +1;
+  iInterp = -1;
 end
 
 if ~exist('iERAorECM')
@@ -37,10 +41,16 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
+if length(JOB) == 0
+  JOB = 120
+  JOB = 214;
+end
+
 %JOB = 53
 
 yymmdd0  = [2022 01 13]; ddLoop = [];  %% ECMWF says ATMS shows gravity waves from Tonga
 yymmdd0  = [2022 01 15]; ddLoop = [14 : 22];  %% ECMWF says ATMS shows gravity waves from Tonga
+yymmdd0  = [2019 04 25]; ddLoop = [];  %% HALO day theat Eric processed, see ~/MATLABCODE/CRODGERS_FAST_CLOUD/HALO_BdryLayer/Proposal2024/driver_compare_AI.m
 
 if length(ddLoop) == 0
   ddLoop = yymmdd0(3);

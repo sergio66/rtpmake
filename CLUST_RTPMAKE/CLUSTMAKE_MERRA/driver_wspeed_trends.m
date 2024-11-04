@@ -15,6 +15,8 @@ p0 = p00;
 yyEnd = 2022; mmEnd = 08;
 yyEnd = 2024; mmEnd = 06;
 
+coast = load('/home/sergio/MATLABCODE/PLOTTER/coast.mat');
+
 iCnt = 0;
 for yy = 2002 : yyEnd
   mmS = 1;
@@ -33,31 +35,34 @@ for yy = 2002 : yyEnd
   for mm = mmS : mmE
     iCnt = iCnt + 1;
     fprintf(1,'iCnt = %3i  : %4i/%2i \n',iCnt,yy,mm)
-    a = read_netcdf_lls(['/asl/models/era5_monthly/' num2str(yy) '/' num2str(yy) '-' num2str(mm,'%02i') '_sfc.nc']);
+    a = read_netcdf_lls(['/asl/models/merra2_monthly/' num2str(yy) '/merra2_' num2str(yy) num2str(mm,'%02i') '_sfc.nc']);
     %% see ~/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB/grib_interpolate_era5.m  
-    [X,Y] = ndgrid(a.latitude,a.longitude);
+    [X,Y] = ndgrid(a.longitude,a.latitude);
     iX = flipud(X); iY = flipud(Y);
+    iX = X; iY = Y;
+
+    if iCnt == 1
+      stemp = a.skt;
+      pcolor(iX,iY,stemp); shading interp; colorbar; colormap jet
+      hold on; plot(coast.long,coast.lat,'k','linewidth',2); hold off; pause(0.1)
+    end
 
     stemp = a.skt;
-    stemp = mean(stemp,3);
-    F = griddedInterpolant(iX,iY,flipud(stemp'));
-    p0.stemp = F(p0.rlat,wrapTo360(p0.rlon));
-    scatter_coast(p0.rlon,p0.rlat,50,p0.stemp); caxis([200 320]); colormap jet; pause(0.1)
+    F = griddedInterpolant(iX,iY,stemp);
+    p0.stemp = F(p0.rlon,p0.rlat);
+    figure(1); clf; scatter_coast(p0.rlon,p0.rlat,50,p0.stemp); caxis([200 320]); colormap jet; pause(0.1)
 
     tcc = a.tcc;
-    tcc = mean(tcc,3);
-    F = griddedInterpolant(iX,iY,flipud(tcc'));
-    p0.tcc = F(p0.rlat,wrapTo360(p0.rlon));
-    scatter_coast(p0.rlon,p0.rlat,50,p0.tcc); caxis([200 320]); colormap jet; pause(0.1)
+    F = griddedInterpolant(iX,iY,tcc);
+    p0.tcc = F(p0.rlon,p0.rlat);
+    figure(2); clf; scatter_coast(p0.rlon,p0.rlat,50,p0.tcc); caxis([0 1]); colormap jet; pause(0.1)
 
     wspd = sqrt(a.u10.^2 + a.v10.^2);
     wspd_max  = max(wspd,3);
     wspd_min  = min(wspd,3);
-    wspd_mean = mean(wspd,3);
-    %pcolor(a.longitude,a.latitude,wspd_mean'); shading flat; colorbar; colormap jet; caxis([0 15])  
-    F = griddedInterpolant(iX,iY,flipud(wspd_mean'));
-    p0.wspeed = F(p0.rlat,wrapTo360(p0.rlon));
-    scatter_coast(p0.rlon,p0.rlat,50,p0.wspeed); caxis([0 15]); colormap jet; pause(0.1)
+    F = griddedInterpolant(iX,iY,wspd);
+    p0.wspeed = F(p0.rlon,p0.rlat);
+    figure(3); clf; scatter_coast(p0.rlon,p0.rlat,50,p0.wspeed); caxis([0 10]); colormap jet; pause(0.1)
   
     yysave(iCnt) = yy;
     mmsave(iCnt) = mm;
@@ -74,7 +79,7 @@ iCntMax = iCnt;
 scatter_coast(p0.rlon,p0.rlat,50,nanmean(wspeedsave,1)); caxis([0 15]); colormap jet; title('<speed> over 20 years')
 
 % save wspeed_2002_09_2022_08.mat yysave mmsave wspeedsave
-saver = ['save wspeed_2002_09_' num2str(yyEnd) '_' num2str(mmEnd,'%02d') '.mat  yysave mmsave wspeedsave stempsave tccsave iCntMax yyEnd mmEnd'];
+saver = ['save merra2_wspeed_2002_09_' num2str(yyEnd) '_' num2str(mmEnd,'%02d') '.mat  yysave mmsave wspeedsave stempsave tccsave iCntMax yyEnd mmEnd'];
 eval(saver)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

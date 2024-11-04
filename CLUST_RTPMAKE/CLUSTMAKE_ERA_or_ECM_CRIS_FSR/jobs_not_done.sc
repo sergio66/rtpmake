@@ -1,1 +1,1 @@
-sbatch -p cpu2021 --exclude=  --array=52-56,240 sergio_matlab_jobB.sbatchX XYZ 
+sbatch -p cpu2021 --exclude=  --array=240 sergio_matlab_jobB.sbatch 2

@@ -49,8 +49,8 @@ set_filelist
 thefilelist = load(filelist);
 thefilelist = thefilelist(JOB,1:3);
 
+%%thefilelist = [2019 04 25];
 iaGlist = 001 : 240;
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% this is for /home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/tonga_volcano_jan2022_jpss.txt : 

@@ -9,6 +9,8 @@ bt1231clr = nan(240,21,12,4608);
 landfrac  = nan(240,21,12,4608);
 stemp     = nan(240,21,12,4608);
 
+%% clust_loop_make_monthly_tile_273points.m made these files, then clust_find_hottest_10percent_from_ERA5clearcalcs.m finds the hottest 10 percent and avg
+%% 20 years = 240 months : divide into 24 files, each 10 steps long
 for ii = 1 : 24
   fin = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Monthly/summary_' num2str(ii,'%02d') '.mat'];
   loader = ['a = load(''' fin ''');'];
@@ -118,7 +120,6 @@ for ii = 1 : 240
   bt1231clr_Q90(ii)  = mean(junk(indQ90));
 end
 figure(7); plot(1:240,bt1231clr_mean,1:240,bt1231clr_Q90)
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 find_trends_summary_10percent_from_ERA5clearcalc

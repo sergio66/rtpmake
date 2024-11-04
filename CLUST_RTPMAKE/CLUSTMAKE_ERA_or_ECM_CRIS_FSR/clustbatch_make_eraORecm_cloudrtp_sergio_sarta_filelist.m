@@ -1,5 +1,6 @@
 %% run with
-%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_jobB.sbatch
+%%   sbatch --array=N1-N2 --output='testslurm' sergio_matlab_jobB.sbatch
+%%   sbatch -p cpu2021 --array=1-Y   sergio_matlab_jobB.sbatch 1
 %% N1 = 1, N2 = number of files to be processed
 
 %% specify text file which has YY MM DD GG lst that needs to be processed 
@@ -41,6 +42,11 @@ JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 %JOB = 15  %% J-1 H. Dorian 2019/09/03 at 7.30 am
 %JOB = 4   %% NPP HALO lidar 2019/04/25 at 22.10 pm --> JPSS 2019/04/25 at 21.20 pm, kinda misses HALO
 %JOB = 3   %% NPP HALO lidar 2019/04/25 at 22.10 pm --> JPSS 2019/04/25 at 21.25 pm, gets most of HALO /asl/s1/sergio/rtp/j1_ccast_hires/allfov/2019/04/25//cloudy_airs_l1c_ecm_sarta_baum_ice.2019.04.25.214.rtp
+
+if length(JOB) == 0
+  JOB = 1;
+  JOB = 6;
+end
 
 thefilelist = load(filelist);
 thefilelist = thefilelist(JOB,:);
