@@ -42,15 +42,18 @@ end
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 if length(JOB) == 0
-  JOB = 120
+  JOB = 120;
   JOB = 214;
+  JOB = 212; JOB = 099; %% LA fires from D. Tobin
 end
 
 %JOB = 53
 
 yymmdd0  = [2022 01 13]; ddLoop = [];  %% ECMWF says ATMS shows gravity waves from Tonga
 yymmdd0  = [2022 01 15]; ddLoop = [14 : 22];  %% ECMWF says ATMS shows gravity waves from Tonga
-yymmdd0  = [2019 04 25]; ddLoop = [];  %% HALO day theat Eric processed, see ~/MATLABCODE/CRODGERS_FAST_CLOUD/HALO_BdryLayer/Proposal2024/driver_compare_AI.m
+yymmdd0  = [2019 04 25]; ddLoop = [];  %% HALO day that Eric processed, see ~/MATLABCODE/CRODGERS_FAST_CLOUD/HALO_BdryLayer/Proposal2024/driver_compare_AI.m
+yymmdd0  = [2019 04 26]; ddLoop = [];  %% rather surprisingly, he did this day???
+yymmdd0  = [2025 01 08]; ddLoop = [];  %% FIres over LA, from Dave Tobin
 
 if length(ddLoop) == 0
   ddLoop = yymmdd0(3);
@@ -122,14 +125,29 @@ for iiddloop = 1 : length(ddLoop)
     end
   
     rtpwrite([dout '/' fout],hd0, ha0, pd0, pa0);
+
+    addpath /home/sergio/MATLABCODE/PLOTTER
+
     i900 = find(hd0.vchan >= 900,1);
     tobs = rad2bt(900,pd0.robs1(i900,:));
     tclr = rad2bt(900,pd0.sarta_rclearcalc(i900,:));
     tcld = rad2bt(900,pd0.rcalc(i900,:));
-    addpath /home/sergio/MATLABCODE/PLOTTER
     figure(1); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tobs); title('BT 900 obs FSR'); cx1 = caxis; colormap jet
     figure(2); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tclr); title('BT 900 clr');     cx2 = caxis; colormap jet
     figure(3); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tcld); title('BT 900 cld');     cx3 = caxis; colormap jet
+
+%{
+%% CO
+    i2160 = find(hd0.vchan >= 2160.00,1);
+    i2162 = find(hd0.vchan >= 2161.75,1);
+    tobs = rad2bt(2160,pd0.robs1(i2160,:))-rad2bt(2162,pd0.robs1(i2162,:));
+    tclr = rad2bt(2160,pd0.sarta_rclearcalc(i2160,:)) - rad2bt(2162,pd0.sarta_rclearcalc(i2162,:));
+    tcld = rad2bt(2160,pd0.rcalc(i2160,:)) - rad2bt(2162,pd0.rcalc(i2162,:));
+
+    figure(1); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tobs); title('BT 2161 obs FSR'); cx1 = caxis; colormap jet
+    figure(2); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tclr); title('BT 2161 clr');     cx2 = caxis; colormap jet
+    figure(3); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tcld); title('BT 2161 cld');     cx3 = caxis; colormap jet
+%}
   
     cx(1) = min([cx1(1)  cx2(1) cx3(1)]);
     cx(2) = max([cx1(2)  cx2(2) cx3(2)]);

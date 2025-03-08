@@ -73,8 +73,8 @@ SRC = lower(SRC);
 if(~ismember(SRC{1},{'npp','j01'})); error('Invalid CrIS'); return; end
 if(~ismember(SRC{2},{'nsr','fsr'})); error('Invalid spec.res'); return; end
 
-iUMBCorCLASS = +1;
-iUMBCorCLASS = -1;
+iUMBCorCLASS = +1;  %% till  2023/12/31
+iUMBCorCLASS = -1;  %% after 2024/01/01
 
 switch SRC{1}
   case 'npp'
@@ -93,7 +93,20 @@ switch SRC{1}
     end
 end   
 if iUMBCorCLASS < 0
+  disp('WARNING : using NOAA CLASS .nc radiance files so L2 and L1 granule numbers will match')
+  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
+  disp('WARNING : using NOAA CLASS .nc radiance files so L2 and L1 granule numbers will match')
+  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
+  disp('WARNING : using NOAA CLASS .nc radiance files so L2 and L1 granule numbers will match')
+  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
   d.home = '/asl/s1/sergio/rtp/JUNK_L1B_JPSS-1/'
+else
+  disp('WARNING : using UMBC CCAST .mat radiance files so L2 is one granule ahead of L1 mat file')
+  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
+  disp('WARNING : using UMBC CCAST .mat radiance files so L2 is one granule ahead of L1 mat file')
+  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
+  disp('WARNING : using UMBC CCAST .mat radiance files so L2 is one granule ahead of L1 mat file')
+  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
 end
 
 % Check valid date requested

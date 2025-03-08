@@ -1,4 +1,6 @@
 %% cp -a /home/sergio/MATLABCODE/CAMEL_emissivity/driver_wspeed_trends.m .
+%% this is basically weighting in time, but doing things at tile center, not averaging
+
 addpath /home/sergio/MATLABCODE
 addpath /home/sergio/MATLABCODE/COLORMAP
 addpath /home/sergio/MATLABCODE/COLORMAP/LLS

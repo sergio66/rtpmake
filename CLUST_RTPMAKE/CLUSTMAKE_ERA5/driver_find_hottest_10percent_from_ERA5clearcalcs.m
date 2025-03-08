@@ -22,6 +22,6 @@ if ~exist('loadedfiles')
 end
 
 find_hottest_10percent_from_ERA5clearcalc_progress   %% first plot the progress ... there should be about (21 x 12 = 252) mat files made per month
-pause(1)
+pause(1)                                             %% basically makes jobs_not_done.sc
 
 load_in_unreadfiles_10percent_from_ERA5clearcalc_progress

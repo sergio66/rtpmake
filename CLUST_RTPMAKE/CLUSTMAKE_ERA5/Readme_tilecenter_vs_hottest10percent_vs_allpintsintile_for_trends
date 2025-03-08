@@ -1,0 +1,54 @@
+%% this gives the 13x21 points in every tile
+%% /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/test_read_eraI.m
+%% /home/sergio/git/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/test_read_eraI.m
+%%   save /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/theECM5gridptslist_ERA5_tile_points.mat theECM5gridptslist comment
+load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/theECMgridptslist_ECM_tile_points.mat');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+-rw-r--r-- 1 sergio pi_strow 10795 Mar  7 05:16 clust_loop_make_monthly_tile_273points.m  
+  this is mother code, does the looping so runs through all points inside a 3x5 tile (ok not all, in the fatter tiles near polar) but 3x5 tiles = 3x4+1 X 5x4+1 = 13x21 points per month, so 240 months
+  %% JOB = timestep
+  %% takes 3 minutes per rtp set of 4608 profiles, with 13*21 grid points per day for each ERA5 month dataset, that is 900 minutes ... with 16 days that is 15 hours on strowinteract
+
+  After getting all 273 points, it save the before/after klayers prfiles into 
+    dout = /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/test_read_eraI.m
+    fout = [dout '/era_tile_X_' num2str(eeeX) '_Y_' num2str(eeeY)  '_individual_timestep_' num2str(JOB,'%03d') '.mat'];
+  Then call << prototype : driver_find_hottest_10percent_from_ERA5clearcalcs >> then << actual : clust_find_hottest_10percent_from_ERA5clearcalcs >>
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+this is called by 
+  sbatch -p high_mem --array=1-24   sergio_matlab_jobB.sbatch 15   : each JOB will take about 15 minutes to process
+
+-rw-rw-r-- 1 sergio pi_strow  2167 Mar  7 05:13 clust_find_hottest_10percent_from_ERA5clearcalcs.m
+  checks if above code has made the files, then inside it calls : 
+  JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));  %% about 240 months, each JOB does 10 so 24 of these for 20 years
+
+-rw-rw-r-- 1 sergio pi_strow  5691 Mar  7 05:12 load_in_unreadfiles_10percent_from_ERA5clearcalc_progress_JOB.m
+  This does the heavy lifting
+    originally only saved bt1231clr,bt1231cld,stemp,landfrac                   (Nov 2024)
+    now also saves        bt1231clr,bt1231cld,stemp,landfrac,ptemp,gas_1,gas_3 (Mar 2025)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% this is PROTOTYPE code, completely fallen behind clust_find_hottest_10percent_from_ERA5clearcalcs.m and load_in_unreadfiles_10percent_from_ERA5clearcalc_progress_JOB.m
+
+-rw-rw-r-- 1 sergio pi_strow  1403 Mar  7 05:08 driver_find_hottest_10percent_from_ERA5clearcalcs.m
+  this is prototype prcoessing from what was done in mother code, clust_loop_make_monthly_tile_273points.m
+  saves nothing, and completely fallen behind clust_find_hottest_10percent_from_ERA5clearcalcs since that does stemp AND ptemp/gas_1/gas_3
+
+-rw-rw-r-- 1 sergio pi_strow  4316 Mar  7 05:41 load_in_unreadfiles_10percent_from_ERA5clearcalc_progress.m
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Then you process the output from clust_find_hottest_10percent_from_ERA5clearcalcs.m to find the trends
+  driver_load_in_summary_10percent_from_ERA5clearcalc.m                %% OLD, 2024, only did stemp
+  driver_load_in_summary_10percent_from_ERA5clearcalc_profile.m        %% NEW, 2025, also does ptemp, gas_1
+  clust_driver_load_in_summary_10percent_from_ERA5clearcalc_profile.m  %% so you can rush using cluster, JOB = 1 : 10 for 5 T and 5 WV 
+   clust_load_in_summary_10percent_from_ERA5clearcalc_profile.m -> clust_driver_load_in_summary_10percent_from_ERA5clearcalc_profile.m
+
+See results using
+  driver_put_together_5_regions_ERA5_tile_trendsT.m
+  driver_put_together_5_regions_ERA5_tile_trendsWV.m

@@ -13,6 +13,9 @@
 # run this with sbatch -p high_mem --array=1-64   sergio_matlab_jobB.sbatch 8    for cluster_driver_put_together_globalavg_profiles.m
 # run this with sbatch -p high_mem --array=1-64   sergio_matlab_jobB.sbatch 9    for clustmake_fixNaNbug_2012_average_whole_12month_ERA5.m
 # run this with sbatch -p high_mem --array=1-240  sergio_matlab_jobB.sbatch 10   for clust_loop_make_monthly_tile_center_D_N_A_sst.m
+#
+# run this with sbatch -p high_mem --array=1-24   sergio_matlab_jobB.sbatch 15   for clust_find_hottest_10percent_from_ERA5clearcalcs.m                  %% trends from ERA5 matched to tile center vs hottest10% vs all points averaged over tile, for trends paper
+# run this with sbatch -p high_mem --array=1-10   sergio_matlab_jobB.sbatch 16   for clust_driver_load_in_summary_10percent_from_ERA5clearcalc_profile.m %% WV/T trends from ERA5 matched to tile center vs hottest10% vs all points averaged over tile, for trends paper
 
 #  Name of the job:
 #SBATCH --job-name=CLUST_MAKE_ERA_RTP
@@ -39,10 +42,15 @@
 
 #  This is in MB, very aggressive but I have been running outta memory
 ##SBATCH --mem-per-cpu=12000
-#SBATCH --mem-per-cpu=18000
+##SBATCH --mem-per-cpu=18000
 ## this is for fixing the ERA5 average booboo, command line 9
 ##SBATCH --mem-per-cpu=7000
 ##SBATCH --mem-per-cpu=10000
+
+## this is for sergio_matlab_jobB.sbatch 15   for clust_find_hottest_10percent_from_ERA5clearcalcs.m
+##SBATCH --mem-per-cpu=30000
+## this is for sergio_matlab_jobB.sbatch 16   for clust_load_in_summary_10percent_from_ERA5clearcalc_profile.m
+#SBATCH --mem-per-cpu=90000
 
 ########################################################################
 ### check the number of input arguments
@@ -75,9 +83,15 @@ elif [[ "$1" -eq "4" ]]; then
 elif [[ "$1" -eq "5" ]]; then
   echo "cmd line arg = 5, making tile ERA5 monthly individiual ERA5 grid points (240 of them)"
   srun matlab -nodisplay -r "clust_loop_make_monthly_tile_273points; exit"
+
 elif [[ "$1" -eq "15" ]]; then
   echo "cmd line arg = 15, making tile ERA5 monthly individiual ERA5 grid points (240 of them), put stats together"
   srun matlab -nodisplay -r "clust_find_hottest_10percent_from_ERA5clearcalcs; exit"
+elif [[ "$1" -eq "16" ]]; then
+  echo "cmd line arg = 16, making profile trends, WV/T"
+  srun matlab -nodisplay -r "clust_load_in_summary_10percent_from_ERA5clearcalc_profile; exit"
+
+
 elif [[ "$1" -eq "6" ]]; then
   echo "cmd line arg = 6, making tile ERA5 monthly averaged 2m data"
   srun matlab -nodisplay -r "clust_make_monthlyavg_2m; exit"

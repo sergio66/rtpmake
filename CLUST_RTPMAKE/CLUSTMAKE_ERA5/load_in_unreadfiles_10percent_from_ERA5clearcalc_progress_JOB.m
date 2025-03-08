@@ -4,9 +4,13 @@ JOBB = (1:numJOBS) + (JOB-1)*numJOBS;
 
 iFailSave = -1;
 iFailCnt = 0;
+
+%% this is new, March 2025
+iSaveProfile = +1;
+
 for JOBind = 1 : length(JOBB)    
   JOBX = JOBB(JOBind);
-  fprintf(1,'JOBX = %3i \n',JOBX);
+  fprintf(1,'JOBind = %3i --> JOBX = %3i     , out of %3i \n',JOBind,JOBX,length(JOBB));
   eeeXY_cnt = 0;
   for  eeeX = 1 : 21   %% 7X ERA grid points
     for eeeY = 1 : 12  %% 4Y ERA grid points
@@ -50,6 +54,14 @@ for JOBind = 1 : length(JOBB)
           stemp(JOBind,eeeX,eeeY,:)     = a.pnew_op.stemp;
           landfrac(JOBind,eeeX,eeeY,:)  = a.pnew_op.landfrac;
           loadedfiles(JOBind,eeeX,eeeY) = 1;
+
+          %% this is new, March 2025
+          if iSaveProfile > 0
+            ptemp(JOBind,eeeX,eeeY,:,:)     = a.pnew_op.ptemp;
+            gas_1(JOBind,eeeX,eeeY,:,:)     = a.pnew_op.gas_1;
+            %gas_3(JOBind,eeeX,eeeY,:,:)     = a.pnew_op.gas_3;
+          end
+
         end
 
       end
@@ -89,10 +101,47 @@ for JOBind = 1 : length(JOBB)
   pause(0.1)
 end
 
-if iFailSave < 0
-  saver = ['save /asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Monthly/summary_' num2str(JOB,'%02d') '.mat '];
-  saver = [saver ' existence loadedfiles bt1231clr bt1231cld stemp landfrac JOBB'];
-  eval(saver);
+if iFailSave < 0 & iSaveProfile < 0
+  filesave = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Monthly/summary_' num2str(JOB,'%02d') '.mat'];
+  saver = ['save ' filesave ' existence loadedfiles bt1231clr bt1231cld stemp landfrac JOBB'];
+  if exist(filesave)
+    fprintf(1,'%s already exists, not saving \n',filesave)
+  else
+    fprintf(1,'%s DNE, saving \n',filesave)
+    eval(saver);
+  end
+
+elseif iFailSave < 0 & iSaveProfile > 0
+  filesave = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Monthly/summary_with_Tprofile_' num2str(JOB,'%02d') '.mat'];
+  saver = ['save -v7.3 ' filesave ' existence loadedfiles bt1231clr bt1231cld landfrac stemp ptemp gas_1 gas_3 JOBB'];
+  saver = ['save -v7.3 ' filesave ' existence loadedfiles bt1231clr bt1231cld landfrac stemp ptemp JOBB'];
+  if exist(filesave)
+    fprintf(1,'%s already exists, not saving \n',filesave)
+  else
+    fprintf(1,'%s DNE, saving \n',filesave)
+    eval(saver);
+  end
+
+  filesave = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Monthly/summary_with_WVprofile_' num2str(JOB,'%02d') '.mat'];
+  saver = ['save -v7.3 ' filesave ' existence loadedfiles bt1231clr bt1231cld landfrac stemp ptemp gas_1 gas_3 JOBB'];
+  saver = ['save -v7.3 ' filesave ' existence loadedfiles bt1231clr bt1231cld landfrac stemp gas_1 JOBB'];
+  if exist(filesave)
+    fprintf(1,'%s already exists, not saving \n',filesave)
+  else
+    fprintf(1,'%s DNE, saving \n',filesave)
+    eval(saver);
+  end
+
+  %filesave = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Monthly/summary_with_OZprofile_' num2str(JOB,'%02d') '.mat'];
+  %saver = ['save -v7.3 ' filesave ' existence loadedfiles bt1231clr bt1231cld landfrac stemp ptemp gas_1 gas_3 JOBB'];
+  %saver = ['save -v7.3 ' filesave ' existence loadedfiles bt1231clr bt1231cld landfrac stemp gas_3 JOBB'];
+  %if exist(filesave)
+  %  fprintf(1,'%s already exists, not saving \n',filesave)
+  %else
+  %  fprintf(1,'%s DNE, saving \n',filesave)
+  %  eval(saver);
+  %end
+
 else
   disp('iFailSave > 0 so not saving')
   for ii = 1 : iFailCnt

@@ -1,4 +1,9 @@
-%% takes 3 minutes per rtp set of 4608 profiles, with 13*21 grid points per day, that is 900 minutes ... with 16 days that is 13 hours on strowinteract
+%% this is the MOTHER code
+%% this is the MOTHER code
+%% this is the MOTHER code
+
+%% JOB = timestep
+%% takes 3 minutes per rtp set of 4608 profiles, with 13*21 grid points per day for each ERA5 month dataset, that is 900 minutes ... with 16 days that is 15 hours on strowinteract
 
 %% if run.sarta == -1      then do    sbatch -p high_mem --array=1-240  sergio_matlab_jobB.sbatch 5    so can do complete time series for trending SKT
 %% if run.sarta == 9999    then do    sbatch -p high_mem --array=120    sergio_matlab_jobB.sbatch 5    so can compare to histogram in Foig 8 of trends.tex
@@ -17,7 +22,7 @@ addpath /home/sergio/MATLABCODE
 addpath /home/sergio/MATLABCODE/TIME
 addpath /home/sergio/MATLABCODE/PLOTTER
 addpath ../GRIB
-addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
+addpath  /asl/s1/sergio/git/matlib   %% this was /home/sergio/MATLABCODE/matlib/clouds/sarta
 
 system_slurm_stats
 
@@ -32,10 +37,11 @@ if iAllChan_or_1231 < 0
   [h,p] = subset_rtp_allcloudfields(h,p,[],1291,[]);
 end
 
-get_dates_loop_make_monthly2m_tile_center_asc_or_desc
+get_dates_loop_make_monthly2m_tile_center_asc_or_desc  %% produces thedata from loading in a .mat file, which has lat,lon,solzen,hour etc for 502 timesteps,72x74 grid centers
 
 %% this gives the 13x21 points in every tile
 %% /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/test_read_eraI.m
+%% /home/sergio/git/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/test_read_eraI.m
 %%   save /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/theECM5gridptslist_ERA5_tile_points.mat theECM5gridptslist comment
 load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/theECMgridptslist_ECM_tile_points.mat');
 for ii = 1 : 72
@@ -47,6 +53,7 @@ for ii = 1 : 72
     eraY(ii,jj) = theECMgridptslist.adjusted_yvalues{ii,jj}(7); %% 1 2 3 .. 7  .....13 ~ center
   end
 end
+
 tilecenterX = squeeze(thedata.rlon_asc(:,:,1));
 tilecenterY = squeeze(thedata.rlat_asc(:,:,1));
 plot(tilecenterX,tilecenterY,'b.',eraX,eraY,'ro')
@@ -206,6 +213,7 @@ printarray([min(pnew_ip.plon) max(pnew_ip.plon) min(pnew_ip.plat) max(pnew_ip.pl
   end       %% loop over X ERA grid point index
 end         %% loop over the one day/month
 
-disp('now call << driver_find_hottest_10percent_from_ERA5clearcalcs >> then << clust_find_hottest_10percent_from_ERA5clearcalcs >> ')
-disp('now call << driver_find_hottest_10percent_from_ERA5clearcalcs >> then << clust_find_hottest_10percent_from_ERA5clearcalcs >> ')
-disp('now call << driver_find_hottest_10percent_from_ERA5clearcalcs >> then << clust_find_hottest_10percent_from_ERA5clearcalcs >> ')
+%% clust_find_hottest_10percent_from_ERA5clearcalcs can either do stemp or step+ptemp, then find hottest 10 percent or all points
+disp('now call << prototype : driver_find_hottest_10percent_from_ERA5clearcalcs >> then << actual : clust_find_hottest_10percent_from_ERA5clearcalcs >>')
+disp('now call << prototype : driver_find_hottest_10percent_from_ERA5clearcalcs >> then << actual : clust_find_hottest_10percent_from_ERA5clearcalcs >>')
+disp('now call << prototype : driver_find_hottest_10percent_from_ERA5clearcalcs >> then << actual : clust_find_hottest_10percent_from_ERA5clearcalcs >>')
