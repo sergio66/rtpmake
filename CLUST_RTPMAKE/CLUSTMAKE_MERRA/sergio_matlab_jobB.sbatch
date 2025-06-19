@@ -7,6 +7,7 @@
 # yes          run this with sbatch -p high_mem --array=1-228 sergio_matlab_jobB.sbatch 4    for NERRA5 tile center avg, desc, 19 yearsx12months/yr = 228
 # no run not done  this with sbatch -p high_mem --array=1-228 sergio_matlab_jobB.sbatch 5    for tile with 7x4=28 MERRA grid points/tile, 16 days .. set quue to medium, time to 24 hours
 # no run not done  this with sbatch -p high_mem --array=1-240 sergio_matlab_jobB.sbatch 6    for clust_make_monthlyavg_2m.m
+#                            sbatch -p high_mem --array=1-240 sergio_matlab_jobB.sbatch 7    for clustbatch_make_merra_surfaceT.m
 
 #  Name of the job:
 #SBATCH --job-name=CLUST_MAKE_MERRA_RTP
@@ -66,4 +67,7 @@ elif [[ "$1" -eq "5" ]]; then
 elif [[ "$1" -eq "6" ]]; then
   echo "cmd line arg = 6, making tile MERRA5 monthly averaged 2m data"
   srun matlab -nodisplay -r "clust_make_monthlyavg_2m; exit"
+elif [[ "$1" -eq "7" ]]; then
+  echo "cmd line arg = 7, making tile clustbatch_make_merra_surfaceT.m for trends paper"
+  srun matlab -nodisplay -r "clustbatch_make_merra_surfaceT.m; exit"
 fi

@@ -25,13 +25,16 @@ boo5 = squeeze(nanmean(reshape(skt5,72,64),1));
 %% look at Fig 8 of trends paper submitted to JGR
 figure(6); plot(meanvaluebin(rlat65),[boo1; boo2; boo3; boo4; boo5],'linewidth',2); axis([-90 +90 -0.05 +0.10])
   plotaxis2;  legend('Q90 cld BT1231','Q90 clr BT1231','Q90 skt','mean skt','center skt','location','best','fontsize',10);
+  xlabel('Latitude'); ylabel('dST/dt [K/yr]')
 
 %% look at Fig 8 of trends paper submitted to JGR
 figure(7); plot(meanvaluebin(rlat65),[boo1; boo2; boo3; boo4; boo5]-boo1,'linewidth',2); axis([-90 +90 -0.05 +0.10])
 hold on; plot(meanvaluebin(rlat65),boo1,'k.-','linewidth',4); hold off
   plotaxis2;  legend('Q90 cld BT1231','Q90 clr BT1231','Q90 skt','mean skt','center skt','location','best','fontsize',8);
   title('Absolute difference')
+  xlabel('Latitude'); ylabel('dST/dt [K/yr]')
 
 figure(8); plot(meanvaluebin(rlat65),100*([boo1; boo2; boo3; boo4; boo5]-boo1)./boo1,'linewidth',2); axis([-90 +90 -50 +50])
   plotaxis2;  legend('Q90 cld BT1231','Q90 clr BT1231','Q90 skt','mean skt','center skt','location','best','fontsize',10);
   title('Percent difference')
+  xlabel('Latitude'); ylabel('dST/dt [K/yr]')

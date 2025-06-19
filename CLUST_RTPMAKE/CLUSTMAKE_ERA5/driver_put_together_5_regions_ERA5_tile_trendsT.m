@@ -47,6 +47,8 @@ tz4  = [tm2.ptemp_trend_mean   ; tm1.ptemp_trend_mean   ; t00.ptemp_trend_mean  
 tz5  = [tm2.ptemp_trend_cntr   ; tm1.ptemp_trend_cntr   ; t00.ptemp_trend_cntr   ; tp1.ptemp_trend_cntr   ; tp2.ptemp_trend_cntr   ]';
   figure(5); clf; tzz5 = reshape(tz5,101,72,64); tzz5 = squeeze(nanmean(tzz5,2)); pcolor(rlat,plays,tzz5); title('cntr dT/dt [K/yr]')
   set(gca,'ydir','reverse'); set(gca,'yscale','log'); ylim([10 1000]); colorbar; caxis([-1 +1]*0.15); shading interp; xlabel('Lat'); ylabel('Pressure [mb]');
+for ii = 1 : 5; figure(ii); set(gca,'fontsize',10); end
+disp('ret to continue'); pause;
 
 figure(1); clf; tzz1 = reshape(tz1-0*tz1,101,72,64); tzz1 = squeeze(nanmean(tzz1,2)); pcolor(rlat,plays,tzz1); title('Q90 BT1231 cld dT/dt [K/yr]')
   set(gca,'ydir','reverse'); set(gca,'yscale','log'); ylim([10 1000]); colorbar; caxis([-1 +1]*0.15); shading interp; xlabel('Lat'); ylabel('Pressure [mb]');
@@ -58,6 +60,8 @@ figure(4); clf; tzz4 = reshape(tz1-tz4,101,72,64); tzz4 = squeeze(nanmean(tzz4,2
   set(gca,'ydir','reverse'); set(gca,'yscale','log'); ylim([10 1000]); colorbar; caxis([-1 +1]*0.15/10); shading interp; xlabel('Lat'); ylabel('Pressure [mb]');
 figure(5); clf; tzz5 = reshape(tz1-tz5,101,72,64); tzz5 = squeeze(nanmean(tzz5,2)); pcolor(rlat,plays,tzz5); title('Abs diff cntr dT/dt [K/yr]')
   set(gca,'ydir','reverse'); set(gca,'yscale','log'); ylim([10 1000]); colorbar; caxis([-1 +1]*0.15/10); shading interp; xlabel('Lat'); ylabel('Pressure [mb]');
+for ii = 1 : 5; figure(ii); set(gca,'fontsize',10); end
+disp('ret to continue'); pause;
 
 figure(1); clf; tzz1 = reshape(tz1-0*tz1,101,72,64); tzz1 = squeeze(nanmean(tzz1,2)); pcolor(rlat,plays,tzz1); title('Q90 BT1231 cld dT/dt [K/yr]')
   set(gca,'ydir','reverse'); set(gca,'yscale','log'); ylim([10 1000]); colorbar; caxis([-1 +1]*0.15); shading interp; xlabel('Lat'); ylabel('Pressure [mb]');
@@ -69,3 +73,4 @@ figure(4); clf; tzz4 = reshape(tz1-tz4,101,72,64); tzz4 = squeeze(nanmean(tzz4,2
   set(gca,'ydir','reverse'); set(gca,'yscale','log'); ylim([10 1000]); colorbar; caxis([-1 +1]*10); shading interp; xlabel('Lat'); ylabel('Pressure [mb]');
 figure(5); clf; tzz5 = reshape(tz1-tz5,101,72,64); tzz5 = squeeze(nanmean(tzz5,2)); tzz5 = tzz5./tzz1 * 100; pcolor(rlat,plays,tzz5); title('Percent diff cntr dT/dt [K/yr]')
   set(gca,'ydir','reverse'); set(gca,'yscale','log'); ylim([10 1000]); colorbar; caxis([-1 +1]*10); shading interp; xlabel('Lat'); ylabel('Pressure [mb]');
+for ii = 1 : 5; figure(ii); set(gca,'fontsize',10); end

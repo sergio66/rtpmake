@@ -14,6 +14,7 @@ addpath /asl/matlib/aslutil
 addpath /home/sergio/MATLABCODE/TIME
 addpath /home/sergio/MATLABCODE/PLOTTER
 addpath /home/sergio/MATLABCODE/matlib/clouds/sarta/
+addpath /home/sergio/git/rtp_prod2/util
 
 addpath /home/sergio/MATLABCODE
 
@@ -54,6 +55,7 @@ yymmdd0  = [2022 01 15]; ddLoop = [14 : 22];  %% ECMWF says ATMS shows gravity w
 yymmdd0  = [2019 04 25]; ddLoop = [];  %% HALO day that Eric processed, see ~/MATLABCODE/CRODGERS_FAST_CLOUD/HALO_BdryLayer/Proposal2024/driver_compare_AI.m
 yymmdd0  = [2019 04 26]; ddLoop = [];  %% rather surprisingly, he did this day???
 yymmdd0  = [2025 01 08]; ddLoop = [];  %% FIres over LA, from Dave Tobin
+yymmdd0  = [2024 11 13]; ddLoop = [];  %% FIres over LA, from Dave Tobin
 
 if length(ddLoop) == 0
   ddLoop = yymmdd0(3);

@@ -27,6 +27,7 @@ addpath  /asl/s1/sergio/git/matlib   %% this was /home/sergio/MATLABCODE/matlib/
 system_slurm_stats
 
 iDorA = +1;  %% desc
+iDorA = -1;  %% asc
 
 iDo2m = -1;
 
@@ -58,8 +59,8 @@ tilecenterX = squeeze(thedata.rlon_asc(:,:,1));
 tilecenterY = squeeze(thedata.rlat_asc(:,:,1));
 plot(tilecenterX,tilecenterY,'b.',eraX,eraY,'ro')
 plot(tilecenterX-eraX,tilecenterY-eraY,'b.')
-plot(eraX(:,21)- tilecenterX(:,21))
-plot(eraY(21,:)- tilecenterY(21,:))
+plot(eraX(:,21) - tilecenterX(:,21))
+plot(eraY(21,:) - tilecenterY(21,:))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for ddd = 1 : 1      %% monthly day averages, as we only get one data point per month
@@ -104,12 +105,20 @@ for ddd = 1 : 1      %% monthly day averages, as we only get one data point per 
       run_sarta.sartacloud_code = code1;
 
       %% fout = [dout '/era_tile_X_' num2str(eeeX) '_Y_' num2str(eeeY)  '_day_' num2str(ddd,'%02d') '_individual_timestep_' num2str(JOB,'%03d') '.mat'];
-      if run_sarta.cumsum == -1
-        fout = [dout '/era_tile_X_' num2str(eeeX) '_Y_' num2str(eeeY)  '_individual_timestep_' num2str(JOB,'%03d') '.mat'];
-      elseif run_sarta.cumsum == 9999
-        fout = [dout '/era_tile_X_' num2str(eeeX) '_Y_' num2str(eeeY)  '_individual_timestep_' num2str(JOB,'%03d') '_9999.mat'];
+      if iDorA > 0
+        if run_sarta.cumsum == -1
+          fout = [dout '/era_tile_X_' num2str(eeeX) '_Y_' num2str(eeeY)  '_individual_timestep_' num2str(JOB,'%03d') '.mat'];
+        elseif run_sarta.cumsum == 9999
+          fout = [dout '/era_tile_X_' num2str(eeeX) '_Y_' num2str(eeeY)  '_individual_timestep_' num2str(JOB,'%03d') '_9999.mat'];
+        end
+      else
+        if run_sarta.cumsum == -1
+          fout = [dout '/day_era_tile_X_' num2str(eeeX) '_Y_' num2str(eeeY)  '_individual_timestep_' num2str(JOB,'%03d') '.mat'];
+        elseif run_sarta.cumsum == 9999
+          fout = [dout '/day_era_tile_X_' num2str(eeeX) '_Y_' num2str(eeeY)  '_individual_timestep_' num2str(JOB,'%03d') '_9999.mat'];
+        end
       end
-
+      
       if exist(fout)
         fprintf(1,'JOB %3i : individual era timeseries file %s already exists \n',JOB,fout);
       else
@@ -122,9 +131,9 @@ for ddd = 1 : 1      %% monthly day averages, as we only get one data point per 
       
         pnew_ip.solzen = solzen;
         pnew_ip.satzen = satzen;
-        pnew_ip.scanang = saconv(p.satzen,p.zobs);  
+        pnew_ip.scanang = saconv(p.satzen,p.zobs);	
         pnew_ip.rtime   = rtime;
-
+xrtime        
         pnew_ip.rlon   = eraX(:)';
         pnew_ip.rlat   = eraY(:)';
         figure(3); plot(p.rlon,p.rlat,'.')
