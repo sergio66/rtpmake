@@ -29,8 +29,10 @@ addpath /asl/matlib/aslutil
 addpath /asl/packages/time
 
 % Location of grib files
-fhdr = '/asl/models/era5_avg/';         %% from July 2021
-fhdr = '/asl/models/era5_monthly/';     %% from Jan 2024
+fhdr = '/asl/models/era5_avg/';                  %% from July 2021
+fhdr = '/asl/models/era5_monthly/';              %% from Jan 2024
+fhdr = '/home/sergio/asl/models/era5_monthly/';  %% hmm this should have worked
+fhdr = '/home/sergio/asl/isilonX/ERA5_monthly/'; %% this should work
 
 ename = '';  % This should be placed outside a rtp file loop
 mtime = tai2dnum(prof.rtime);

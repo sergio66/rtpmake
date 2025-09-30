@@ -15,6 +15,53 @@ function F = grib_interpolate_era5(fn_s,fn_h,fn_2m,fn_olr,hindex,iWhich);
 %
 % L. Strow, June 11, 2014
 
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% F.s_time      = ncread(fn_s,'time',[hindex],[1]);  %% orig, time in hours since 1900
+%{
+>> junk = read_netcdf_lls('/home/sergio/asl/isilonX/ERA5_monthly/2023/2023-08_sfc.nc'); junk.time
+   1083288
+   1083291
+   1083294
+   1083297
+   1083300
+   1083303
+   1083306
+   1083309
+This is 3 hours intervals, 1083309-1083306 = 3
+(2023-1900) = 123 years = 123*365.25*24 = 1078218
+august = 08 = 08*30*24                  =    5760  total = 1083978
+------------------------------------------------- 
+
+(2023-1900) = 123 years = 123*365.25*24 = 1078218
+august = 08-1 = 07*30*24                =    040  total = 1083258
+------------------------------------------------- 
+%}
+
+%F.s_time      = ncread(fn_s,'time',[hindex],[1]);
+%F.s_mtime     = datenum(1900,0,0,double(F.s_time),0,0);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%{
+>> junk = read_netcdf_lls('/home/sergio/asl/isilonX/ERA5_monthly/2025/2025-08_sfc.nc'); junk.valid_time
+   1754006400
+   1754017200
+   1754028000
+   1754038800
+   1754049600
+   1754060400
+   1754071200
+   1754082000
+This is 3 hour intervals, (1754082000-1754071200) = 3 * 3600 = 10800 seconds
+Each day has 24*3600 seconds == 86400 seconds
+So 1754082000/86400 = 20302 days = 55 years
+So seconds since around 55 years ago???????
+
+%F.s_time      = ncread(fn_s,'valid_time',[hindex],[1]);
+%F.s_mtime     = datenum(1970,0,0,0,0,double(F.s_time));
+
+%}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
 if nargin <= 3
   error('grib_interpolate_era5 needs 4 arguments, not 3')
 end
@@ -23,11 +70,28 @@ if hindex < 1 | hindex > 8
 end
 
 F.s_longitude = ncread(fn_s,'longitude');
-  %% longitude is 0 to 360
+%% longitude is 0 to 360
 F.s_latitude  = ncread(fn_s,'latitude');
-  %% latitude is +90 to -90
-F.s_time      = ncread(fn_s,'time',[hindex],[1]);
-F.s_mtime     = datenum(1900,0,0,double(F.s_time),0,0);
+%% latitude is +90 to -90
+
+try
+  iNewOrOld = -1;
+  iY0 = 1900;
+  iHourOrSec = +1;
+  F.s_time      = ncread(fn_s,'time',[hindex],[1]);
+  F.s_mtime     = datenum(1900,0,0,double(F.s_time),0,0);
+catch
+  disp('oops : looks like time ----> valid_time : must be newer ERA5 monthly files')
+  iNewOrOld = +1;  
+  iY0 = 1970;
+  iHourOrSec = -1;
+  F.s_time      = ncread(fn_s,'valid_time',[hindex],[1]);
+  F.s_mtime     = datenum(1970,0,0,0,0,double(F.s_time));
+end
+xjunk = F.s_time;
+[yy,mm,dd,hh,doy2002,dstr] = convert_mmtime_to_doy2002(xjunk,1970,-1);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [X,Y] = ndgrid(F.s_latitude,F.s_longitude);
 iX = flipud(X); iY = flipud(Y);
@@ -72,9 +136,29 @@ end
 
 F.h_longitude = ncread(fn_h,'longitude');
 F.h_latitude  = ncread(fn_h,'latitude');
-F.levid       = ncread(fn_h,'level');
-F.h_time      = ncread(fn_h,'time',[hindex],[1]);
-F.h_mtime     = datenum(1900,0,0,double(F.h_time),0,0);
+
+try
+  iNewOrOld = -1;  
+  iY0 = 1900;
+  iHourOrSec = +1;
+  F.h_time      = ncread(fn_h,'time',[hindex],[1]);
+  F.h_mtime     = datenum(1900,0,0,double(F.h_time),0,0);
+catch
+  disp('oops : looks like time ----> valid_time : must be newer ERA5 monthly files')
+  iNewOrOld = +1;  
+  iY0 = 1970;
+  iHourOrSec = -1;
+  F.h_time      = ncread(fn_s,'valid_time',[hindex],[1]);
+  F.h_mtime     = datenum(1970,0,0,0,0,double(F.h_time));
+end
+xjunk = F.h_time;
+[yy,mm,dd,hh,doy2002,dstr] = convert_mmtime_to_doy2002(xjunk,1970,-1);
+
+if iNewOrOld == -1
+  F.levid       = ncread(fn_h,'level');
+else
+  F.levid       = ncread(fn_h,'pressure_level');
+end
 
 [X,Y] = ndgrid(F.h_latitude,F.h_longitude);
 iX = flipud(X); iY = flipud(Y);
