@@ -17,8 +17,6 @@ ans =
 HDFSW will be removed in a future release. Use MATLAB.IO.HDFEOS.SW instead.
 %}
 
-addpath /home/sergio/MATLABCODE
-
 error('USE cloud_set_defaults_run_maker_interp_analysis')
 error('USE cloud_set_defaults_run_maker_interp_analysis')
 error('USE cloud_set_defaults_run_maker_interp_analysis')
@@ -41,6 +39,7 @@ sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
 klayers = '/asl/packages/klayersV205/BinV201/klayers_airs';
 sarta   = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
 
+addpath /home/sergio/MATLABCODE
 addpath /asl/matlab2012/airs/readers
 addpath /asl/matlib/aslutil
 addpath /asl/matlib/science

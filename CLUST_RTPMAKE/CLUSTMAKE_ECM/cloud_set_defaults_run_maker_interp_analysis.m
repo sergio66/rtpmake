@@ -17,52 +17,16 @@ ans =
 HDFSW will be removed in a future release. Use MATLAB.IO.HDFEOS.SW instead.
 %}
 
-addpath /home/sergio/MATLABCODE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+add_the_paths_and_klayers_sarta_execs
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 iv5or6 = 5;   %% AIRS L1B
 iv5or6 = 6;   %% AIRS L1C
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% creates an rtp file for ONE granule
-%% can be modified for more!
-
-klayers = '/asl/packages/klayers/Bin/klayers_airs';
-sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
-
-klayers = '/asl/packages/klayers/Bin/klayers_airs';
-sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
-
-klayers = '/asl/packages/klayersV205/BinV201/klayers_airs';
-sarta   = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
-sartaCld = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_may19_prod';
-
-addpath /asl/matlab2012/airs/readers
-addpath /asl/matlib/aslutil
-addpath /asl/matlib/science
-addpath /asl/matlib/rtptools
-addpath /asl/matlib/h4tools/
-addpath /asl/matlib/rtptools/
-addpath /asl/matlib/gribtools/
-addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
-addpath /home/sergio/MATLABCODE/TIME
-addpath /home/sergio/MATLABCODE/PLOTTER
-addpath /home/sergio/MATLABCODE/COLORMAP
-
-%addpath /home/strow/cress/Work/Rtp
-%addpath /home/strow/Matlab/Grib
-
-%addpath /home/sergio/MATLABCODE/CRIS_HiRes             %% for sergio_fill_ecmwf
-%addpath /home/strow/Git/rtp_prod2/grib                  %% for fill_ecm 
-%addpath /asl/rtp_prod2/grib/                           %% for fill_ecmwf
-
-%addpath  /asl/packages/rtp_prod2/grib
-%addpath  /home/sbuczko1/git/rtp_prod2/grib
-
-addpath /home/strow/git/rtp_prod2/grib
-addpath /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB
-addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS/Strow_humidity/convert_humidity/
 
 if iv5or6 == 5
   theinds = (1 : 2378)';
@@ -225,7 +189,6 @@ for ixx = 1 : length(iaGlist)
     new_8_ECMfiles_interp_analysis
     %%%%%%%%%%%%%%%%%%%%%%%%%
 
-    addpath /home/sergio/MATLABCODE/TIME
     [xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
     time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
     co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
@@ -241,15 +204,6 @@ for ixx = 1 : length(iaGlist)
     %p = Prof_add_emis(p,yymmddgg(1),yymmddgg(2),yymmddgg(3));  %% broken crap by whoever
     %p = rtpadd_emis_DanZhou(h,ha,p,pa);   %% lso totally broken crap
     %[h,ha,p,pa] = rtpadd_emis_wis(h,ha,p,pa);
-    %addpath /asl/rtp_prod2/emis/
-    %addpath /asl/rtp_prod2/util/    
-    %addpath /asl/packages/rtp_prod2/emis/
-    %addpath /asl/packages/rtp_prod2/util/
-    %addpath /asl/rtp_prod2/emis/
-    %addpath /asl/rtp_prod2/util/
- 
-    addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis/
-    addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/
 
     p.rlon = wrapTo180(p.rlon);
     [p,pa] = rtp_add_emis(p,pa);

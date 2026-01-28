@@ -17,48 +17,15 @@ ans =
 HDFSW will be removed in a future release. Use MATLAB.IO.HDFEOS.SW instead.
 %}
 
-addpath /home/sergio/MATLABCODE
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 iv5or6 = 5;   %% AIRS L1B
 iv5or6 = 6;   %% AIRS L1C
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% creates an rtp file for ONE granule
-%% can be modified for more!
+add_the_paths_and_klayers_sarta_execs
 
-klayers = '/asl/packages/klayers/Bin/klayers_airs';
-sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
-
-klayers = '/asl/packages/klayers/Bin/klayers_airs';
-sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
-
-klayers = '/asl/packages/klayersV205/BinV201/klayers_airs';
-sarta   = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
-
-sartaCld = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_may19_prod';
-
-addpath /asl/matlab2012/airs/readers
-addpath /asl/matlib/aslutil
-%addpath /asl/matlib/science
-addpath /home/sergio/MATLABCODE/matlib/science/
-addpath /asl/matlib/rtptools
-addpath /asl/matlib/h4tools/
-addpath /asl/matlib/rtptools/
-addpath /asl/matlib/gribtools/
-addpath /asl/matlib/time
-addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
-addpath /home/sergio/MATLABCODE
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
-
-% addpath /home/strow/cress/Work/Rtp
-% addpath /home/strow/Matlab/Grib     WARNING /home/strow/Matlab/Grib/rtpadd_grib_data.m DIFFERENT than /asl/matlib/gribtools/rtpadd_era_data.m
-% addpath /home/sergio/MATLABCODE/CRIS_HiRes             %% for sergio_fill_ecmwf
-% addpath /home/strow/Git/rtp_prod2/grib                  %% for fill_ecm
-% addpath /asl/packages/rtp_prod2/grib
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/grib
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if iv5or6 == 5
   theinds = (1 : 2378)';
@@ -221,7 +188,6 @@ disp('calling fill_ecmwf')
 
     [p,h] = fill_ecmwf(p,h);
 
-    addpath /home/sergio/MATLABCODE/TIME
     [xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
     time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
     co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
@@ -236,13 +202,6 @@ disp('calling fill_ecmwf')
     %p = Prof_add_emis(p,yymmddgg(1),yymmddgg(2),yymmddgg(3));  %% broken crap by whoever
     %p = rtpadd_emis_DanZhou(h,ha,p,pa);   %% lso totally broken crap
     %[h,ha,p,pa] = rtpadd_emis_wis(h,ha,p,pa);
-    %addpath /asl/rtp_prod2/emis/
-    %addpath /asl/rtp_prod2/util/    
-    %addpath /asl/packages/rtp_prod2/emis/
-    %addpath /asl/packages/rtp_prod2/util/
-
-    addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis/
-    addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/
 
     p.rlon = wrapTo180(p.rlon);
     [p,pa] = rtp_add_emis(p,pa);
@@ -265,7 +224,6 @@ disp('calling fill_ecmwf')
     tclr1231 = rad2bt(h.vchan(i1231),p2x.sarta_rclearcalc(i1231,:));
     tcld1231 = rad2bt(h.vchan(i1231),p2x.rcalc(i1231,:));
 
-    addpath /home/sergio/MATLABCODE/PLOTTER
     scatter_coast(p2x.rlon,p2x.rlat,10,tobs1231)
     scatter_coast(p2x.rlon,p2x.rlat,10,tobs1231-tcld1231); caxis([-10 +10]); colorbar
     %}   
@@ -285,7 +243,6 @@ figure(5); scatter_coast(p2x.rlon,p2x.rlat,10,p.tcc); colormap jet; title('ORIG'
 
 [Y,I] = sort(p.tcc);
 figure(6); plot(p.tcc(I),tcc1(I),'b',p.tcc(I),tcc2(I),'g',p.tcc(I),tcc3A(I),'r',p.tcc(I),tcc3B(I),'m')
-addpath /home/sergio/MATLABCODE/NANROUTINES
 corr1 = linearcorrelation(p.tcc,tcc1);
 corr2 = linearcorrelation(p.tcc,tcc2);
 corr3A = linearcorrelation(p.tcc,tcc3A);

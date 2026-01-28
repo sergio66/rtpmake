@@ -3,10 +3,10 @@
 # run this with   sbatch --exclude=cnode[225,267] --array=1-48  --output='testslurm' sergio_matlab_chip.sbatch
 # run this with   sbatch --exclude=cnode[225,267] --array=1-48  sergio_matlab_chip.sbatch 1   for filelist
 # run this with   sbatch --exclude=cnode[225,267] --array=1-240 sergio_matlab_chip.sbatch 2   for loop over a day
-# run this with   sbatch -p 2021                  --array=1-48  sergio_matlab_chip.sbatch 1   for filelist
-# run this with   sbatch -p 2021                  --array=1-240 sergio_matlab_chip.sbatch 2   for loop over a day
-# run this with   sbatch -p 2021                  --array=1-240 sergio_matlab_chip.sbatch 3   for filelist, with interp analysis
-# run this with   sbatch -p 2021                  --array=1-72  sergio_matlab_chip.sbatch 4   for chirp tilelist
+# run this with   sbatch --array=1-48  sergio_matlab_chip.sbatch 1   for filelist
+# run this with   sbatch --array=1-240 sergio_matlab_chip.sbatch 2   for loop over a day
+# run this with   sbatch --array=1-240 sergio_matlab_chip.sbatch 3   for filelist, with interp analysis
+# run this with   sbatch --array=1-72  sergio_matlab_chip.sbatch 4   for chirp tilelist
 
 # >>>>>>>>>>>>>>>>>>>>>>>>> ########################################################################
 

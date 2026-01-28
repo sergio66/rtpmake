@@ -3,7 +3,9 @@
 %% sbatch --array=1-48 sergio_matlab_jobB.sbatch 
 %% N1 = 1, N2 = number of files to be processed
 
-JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));  %% JOB = 1--72 lonbins, then loop over the 10 files in set_filelist_chirptile.m
+%JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));  %% JOB = 1-- 20 files in set_filelist_chirptile.m, then loop over 1-72 lonbins
+JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));  %% JOB = 1--72 lonbins, then loop over the 20 files in set_filelist_chirptile.m
+
 if length(JOB) == 0
   JOB = 1;
   JOB = 30;
