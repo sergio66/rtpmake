@@ -40,15 +40,18 @@ if nargin ~= nargout
 end
 %}
 
-addpath /asl/matlib/aslutil
-addpath /asl/packages/time
+% addpath /asl/matlib/aslutil
+% addpath /asl/packages/time
+addpath /home/sergio/git/matlabcode/TIME
+addpath /home/sergio/git/matlabcode/matlab2012/aslutil/
 
 iaDone = zeros(size(profin.rlat));
 
 % Location of grib files
-fhdr = '/asl/data/ecmwf_nc/';  %% till Sept 2019
-fhdr = '/asl/data/ecmwf/';     %% from Oct 2019 - 
-fhdr = '/asl/models/ecmwf/';   %% from Oct 2019 - 
+fhdr = '/asl/data/ecmwf_nc/';       %% till Sept 2019
+fhdr = '/asl/data/ecmwf/';          %% from Oct 2019 - 
+fhdr = '/asl/models/ecmwf/';        %% from Oct 2019 - 
+fhdr = '/umbc/rs/strow/asl/ecmwf/'; %% Sad Nov2025-Jan2026
 
 ename = '';  % This should be placed outside a rtp file loop
 
@@ -63,7 +66,7 @@ enames = get_ecmwf_enames(mtime);
 [u_enames, ia, ic] = unique(enames);
 %u_enames
 n = length(u_enames);
-
+fprintf(1,'need to deal with %3i ecmwf files \n',n);
 skipped = 0;
 
 % Loop over unique grib file names
@@ -83,23 +86,35 @@ for i = 1:n
   %% to ECMWF files ==> "CONTINUE" statement from line 75 below takes into effect, and you
   %% won't have this problem ==> ptime will be fine
 
-  addpath /home/sergio/MATLABCODE/TIME
+  %% addpath /home/sergio/MATLABCODE/TIME
+  rmpath /umbc/rs/pi_sergio/WorkDirDec2025/matlabcode/TIME/
+  addpath /home/sergio/git/matlabcode/TIME   %% Jan 2026
+  
   %% /asl/data/ecmwf_nc/2013/07/UAD07021200070221001
   %% /asl/data/ecmwf_nc/YYYY/MM/UADMMDD1200MMDD21001  
   slash = findstr(fn,'/');
-  zahyear  = str2num(fn(slash(4)+1:slash(4)+4));
-  zahmonth = str2num(fn(slash(5)+1:slash(5)+2));
-  zahday   = str2num(fn(slash(6)+6:slash(6)+7));
-  zahhr    = str2num(fn(slash(6)+8:slash(6)+9));
-  zahhr    = str2num(fn(slash(6)+16:slash(6)+17));  
-  ptime    = utc2taiSergio(zahyear,zahmonth,zahday,zahhr);
+  if fhdr(1:5) == '/asl/'   %% '/asl/models/ecmwf/
+    zahyear  = str2num(fn(slash(4)+1:slash(4)+4));
+    zahmonth = str2num(fn(slash(5)+1:slash(5)+2));
+    zahday   = str2num(fn(slash(6)+6:slash(6)+7));
+    zahhr    = str2num(fn(slash(6)+8:slash(6)+9));
+    zahhr    = str2num(fn(slash(6)+16:slash(6)+17));
+  elseif fhdr(1:9) == '/umbc/rs/'  %% '/umbc/rs/strow/asl/ecmwf/
+    zahyear  = str2num(fn(slash(6)+1:slash(6)+4));
+    zahmonth = str2num(fn(slash(7)+1:slash(7)+2));
+    zahday   = str2num(fn(slash(8)+6:slash(8)+7));
+    zahhr    = str2num(fn(slash(8)+8:slash(8)+9));
+    zahhr    = str2num(fn(slash(8)+16:slash(8)+17));    
+  end
+  ptime    = utc2taiSergio(zahyear,zahmonth,zahday,zahhr);  
+  %whos ptime zah*
 
   % Actually read grib1, grib2 .nc files
   fn_s = [fn '-1.nc'];
   fn_h = [fn '-2.nc'];
   % Do the netcdf files exist?
   if exist(fn_s) == 0 | exist(fn_h) == 0 
-    disp(['Netcdf grib files missing for root: ' fn])
+    disp(['rtpmake/CLUST_RTPMAKE/GRIB/fill_ecmwf.m : Netcdf grib files missing for root: ' fn])
     k = find( ic == i );  % indices of first partition (of n total)
     skipped = skipped + length(k);
     fprintf(1,'skipping to next time partition, will have to ignore %4i FOVS \n',length(k))
@@ -120,9 +135,15 @@ for i = 1:n
     headin.ngas = 0;
   end
 
-  [head,prof] = subset_rtp(headin,profin,[],[],k);
-  iaDone(k) = 1;
-
+  %[i min(k) max(k) length(profin.rlon)]
+  if length(k) >= 1
+    [head,prof] = subset_rtp(headin,profin,[],[],k);
+    iaDone(k) = 1;
+  else
+    disp('oops k = 0')
+    keyboard_nowindow
+  end
+  
   % Assume rtp lat/lon are +-180??  Need to be 0-360 for grib interpolation
   %   rlat = prof.rlat(k);
   %   rlon = prof.rlon(k);
