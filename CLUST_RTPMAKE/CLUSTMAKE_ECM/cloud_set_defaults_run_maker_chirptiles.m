@@ -19,7 +19,7 @@ HDFSW will be removed in a future release. Use MATLAB.IO.HDFEOS.SW instead.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-add_the_paths _and_klayers_sarta_execs
+add_the_paths_and_klayers_sarta_execs
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -108,8 +108,8 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-for ixx = 1 : len_dir0
-%for ixx = len_dir0/2 : -1 : 1
+%for ixx = 1 : len_dir0
+for ixx = len_dir0 : -1 : 1
   disp(' ')
   disp('new process new process new process new process new process new process')
   disp(' ')
@@ -119,7 +119,7 @@ for ixx = 1 : len_dir0
   fprintf(1,'ixx = %2i JOB = %3i dir0(ixx) = %s lonbin_list(JOB).name = %s \n',ixx,JOB,dir0{ixx},lonbin_list(JOB).name)
   moostr = lonbin_list(JOB).name;
   moostr = moostr(1:end-3);
-  fdirOUT = ['/home/sergio/git/matlabcode/QUICKTASKS_TELECON/SuddenStratWarming_SSW/TestRTP/' num2str(ixx,'%03i') '/'];
+  fdirOUT = ['/home/sergio/git/matlabcode/QUICKTASKS_TELECON/SuddenStratWarming_SSW/TestRTP/' setstr '/' num2str(ixx,'%03i') '/'];
 
   %%% .... now the rest ....
   %%% .... now the rest ....
@@ -261,6 +261,11 @@ for ixx = 1 : len_dir0
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    disp(' ')
+    disp('inside cloud_set_defaults_run_maker_chirptiles.m just before calling driver_sarta_cloud_rtp')
+    which mktemp
+    which get_sarta_clear
+    which driver_sarta_cloud_rtp
     [p2] = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
 
     fnamex = fnameOUT;

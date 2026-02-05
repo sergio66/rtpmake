@@ -3,17 +3,19 @@
 %% sbatch --array=1-48 sergio_matlab_jobB.sbatch 
 %% N1 = 1, N2 = number of files to be processed
 
+warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
+
 %JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));  %% JOB = 1-- 20 files in set_filelist_chirptile.m, then loop over 1-72 lonbins
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));  %% JOB = 1--72 lonbins, then loop over the 20 files in set_filelist_chirptile.m
 
 if length(JOB) == 0
-  JOB = 1;
   JOB = 30;
   JOB = 24;
-  JOB = 37;
+  JOB = 37;  
+  JOB = 1;
+  JOB = 9;
 end
-warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
-fprintf(1,'JOB = %3i \n',JOB);
+fprintf(1,'processing JOB = %3i \n',JOB);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% specify text file which has YY MM DD GG lst that needs to be processed 
@@ -48,3 +50,4 @@ else
   error('enh wazzup doc, not yet possible to do this')
 end
 
+disp('now go to /home/sergio/git/matlabcode/QUICKTASKS_TELECON/SuddenStratWarming_SSW and run cluster_look_at_rtp.m');
