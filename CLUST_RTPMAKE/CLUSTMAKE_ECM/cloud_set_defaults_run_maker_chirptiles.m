@@ -18,7 +18,10 @@ HDFSW will be removed in a future release. Use MATLAB.IO.HDFEOS.SW instead.
 %}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% creates an rtp file for ONE granule
+%% can be modified for more!
 
+%% see lner_to_CLUSTMAKE_ERA_addpath0.sc
 add_the_paths_and_klayers_sarta_execs
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,43 +37,15 @@ else
   theinds = (1 : 2645)';
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% set sarta exec
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-run_sarta.clear = +1;
-run_sarta.cloud = +1;
-
-if iSlabCld_CumSumStrowORGeorge > 0
-  run_sarta.cumsum = 9999;  %% strow pick, cloud at PEAK of wgt fcn
-else
-  run_sarta.cumsum = -1;  %% aumann pick, cloud at wgt mean of profile
-end
-run_sarta.klayers_code = klayers;
-
-codeX = 0; %% use default with A. Baran params
-codeX = 1; %% use new     with B. Baum, P. Yang params
-
-code0 = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = sartaCld;
-
-if codeX == 0
-  icestr = '_sarta_baran_ice';
-  run_sarta.sartacloud_code = code0;
-elseif codeX == 1
-  icestr = '_sarta_baum_ice';
-  run_sarta.sartacloud_code = code1;
-else
-  error('codeX???')
-end
-
-run_sarta.sartaclear_code = run_sarta.sartacloud_code;
+set_run_sarta_options
 
 %icestr = ['NEWLANDFRAC/cloudy_airs_l1b_ecm' icestr '.'];
 if iv5or6 == 5
-  icestr = ['cloudy_airs_l1b_ecm' icestr '.'];
+  icestr = ['chirp_cloudy_airs_l1b_ecm' icestr '.'];
 elseif iv5or6 == 6
-  icestr = ['cloudy_airs_l1c_ecm' icestr '.'];
+  icestr = ['chirp_cloudy_airs_l1c_ecm' icestr '.'];
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -206,13 +181,8 @@ for ixx = len_dir0 : -1 : 1
       h.vchan = wavoo.h.vchan;
     end
 
-    %%% this is NEW
-    %p.landfrac_fromL1B = p.landfrac;
-    %p.salti_fromL1B = p.salti;
-    %[salti, landfrac] = usgs_deg10_dem(p.rlat, p.rlon);
-    %p.landfrac = landfrac;
-    %p.salti    = salti;
-
+    set_landfrac_using_L1B_LIC_or_usgs
+    
     clrfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3'};
     cldfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3',...
                  'CC','CIWC','CLWC'};
@@ -242,30 +212,20 @@ for ixx = len_dir0 : -1 : 1
     %p = Prof_add_emis(p,yymmddgg(1),yymmddgg(2),yymmddgg(3));  %% broken crap by whoever
     %p = rtpadd_emis_DanZhou(h,ha,p,pa);   %% lso totally broken crap
     %[h,ha,p,pa] = rtpadd_emis_wis(h,ha,p,pa);
-    p.rlon = wrapTo180(p.rlon);
-
-    if exist('/asl/data/iremis/danz/danz_interpolant.mat')
-      [p,pa] = rtp_add_emis(p,pa);
-    else  
-      disp('no /asl/data/iremis/danz/danz_interpolant.mat so skip rtp_add_emis  .... use constant emis')
-      disp('no /asl/data/iremis/danz/danz_interpolant.mat so skip rtp_add_emis  .... use constant emis')
-      disp('no /asl/data/iremis/danz/danz_interpolant.mat so skip rtp_add_emis  .... use constant emis')
-      p.nemis = ones(size(p.stemp)) * 2;
-      p.efreq = [600 3000]' * ones(1,length(p.stemp));
-      p.emis  = [0.98 0.98]' * ones(1,length(p.stemp));
-      p.rho = (1-p.emis)/pi;
-    end
     
+    p.rlon = wrapTo180(p.rlon);    
+    add_the_DanZhou_emis
+
     %figure(1)
     %scatter_coast(p.rlon,p.rlat,10,p.nemis); 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     disp(' ')
-    disp('inside cloud_set_defaults_run_maker_chirptiles.m just before calling driver_sarta_cloud_rtp')
-    which mktemp
-    which get_sarta_clear
-    which driver_sarta_cloud_rtp
+    %disp('inside cloud_set_defaults_run_maker_chirptiles.m just before calling driver_sarta_cloud_rtp')
+    %which mktemp
+    %which get_sarta_clear
+    %which driver_sarta_cloud_rtp
     [p2] = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
 
     fnamex = fnameOUT;

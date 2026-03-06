@@ -5,16 +5,12 @@ function [h,ha,p2x,pa] = quickmake_oneECM_file(h,ha,p,pa)
     
 p0 = p;
 
-%[h,ha,p,pa] = rtpadd_emis_DanZhou2(h,ha,p,pa);
-%p = Prof_add_emis(p,yymmddgg(1),yymmddgg(2),yymmddgg(3));  %% broken crap by whoever
-%p = rtpadd_emis_DanZhou(h,ha,p,pa);   %% lso totally broken crap
-%[h,ha,p,pa] = rtpadd_emis_wis(h,ha,p,pa);
 
 addpath /asl/rtp_prod2/emis/
 addpath /asl/rtp_prod2/util/
-%p.rlon = wrapTo180(p.rlon);
-%[p,pa] = rtp_add_emis(p,pa);
-    
+% p.rlon = wrapTo180(p.rlon);
+% add_the_DanZhou_emis
+  
 %figure(1)
 %scatter_coast(p.rlon,p.rlat,10,p.nemis); 
 

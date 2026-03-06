@@ -9,13 +9,7 @@
 %% ls -lt clustbatch_eracloudrtp_sarta_filelist_interp_YYMMDD_loopGG.m
 %%     clustbatch_eracloudrtp_sarta_filelist_interp_YYMMDD_loopGG.m -> clustbatch_make_eracloudrtp_sergio_sarta_filelist_interp_YYMMDD_loopGG.m
 
-addpath /asl/matlib/h4tools
-addpath /asl/matlib/rtptools
-addpath /asl/matlib/aslutil
-addpath /home/sergio/MATLABCODE
-addpath /home/sergio/MATLABCODE/TIME
-addpath /home/sergio/MATLABCODE/PLOTTER
-addpath /home/sergio/MATLABCODE/matlib/clouds/sarta/
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 system_slurm_stats
 
@@ -50,7 +44,9 @@ thefilelist = load(filelist);
 thefilelist = thefilelist(JOB,1:3);
 
 %%thefilelist = [2019 04 25];
+
 iaGlist = 001 : 240;
+iaGlist = 234; %% testing 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% this is for /home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/tonga_volcano_jan2022_jpss.txt : 
@@ -82,10 +78,14 @@ for ggx = 1 : length(iaGlist)
   
   if iSNPPorJ1orJ2 == 0
     NONONOdout = ['/asl/rtp/cris/npp_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-    dout = ['/asl/s1/sergio/rtp/npp_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
+    dout = ['/asl/s1/sergio/rtp/npp_ccast_hires/allfov/'];
+    dout = ['/umbc/rs/pi_sergio/WorkDirDec2025/sergio_temp_rtp_files/npp_ccast_hires/allfov/'];
+    dout = [dout  num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
   elseif iSNPPorJ1orJ2 == 1
     NONONOdout = ['/asl/rtp/cris/j1_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-    dout = ['/asl/s1/sergio/rtp/j1_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
+    dout = ['/asl/s1/sergio/rtp/j1_ccast_hires/allfov/'];
+    dout = ['/umbc/rs/pi_sergio/WorkDirDec2025/sergio_temp_rtp_files/npp_ccast_hires/allfov/'];    
+    dout = [dout num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
   else
     error('unknow SNPP, J1 or ... ?')
   end

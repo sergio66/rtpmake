@@ -18,18 +18,29 @@ tstr = [];
 % based on ~/projects/airs/airs_l1c_to_rtp.m
 % and /home/sbuczko1/git/rtp_prod2/cris/create_cris_ccast_hires_clear_day_rtp.m
 
-addpath ~motteler/shome/cris/ccast/source/          % fixmyQC
-addpath /asl/matlib/rtptools                        % set_attr
-addpath /asl/matlib/time
-addpath /asl/matlib/aslutil                         % int2bits
-addpath /home/sbuczko1/git/rtp_prod2/chirp/util/uniform_clear/
-addpath /home/sbuczko1/git/rtp_prod2/grib/          % fill_era
-addpath /home/sbuczko1/git/rtp_prod2/emis
-addpath /home/sbuczko1/git/rtp_prod2/util           % genscratchpath
-addpath /home/sbuczko1/git/rtp_prod2/cris/util      % guard_ind
-addpath /home/sbuczko1/git/rtp_prod2/cris/util/uniform_clear
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+add_the_paths_and_klayers_sarta_execs
+
+% addpath ~motteler/shome/cris/ccast/source/          % fixmyQC
+% addpath /home/sbuczko1/git/rtp_prod2/chirp/util/uniform_clear/
+% addpath /home/sbuczko1/git/rtp_prod2/grib/          % fill_era
+% addpath /home/sbuczko1/git/rtp_prod2/emis
+% addpath /home/sbuczko1/git/rtp_prod2/util           % genscratchpath
+% addpath /home/sbuczko1/git/rtp_prod2/cris/util      % guard_ind
+% addpath /home/sbuczko1/git/rtp_prod2/cris/util/uniform_clear
+% addpath /home/chepplew/projects/chirp               % cat_rtp_clh
+% addpath /home/sergio/MATLABCODE
+
+% /home/sergio/git/rtp_prod2/
+
+addpath /home/sergio/git/matlabcode/ccast/          % fixmyQC
+addpath /home/sergio/git/rtp_prod2/chirp/util/uniform_clear/
+addpath /home/sergio/git/rtp_prod2/cris/util      % guard_ind
+addpath /home/sergio/git/rtp_prod2/cris/util/uniform_clear
 addpath /home/chepplew/projects/chirp               % cat_rtp_clh
-addpath /home/sergio/MATLABCODE
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % ---------- Input Options and setup ----------------
 
@@ -81,32 +92,42 @@ switch SRC{1}
     switch SRC{2}
       case 'fsr'
         d.home = '/asl/cris/ccast/sdr45_npp_HR/';
+	d.home = '/umbc/xfs3/strow/asl/cris/';
       case 'nsr'
         d.home = '/asl/cris/ccast/sdr45_npp_LR/';
+	d.home = '/umbc/xfs3/strow/asl/cris/';	
     end
   case 'j01'
     switch SRC{2}
       case 'fsr'
         d.home = '/asl/cris/ccast/sdr45_j01_HR/';
+	d.home = '/umbc/xfs3/strow/asl/cris/';	
       case 'nsr'
         d.home = '/asl/cris/ccast/sdr45_j01_LR/';
+	d.home = '/umbc/xfs3/strow/asl/cris/';	
     end
 end   
 if iUMBCorCLASS < 0
   disp('WARNING : using NOAA CLASS .nc radiance files so L2 and L1 granule numbers will match')
-  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
+  disp('   see eg /home/sergio/git/matlabcode/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
   disp('WARNING : using NOAA CLASS .nc radiance files so L2 and L1 granule numbers will match')
-  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
+  disp('   see eg /home/sergio/git/matlabcode/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
   disp('WARNING : using NOAA CLASS .nc radiance files so L2 and L1 granule numbers will match')
-  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
-  d.home = '/asl/s1/sergio/rtp/JUNK_L1B_JPSS-1/'
+  disp('   see eg /home/sergio/git/matlabcode/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
+
+  %% see https://www.aev.class.noaa.gov/saa/products/search?datatype_family=CRIS_SDR
+  %% https://search.earthdata.nasa.gov/search/granules?p=C1442068434-GES_DISC&pg[0][v]=f&pg[0][gsk]=-start_date&q=CRIS%20JPSS
+  %% use   [mmmm,dddd] = doy_to_mmdd(180,2018)   to figure it out   becomes 06/29/2018
+  d.home = '/asl/s1/sergio/rtp/JUNK_L1B_JPSS-1/';
+  d.home = '/home/sergio/git/sergio_temp_rtp_files/JUNK_L1B_JPSS-1/';
+  
 else
   disp('WARNING : using UMBC CCAST .mat radiance files so L2 is one granule ahead of L1 mat file')
-  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
+  disp('   see eg /home/sergio/git/matlabcode/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
   disp('WARNING : using UMBC CCAST .mat radiance files so L2 is one granule ahead of L1 mat file')
-  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
+  disp('   see eg /home/sergio/git/matlabcode/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
   disp('WARNING : using UMBC CCAST .mat radiance files so L2 is one granule ahead of L1 mat file')
-  disp('   see eg /home/sergio/MATLABCODE/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
+  disp('   see eg /home/sergio/git/matlabcode/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
 end
 
 % Check valid date requested
@@ -145,12 +166,13 @@ fpattern = ['CrIS_SDR_*' vers '.mat'];
 if iUMBCorCLASS < 0
   fpattern = ['SNDR.J1.CRIS*.nc'];
 end
-d.dir = dir([d.home fpattern]);
+lookfor = [d.home '/' fpattern]
+d.dir = dir(lookfor);
 
 % Check SDRs exist
-if(length(d.dir) <= 1) 
-  d.home
-  fpattern
+if(length(d.dir) < 1) 
+  fprintf(1,'d.home   = %s \n',d.home)
+  fprintf(1,'fpattern = %s \n',fpattern);
   error('Insufficient SDR granules found'); 
   return; 
 end 
@@ -158,7 +180,7 @@ end
 % reorder the listing into granule order (shouldn't be needed)
 gnum = [];
 if iUMBCorCLASS > 0
-  for fn=1:length(d.dir) 
+  for fn = 1:length(d.dir) 
     junk  = strsplit(d.dir(fn).name,{'_','.'});
     gnum  = [gnum str2double(junk{7}(2:end))];
     gajunk = junk{6};
@@ -167,7 +189,7 @@ if iUMBCorCLASS > 0
     thetime(fn,3) = thetime(fn,1)*10 + (round(thetime(fn,2)/6)+0);   %%% GONNA HAVE PROBLEMS with FIRST and LAST
   end
 else
-  for fn=1:length(d.dir) 
+  for fn = 1:length(d.dir) 
     junk  = strsplit(d.dir(fn).name,{'_','.'});
     gnum  = [gnum str2double(junk{6}(2:end))];
     gajunk = junk{4};
@@ -183,6 +205,9 @@ end
 % Check requested granule numbers to process if allsky
 if(strcmp(prod, 'sct'))
   iign = intersect(rgrans, gnum);
+  rgrans
+  gnum
+  thetime
   [~,~,iign] = intersect(rgrans, thetime(:,3));
   tstr = strsplit(d.dir(iign).name,{'_','.'});
   tstr = tstr{6};
@@ -213,13 +238,7 @@ fn_rtp2 = mktempS('fx.op.rtp');
 fn_rtp3 = mktempS('fx.rp.rtp');
 fn_rtp4 = mktempS('fx.xp.rtp');
 
-% assign executables and command strings (clr or sct)
-klayers_bin      = '/asl/packages/klayersV205/BinV201/klayers_airs_wetwater';
-sartaclr_bin.nsr = '/home/chepplew/gitLib/sarta/bin/crisg4_oct16';
-sartasct_bin.nsr = '';
-%sartaclr_bin.fsr = '/home/chepplew/gitLib/sarta/bin/cris_hrg4_p2019dec18';
-sartaclr_bin.fsr = '/home/chepplew/gitLib/sarta/bin/crisg4_oct16_aug20';
-sartasct_bin.fsr = '/home/chepplew/gitLib/sarta/bin/crisg4_hires_dec17_iceGHMbaum_wdrop_ddust_sc_hg3_new';
+set_path_to_execs
 
 klayers_run = [klayers_bin ' fin=' fn_rtp1 ' fout=' fn_rtp2 ' >& ugh'];
 
@@ -286,9 +305,7 @@ for fn = iign
  %% keyboard_nowindow
  %% plot(h.vchan,noise)
 
-  [salti, landfrac] = usgs_deg10_dem(p.rlat, p.rlon);
-  p.landfrac = landfrac;
-  p.salti    = salti;
+  set_landfrac_using_L1B_L1C_or_usgs
 
   %-----------------------
   % set header attributes
@@ -298,7 +315,6 @@ for fn = iign
           };
 
 
-  addpath /home/sergio/MATLABCODE/TIME
   [xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
   time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
   co2ppm = 368 + 2.077*time_so_far;  %% 395.6933
@@ -318,9 +334,6 @@ for fn = iign
   
   colormap jet
   pause(0.1);
-
-  %% /umbc/xfs2/strow/asl/s1/sbuczko1/git/rtp_prod2/grib/fill_ecmwf.m cn mess up p.plon (needs wrapTo180)
-  addpath /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB
 
   % Add in model data ******************************
   fprintf(1, '>>> Add model: %s...', cfg.model)
@@ -354,18 +367,15 @@ for fn = iign
   %p = Prof_add_emis(p,yymmddgg(1),yymmddgg(2),yymmddgg(3));  %% broken crap by whoever
   %p = rtpadd_emis_DanZhou(h,ha,p,pa);   %% lso totally broken crap
   %[h,ha,p,pa] = rtpadd_emis_wis(h,ha,p,pa);
-  %addpath /asl/rtp_prod2/emis/
-  %addpath /asl/rtp_prod2/util/    
-  %addpath /asl/packages/rtp_prod2/emis/
-  %addpath /asl/packages/rtp_prod2/util/
-  %addpath /asl/rtp_prod2/emis/
-  %addpath /asl/rtp_prod2/util/
- 
-  addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis/
-  addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/
 
   p.rlon = wrapTo180(p.rlon);
-  [p,pattr] = rtp_add_emis(p,pattr);
+  pa = pattr;
+
+  error('this is fake since cannot run set_landfrac_using_L1B_L1C_or_usgs.m ... doing next two lines for testing')
+  %p.landfrac = zeros(size(p.stemp));
+  %p.salti    = zeros(size(p.stemp));
+  
+  add_the_DanZhou_emis
 
   h.pfields = 5;  % robs, model
 
@@ -445,25 +455,17 @@ for fn = iign
   
   end      % end if(prod == 'clr')
   % ===================== allsky ==================
-  if(strcmp(prod,'sct'))
+  if (strcmp(prod,'sct'))
     disp('allsky calcs')
 
-   run_sarta.co2ppm = p.co2ppm;
-   run_sarta.clear = +1;
-   run_sarta.cloud = +1;
-   run_sarta.cumsum = -1;    %% this is "closer" to MRO but since cliuds are at centroid, does not do too well with DCC
-   run_sarta.cumsum = 9999;  %% larrabee likes this, puts clouds high so does well for DCC
+    iSlabCld_CumSumStrowORGeorge = +1;
+    set_run_sarta_options
+    
+    run_sarta.co2ppm = p.co2ppm;    
+    run_sarta.sartaclear_code = sartaclr_bin.fsr;
+    run_sarta.sartacloud_code = sartasct_bin.fsr;
    
-   iSlabCld_CumSumStrowORGeorge = -1;
-   if iSlabCld_CumSumStrowORGeorge > 0
-     run_sarta.cumsum = 9999;  %% strow pick, cloud at PEAK of wgt fcn
-   else
-     run_sarta.cumsum = -1;  %% aumann pick, cloud at wgt mean of profile
-   end
-   run_sarta.sartaclear_code = sartaclr_bin.fsr;
-   run_sarta.sartacloud_code = sartasct_bin.fsr;
-   
-   run_sarta
+    run_sarta
    
     if ~isfield(p,'scanang')
       p.scanang = saconv(p.satzen,p.zobs);

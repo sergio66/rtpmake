@@ -10,8 +10,9 @@ set_filelist
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-%JOB = 37
-%JOB = 3
+if length(JOB) == 0
+  JOB = 1;
+end
 
 thefilelist = load(filelist);
 thefilelist = thefilelist(JOB,:);

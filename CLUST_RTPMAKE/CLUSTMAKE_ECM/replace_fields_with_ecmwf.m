@@ -179,8 +179,10 @@ if eeP == 0
   %[h,ha,p,pa] = rtpadd_emis_wis(h,ha,p,pa);
   addpath /asl/rtp_prod2/emis/
   addpath /asl/rtp_prod2/util/
+  
   p.rlon = wrapTo180(p.rlon);
-  [p,pa] = rtp_add_emis(p,pa);
+  add_the_DanZhou_emis
+  
   %figure(1)
   %scatter_coast(p.rlon,p.rlat,10,p.nemis); 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

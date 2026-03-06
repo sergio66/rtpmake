@@ -17,59 +17,15 @@ ans =
 HDFSW will be removed in a future release. Use MATLAB.IO.HDFEOS.SW instead.
 %}
 
-addpath /home/sergio/MATLABCODE
-
-if ~exist('iSaveRTP')
-  iSaveRTP = +1;
-end
-if ~exist('iaFovList')
-  iaFovList = 1 : 12150;
-end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 iv5or6 = 5;   %% AIRS L1B
 iv5or6 = 6;   %% AIRS L1C
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% creates an rtp file for ONE granule
-%% can be modified for more!
+add_the_paths_and_klayers_sarta_execs
 
-%klayers = '/asl/packages/klayers/Bin/klayers_airs';
-%sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
-
-%klayers = '/asl/packages/klayers/Bin/klayers_airs';
-%sarta   = '/asl/packages/sartaV108/Bin/sarta_apr08_m140_wcon_nte';
-
-klayers  = '/asl/packages/klayersV205/BinV201/klayers_airs';
-sartaClr = '/asl/packages/sartaV108_PGEv6/Bin/sarta_airs_PGEv6_postNov2003';
-sartaCld = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_may19_prod';
-
-addpath /home/sergio/MATLABCODE
-addpath /asl/matlab2012/airs/readers
-addpath /asl/matlib/aslutil
-%addpath /asl/matlib/science
-addpath /home/sergio/MATLABCODE/matlib/science/
-addpath /asl/matlib/rtptools
-addpath /asl/matlib/h4tools/
-addpath /asl/matlib/rtptools/
-addpath /asl/matlib/gribtools/
-addpath /asl/matlib/time
-addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
-addpath /home/sergio/MATLABCODE
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
-addpath /home/sergio/MATLABCODE/TIME/
-addpath /home/sergio/MATLABCODE/PLOTTER
-
-% addpath /home/strow/cress/Work/Rtp
-% addpath /home/strow/Matlab/Grib     WARNING /home/strow/Matlab/Grib/rtpadd_grib_data.m DIFFERENT than /asl/matlib/gribtools/rtpadd_era_data.m
-% addpath /home/sergio/MATLABCODE/CRIS_HiRes             %% for sergio_fill_ecmwf
-% addpath /home/strow/Git/rtp_prod2/grib                  %% for fill_ecm
-% addpath /asl/packages/rtp_prod2/grib
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/grib
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
-
-addpath /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if iv5or6 == 5
   theinds = (1 : 2378)';
@@ -78,38 +34,19 @@ else
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
-%%% set sarta exec
 
-code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = '/home/sergio/SARTA_CLOUDY/BinV201/xsarta_apr08_m140_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = '/home/chepplew/gitLib/sarta/bin/airs_l1c_2834_cloudy_may19_prod_v3';
-code1 = sartaCld;
+set_run_sarta_options
 
-run_sarta.sartaclear_code = code1;
-run_sarta.sartacloud_code = code1;
-
-run_sarta.clear = +1;
-run_sarta.cloud = +1;
-run_sarta.cumsum = -1;    %% this is "closer" to MRO but since cliuds are at centroid, does not do too well with DCC
-run_sarta.cumsum = 9999;  %% larrabee likes this, puts clouds high so does well for DCC
-
-if iSlabCld_CumSumStrowORGeorge > 0
-  run_sarta.cumsum = 9999;  %% strow pick, cloud at PEAK of wgt fcn
-else
-  run_sarta.cumsum = -1;  %% aumann pick, cloud at wgt mean of profile
+if ~exist('iSaveRTP')
+  iSaveRTP = +1;
 end
-
-codeX = 0; %% use default with A. Baran params
-codeX = 1; %% use new     with B. Baum, P. Yang params
-
-code0 = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = '/home/sergio/SARTA_CLOUDY/BinV201/xsarta_apr08_m140_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = '/home/chepplew/gitLib/sarta/bin/airs_l1c_2834_cloudy_may19_prod_v3';
+if ~exist('iaFovList')
+  iaFovList = 1 : 12150;
+end
 
 if codeX == 0
   icestr = '_sarta_baran_ice';
-  run_sarta.sartacloud_code = code0;
+o  run_sarta.sartacloud_code = code0;
 elseif codeX == 1
   icestr = '_sarta_baum_ice';
   run_sarta.sartacloud_code = code1;
@@ -131,7 +68,7 @@ elseif iv5or6 == 6
   nocldstr = ['clear_airs_l1c_era.'];
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 for ixx = 1 : length(iaGlist)
   ix = iaGlist(ixx);
@@ -155,8 +92,10 @@ for ixx = 1 : length(iaGlist)
   fdirOUT = ['/asl/rtp/rtprod_airs/' ystr '/' mstr '/' dstr '/'];
   if iv5or6 == 5
     fdirOUT = ['/asl/s1/sergio/rtp/rtp_airibrad_v5/' ystr '/' mstr '/' dstr '/'];  %% till 2018
+    fdirOUT = ['/umbc/rs/pi_sergio/WorkDirDec2025/sergio_temp_rtp_files/rtp_airibrad_v5/' ystr '/' mstr '/' dstr '/'];    
   elseif iv5or6 == 6
     fdirOUT = ['/asl/s1/sergio/rtp/rtp_airicrad_v6/' ystr '/' mstr '/' dstr '/'];  %% after 2018
+    fdirOUT = ['/umbc/rs/pi_sergio/WorkDirDec2025/sergio_temp_rtp_files/rtp_airibrad_v6/' ystr '/' mstr '/' dstr '/'];
   end
 
   if ~exist(fdirOUT) & iSaveRTP > 0
@@ -245,12 +184,7 @@ for ixx = 1 : length(iaGlist)
 %%%    [h,ha,p,pa] = make_generic_ERA_rtp(h,ha,p,pa);      
 %%%%  could replace following lines with  %%%
 
-    %%% this is NEW
-    p.landfrac_fromL1B = p.landfrac;
-    p.salti_fromL1B = p.salti;
-    [salti, landfrac] = usgs_deg10_dem(p.rlat, p.rlon);
-    p.landfrac = landfrac;
-    p.salti    = salti;
+    set_landfrac_using_L1B_L1C_or_usgs
 
     clrfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3'};
     cldfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3',...
@@ -275,16 +209,8 @@ for ixx = 1 : length(iaGlist)
     %p = Prof_add_emis(p,yymmddgg(1),yymmddgg(2),yymmddgg(3));  %% broken crap by whoever
     %p = rtpadd_emis_DanZhou(h,ha,p,pa);   %% lso totally broken crap
     %[h,ha,p,pa] = rtpadd_emis_wis(h,ha,p,pa);
-    %addpath /asl/rtp_prod2/emis/
-    %addpath /asl/rtp_prod2/util/
-    %addpath /asl/packages/rtp_prod2/emis/
-    %addpath /asl/packages/rtp_prod2/util/
-
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/time
-  p.rlon = wrapTo180(p.rlon);
-  [p,pa] = rtp_add_emis(p,pa);
+    p.rlon = wrapTo180(p.rlon);
+    add_the_DanZhou_emis
 
     %figure(1)
     %scatter_coast(p.rlon,p.rlat,10,p.nemis); 

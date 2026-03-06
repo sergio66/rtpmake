@@ -34,29 +34,9 @@ else
   theinds = (1 : 2645)';
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% set sarta exec
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-run_sarta.clear = +1;
-run_sarta.cloud = +1;
-run_sarta.cumsum = 9999;
-
-codeX = 0; %% use default with A. Baran params
-codeX = 1; %% use new     with B. Baum, P. Yang params
-
-code0 = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = sartaCld;
-
-if codeX == 0
-  icestr = '_sarta_baran_ice';
-  run_sarta.sartacloud_code = code0;
-elseif codeX == 1
-  icestr = '_sarta_baum_ice';
-  run_sarta.sartacloud_code = code1;
-else
-  error('codeX???')
-end
+set_run_sarta_options
 
 %icestr = ['NEWLANDFRAC/cloudy_airs_l1b_ecm' icestr '.'];
 %icestr = ['interp_analysis_cloudy_airs_l1b_ecm' icestr '.'];
@@ -206,7 +186,7 @@ for ixx = 1 : length(iaGlist)
     %[h,ha,p,pa] = rtpadd_emis_wis(h,ha,p,pa);
 
     p.rlon = wrapTo180(p.rlon);
-    [p,pa] = rtp_add_emis(p,pa);
+    add_the_DanZhou_emis
 
     %figure(1)
     %scatter_coast(p.rlon,p.rlat,10,p.nemis); 

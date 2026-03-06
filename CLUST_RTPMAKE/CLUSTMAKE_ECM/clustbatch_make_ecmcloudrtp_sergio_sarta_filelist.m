@@ -4,7 +4,12 @@
 %% N1 = 1, N2 = number of files to be processed
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-%JOB = 2
+if length(JOB) == 0
+  JOB = 2;
+  JOB = 3;    
+  JOB = 1;
+end
+
 warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

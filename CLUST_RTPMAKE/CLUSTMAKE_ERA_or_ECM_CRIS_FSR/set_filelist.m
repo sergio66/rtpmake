@@ -1,1 +1,1 @@
-../CLUSTMAKE_ECM/set_filelist.m
+../COMMON_SETTINGS/set_filelist.m

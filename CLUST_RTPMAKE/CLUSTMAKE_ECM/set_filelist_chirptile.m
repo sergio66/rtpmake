@@ -57,6 +57,13 @@ dir0{22} = '/umbc/rs/strow/asl/airs/tile_test7/2020_s414/N57p75/';
 dir0{23} = '/umbc/rs/strow/asl/airs/tile_test7/2020_s415/N57p75/';
 dir0{24} = '/umbc/rs/strow/asl/airs/tile_test7/2020_s416/N57p75/';
 dir0{25} = '/umbc/rs/strow/asl/airs/tile_test7/2020_s417/N57p75/';
-dir0{26} = '/umbc/rs/strow/asl/airs/tile_test7/2020_s418/N57p75/'; 
+dir0{26} = '/umbc/rs/strow/asl/airs/tile_test7/2020_s418/N57p75/';
+%% added in March 2026 to test rtp_add_emis with DanZhou, same test as below
+dir0{27} = '/umbc/rs/strow/asl/airs/tile_test7/2020_s419/N57p75/'; 
+
+setstr = '/SET2/';
+clear dir0
+%% added in March 2026 to test rtp_add_emis with DanZhou, same test as above
+dir0{1} = '/umbc/rs/strow/asl/airs/tile_test7/2020_s419/N57p75/'; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

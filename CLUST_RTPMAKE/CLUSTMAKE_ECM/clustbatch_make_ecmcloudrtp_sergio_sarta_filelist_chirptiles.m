@@ -12,8 +12,8 @@ if length(JOB) == 0
   JOB = 30;
   JOB = 24;
   JOB = 37;  
-  JOB = 1;
   JOB = 9;
+  JOB = 1;
 end
 fprintf(1,'processing JOB = %3i \n',JOB);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -42,8 +42,8 @@ end
 
 % addpath /asl/matlib/aslutil
 % addpath /asl/packages/time
-addpath /home/sergio/git/matlabcode/TIME
-addpath /home/sergio/git/matlabcode/matlab2012/aslutil/
+% addpath /home/sergio/git/matlabcode/TIME
+% addpath /home/sergio/git/matlabcode/matlab2012/aslutil/
 
 iaDone = zeros(size(profin.rlat));
 

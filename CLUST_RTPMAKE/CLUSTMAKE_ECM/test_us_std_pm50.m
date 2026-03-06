@@ -290,8 +290,9 @@ fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm
     %addpath /asl/rtp_prod2/util/    
     addpath /asl/packages/rtp_prod2/emis/
     addpath /asl/packages/rtp_prod2/util/
+    
     p.rlon = wrapTo180(p.rlon);
-    [p,pa] = rtp_add_emis(p,pa);
+    add_the_DanZhou_emis
 
     %figure(1)
     %scatter_coast(p.rlon,p.rlat,10,p.nemis); 

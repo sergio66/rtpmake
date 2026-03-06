@@ -1,42 +1,34 @@
+%{
+https://www.mathworks.com/help/matlab/matlab_prog/suppress-warnings.html?requestedDomain=www.mathworks.com
+
+Warning: HDFSD will be removed in a future release. Use MATLAB.IO.HDF4.SD instead.
+> In hdfsd (line 261)
+In sdload (line 116)
+In cloud_set_defaults_run_maker (line 121)
+In clustbatch_make_ecmcloudrtp_sergio_sarta_filelist (line 32)
+
+>> w = warning('query','last')
+w = identifier: 'MATLAB:imagesci:hdf:removalWarningHDFSD'
+         state: 'on'
+>> id = w.identifier;
+>> warning('off',id)
+>> lastwarn
+ans = 
+HDFSW will be removed in a future release. Use MATLAB.IO.HDFEOS.SW instead.
+%}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 iv5or6 = 5;   %% CRIS NSR
 iv5or6 = 6;   %% CRIS FSR
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+add_the_paths_and_klayers_sarta_execs
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %% creates an rtp file for ONE granule
 %% can be modified for more!
-
-klayers = '/asl/packages/klayers/Bin/klayers_airs';
-klayers_bin      = '/asl/packages/klayersV205/BinV201/klayers_airs_wetwater';
-sartaclr_bin.nsr = '/home/chepplew/gitLib/sarta/bin/crisg4_oct16';
-sartasct_bin.nsr = '';
-%sartaclr_bin.fsr = '/home/chepplew/gitLib/sarta/bin/cris_hrg4_p2019dec18';
-sartaclr_bin.fsr = '/home/chepplew/gitLib/sarta/bin/crisg4_oct16_aug20';
-sartasct_bin.fsr = '/home/chepplew/gitLib/sarta/bin/crisg4_hires_dec17_iceGHMbaum_wdrop_ddust_sc_hg3_new';
-
-addpath /home/sergio/MATLABCODE
-addpath /asl/matlab2012/airs/readers
-addpath /asl/matlib/aslutil
-%addpath /asl/matlib/science
-addpath /home/sergio/MATLABCODE/matlib/science/
-addpath /asl/matlib/rtptools
-addpath /asl/matlib/h4tools/
-addpath /asl/matlib/rtptools/
-addpath /asl/matlib/gribtools/
-addpath /asl/matlib/time
-addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
-addpath /home/sergio/MATLABCODE
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
-
-% addpath /home/strow/cress/Work/Rtp
-% addpath /home/strow/Matlab/Grib     WARNING /home/strow/Matlab/Grib/rtpadd_grib_data.m DIFFERENT than /asl/matlib/gribtools/rtpadd_era_data.m
-% addpath /home/sergio/MATLABCODE/CRIS_HiRes             %% for sergio_fill_ecmwf
-% addpath /home/strow/Git/rtp_prod2/grib                  %% for fill_ecm
-% addpath /asl/packages/rtp_prod2/grib
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/grib
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
-
-addpath /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/GRIB
 
 if iv5or6 == 5
   theinds = (1 : 2378)';
@@ -45,36 +37,8 @@ else
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
-%%% set sarta exec
 
-run_sarta.clear = +1;
-run_sarta.cloud = +1;
-run_sarta.cumsum = -1;    %% this is "closer" to MRO but since cliuds are at centroid, does not do too well with DCC
-run_sarta.cumsum = 9999;  %% larrabee likes this, puts clouds high so does well for DCC
-
-if iSlabCld_CumSumStrowORGeorge > 0
-  run_sarta.cumsum = 9999;  %% strow pick, cloud at PEAK of wgt fcn
-else
-  run_sarta.cumsum = -1;  %% aumann pick, cloud at wgt mean of profile
-end
-
-codeX = 0; %% use default with A. Baran params
-codeX = 1; %% use new     with B. Baum, P. Yang params
-
-code0 = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
-code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = '/home/sergio/SARTA_CLOUDY/BinV201/xsarta_apr08_m140_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
-code1 = '/home/chepplew/gitLib/sarta/bin/airs_l1c_2834_cloudy_may19_prod_v3';
-
-if codeX == 0
-  icestr = '_sarta_baran_ice';
-  run_sarta.sartacloud_code = code0;
-elseif codeX == 1
-  icestr = '_sarta_baum_ice';
-  run_sarta.sartacloud_code = code1;
-else
-  error('codeX???')
-end
+set_run_sarta_options
 
 %icestr = ['NEWLANDFRAC/cloudy_airs_l1b_era' icestr '.'];
 %icestr = ['NEWLANDFRAC/cloudy_airs_l1b_era' icestr '.'];
@@ -240,12 +204,7 @@ f2645 = f(ichan);
       h.vchan = f2645;
     end
 
-    %%% this is NEW
-    p.landfrac_fromL1B = p.landfrac;
-    p.salti_fromL1B = p.salti;
-    [salti, landfrac] = usgs_deg10_dem(p.rlat, p.rlon);
-    p.landfrac = landfrac;
-    p.salti    = salti;
+    set_landfrac_using_L1B_L1C_or_usgs
 
     clrfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3'};
     cldfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3',...
@@ -269,15 +228,10 @@ fprintf(1,'CLIMATOLOGY co2ppm for LAST  %4i/%2i/%2i = %8.6f ppmv\n',xyy(end),xmm
     %p = Prof_add_emis(p,yymmddgg(1),yymmddgg(2),yymmddgg(3));  %% broken crap by whoever
     %p = rtpadd_emis_DanZhou(h,ha,p,pa);   %% lso totally broken crap
     %[h,ha,p,pa] = rtpadd_emis_wis(h,ha,p,pa);
-    %addpath /asl/rtp_prod2/emis/
-    %addpath /asl/rtp_prod2/util/
-    %addpath /asl/packages/rtp_prod2/emis/
-    %addpath /asl/packages/rtp_prod2/util/
-    [p,pa] = rtp_add_emis(p,pa);
-    
-    %figure(1)
-    %scatter_coast(p.rlon,p.rlat,10,p.nemis); 
 
+    p.rlon = wrapTo180(p.rlon);
+    add_the_DanZhou_emis
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     if iPertTCC ~= 0

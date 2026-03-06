@@ -27,12 +27,13 @@ if mm > 1 & nn == 1
   error('size(prof.rtime) = mm x 1   instead of 1 x nn');
 end
 
-addpath /asl/matlib/aslutil
-addpath /asl/packages/time
+% addpath /asl/matlib/aslutil
+% addpath /asl/packages/time
 
 % Location of grib files
-fhdr = '/asl/data/era/';
-fhdr = '/asl/models/era/';
+fhdr = '/asl/data/era/';          %% from Oct 2019 -
+fhdr = '/asl/models/era/';        %% from Oct 2019 -
+fhdr = '/umbc/rs/strow/asl/era/'; %% Sad Nov2025-Jan2026
 
 ename = '';  % This should be placed outside a rtp file loop
 mtime = tai2dnum(prof.rtime);
@@ -186,3 +187,31 @@ switch nargin
 end
 
 %  save ~/sfhi sfhi   % debug
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% fix plat,plon
+bad = find(prof.plat < -89.9999); 
+if length(bad) > 0
+  prof.plat(bad) = -89.999999;
+  fprintf(1,'fill_ecmwf.m : found %5i profile with plat < -90, fixed \n',length(bad))
+end
+
+bad = find(prof.plat > +89.9999); 
+if length(bad) > 0
+  prof.plat(bad) = +89.999999;
+  fprintf(1,'fill_ecmwf.m : found %5i profile with plat > +90, fixed \n',length(bad))
+end
+
+bad = find(prof.plon < -179.9999); 
+if length(bad) > 0
+  prof.plon(bad) = wrapTo180(prof.plon(bad));
+  %prof.plon(bad) = -179.999999;
+  fprintf(1,'fill_ecmwf.m : found %5i profile with plon < -180, fixed \n',length(bad))
+end
+
+bad = find(prof.plon > +179.9999); 
+if length(bad) > 0
+  prof.plon(bad) = wrapTo180(prof.plon(bad));
+  %% prof.plon(bad) = +179.999999;
+  fprintf(1,'fill_ecmwf.m : found %5i profile with plon > +180, fixed \n',length(bad))
+end
