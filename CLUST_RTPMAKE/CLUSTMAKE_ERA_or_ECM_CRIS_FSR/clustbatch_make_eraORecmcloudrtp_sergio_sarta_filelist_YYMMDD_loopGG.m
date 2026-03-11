@@ -9,6 +9,11 @@
 %% ls -lt clustbatch_eracloudrtp_sarta_filelist_interp_YYMMDD_loopGG.m
 %%     clustbatch_eracloudrtp_sarta_filelist_interp_YYMMDD_loopGG.m -> clustbatch_make_eracloudrtp_sergio_sarta_filelist_interp_YYMMDD_loopGG.m
 
+%% [sergio@chip-login1 CLUSTMAKE_ERA_or_ECM_CRIS_FSR]$ ls -lt /home/sergio/git/matlabcode/L2Readers/GetL1_JPSS_CrIS
+%% lrwxrwxrwx 1 sergio pi_sergio  67 Dec 19 05:44 Readme_Get_JPSS1_CriS_L1 -> ../../GET_NWP_ERA5_MERRA2_ECMWF_data_NOTES/Readme_Get_JPSS1_CriS_L1
+%% so this is /home/sergio/git/matlabcode/GET_NWP_ERA5_MERRA2_ECMWF_data_NOTES/Readme_Get_JPSS1_CriS_L1
+%% which says get L1 data from    //sounder.gesdisc.eosdis.nasa.gov/data/JPSS1_Sounder_Level1/SNDRJ1CrISL1B.2/
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 system_slurm_stats
@@ -32,6 +37,7 @@ end
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 if length(JOB) == 0
   JOB = 1;
+  JOB = 5;  
 end
 %JOB = 20
 
@@ -46,7 +52,9 @@ thefilelist = thefilelist(JOB,1:3);
 %%thefilelist = [2019 04 25];
 
 iaGlist = 001 : 240;
-iaGlist = 234; %% testing 
+iaGlist = 234;   %% testing
+iaGlist = 236;   %% testing
+iaGlist = 182;   %% testing 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% this is for /home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/tonga_volcano_jan2022_jpss.txt : 
@@ -77,15 +85,15 @@ for ggx = 1 : length(iaGlist)
   yy = yymmdd0(1); mm = yymmdd0(2); dd = yymmdd0(3); gg = iaGlist(ggx);
   
   if iSNPPorJ1orJ2 == 0
-    NONONOdout = ['/asl/rtp/cris/npp_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-    dout = ['/asl/s1/sergio/rtp/npp_ccast_hires/allfov/'];
-    dout = ['/umbc/rs/pi_sergio/WorkDirDec2025/sergio_temp_rtp_files/npp_ccast_hires/allfov/'];
-    dout = [dout  num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
+    % NONONOdout = ['/asl/rtp/cris/npp_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
+    dout = ['/asl/s1/sergio/rtp/npp_ccast_hires/'];
+    dout = ['/umbc/rs/pi_sergio/WorkDirDec2025/sergio_temp_rtp_files/npp_ccast_hires/'];
+    dout = [dout  '/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
   elseif iSNPPorJ1orJ2 == 1
-    NONONOdout = ['/asl/rtp/cris/j1_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-    dout = ['/asl/s1/sergio/rtp/j1_ccast_hires/allfov/'];
-    dout = ['/umbc/rs/pi_sergio/WorkDirDec2025/sergio_temp_rtp_files/npp_ccast_hires/allfov/'];    
-    dout = [dout num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
+    % NONONOdout = ['/asl/rtp/cris/j1_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
+    dout = ['/asl/s1/sergio/rtp/j1_ccast_hires/'];
+    dout = ['/umbc/rs/pi_sergio/WorkDirDec2025/sergio_temp_rtp_files/j1_ccast_hires/'];    
+    dout = [dout '/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
   else
     error('unknow SNPP, J1 or ... ?')
   end

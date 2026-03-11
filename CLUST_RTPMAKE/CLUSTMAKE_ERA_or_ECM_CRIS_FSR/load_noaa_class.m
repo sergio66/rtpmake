@@ -42,6 +42,9 @@ p.satazi = single(x.sat_azi(:)');
 p.solzen = single(x.sol_zen(:)');
 p.solazi = single(x.sol_azi(:)');
 
+p.salti    = single(x.surf_alt(:)');
+p.landfrac = single(x.land_frac(:)');
+
 % Incorrect
 p.zobs = nanmean(single(x.sat_alt(:)')) * ones(size(p.rlon));
 

@@ -65,7 +65,7 @@ filelist = '/home/sergio/git/umbc_singlefootprint/Various/huurricane_helene_09_2
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% THESE STILL EXIST
+%% THESE STILL EXIST, note the YY/MM/DD and especially GG are probably for AIRS, not CRIS
 filelist = '/home/sergio/git/rtpmake/CLUST_RTPMAKE/CLUSTMAKE_ECM/hurricane_2002_09_06_g044.txt';
 filelist = '/home/sergio/git/rtpmake/CLUST_RTPMAKE/CLUSTMAKE_ECM/huang_dcc.txt';
 filelist = '/home/sergio/git/rtpmake/CLUST_RTPMAKE/CLUSTMAKE_ECM/mediteraneandustFeb2007.txt';

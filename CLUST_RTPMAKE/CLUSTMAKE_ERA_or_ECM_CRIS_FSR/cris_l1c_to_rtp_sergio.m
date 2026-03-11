@@ -166,7 +166,8 @@ fpattern = ['CrIS_SDR_*' vers '.mat'];
 if iUMBCorCLASS < 0
   fpattern = ['SNDR.J1.CRIS*.nc'];
 end
-lookfor = [d.home '/' fpattern]
+lookfor = [d.home '/' fpattern];
+fprintf(1,'lookfor this pattern :  %s \n',lookfor)
 d.dir = dir(lookfor);
 
 % Check SDRs exist
@@ -176,14 +177,16 @@ if(length(d.dir) < 1)
   error('Insufficient SDR granules found'); 
   return; 
 end 
-  
+
 % reorder the listing into granule order (shouldn't be needed)
 gnum = [];
 if iUMBCorCLASS > 0
   for fn = 1:length(d.dir) 
     junk  = strsplit(d.dir(fn).name,{'_','.'});
     gnum  = [gnum str2double(junk{7}(2:end))];
-    gajunk = junk{6};
+    gajunk0 = junk{6};
+    gajunk  = gajunk0;
+    error('check this, I had to rework the case of iUMBCorCLASS < 0 below')
     thetime(fn,1) = str2num(gajunk(2:3));
     thetime(fn,2) = str2num(gajunk(4:5));
     thetime(fn,3) = thetime(fn,1)*10 + (round(thetime(fn,2)/6)+0);   %%% GONNA HAVE PROBLEMS with FIRST and LAST
@@ -192,10 +195,14 @@ else
   for fn = 1:length(d.dir) 
     junk  = strsplit(d.dir(fn).name,{'_','.'});
     gnum  = [gnum str2double(junk{6}(2:end))];
-    gajunk = junk{4};
-    gajunk = gajunk(9:end);
-    thetime(fn,1) = str2num(gajunk(2:3));
-    thetime(fn,2) = str2num(gajunk(4:5));
+    gajunk0 = junk{4};
+    % orig code
+    % gajunk = gajunk0(9:end);
+    % thetime(fn,1) = str2num(gajunk(2:3));
+    % thetime(fn,2) = str2num(gajunk(4:5));
+    gajunk = gajunk0(5:8);
+    thetime(fn,1) = str2num(gajunk(1:2));
+    thetime(fn,2) = str2num(gajunk(3:4));
     thetime(fn,3) = thetime(fn,1)*10 + (round(thetime(fn,2)/6)+0);   %%% GONNA HAVE PROBLEMS with FIRST and LAST
     thetime(fn,3) = str2num(junk{6}(2:end));
   end
@@ -205,9 +212,12 @@ end
 % Check requested granule numbers to process if allsky
 if(strcmp(prod, 'sct'))
   iign = intersect(rgrans, gnum);
-  rgrans
-  gnum
-  thetime
+  if length(iign) == 0
+    disp('check iaGlist at the beginning of eg clustbatch_make_eraORecmcloudrtp_filelist_YYMMDD_loopGG.m')
+    error('no intersection of rgrans,gnum')
+  end
+  rgrans;
+  fprintf(1,'gnum %03i thetime = %02i %02i %03i \n',gnum,thetime)
   [~,~,iign] = intersect(rgrans, thetime(:,3));
   tstr = strsplit(d.dir(iign).name,{'_','.'});
   tstr = tstr{6};
@@ -282,12 +292,16 @@ trace.RunDate = 'na';
 %  ======= Main loop over Granules for the day ============
 for fn = iign
 
+  %%%%%%%%%%%%%%%%%%%%%%%%%
+  %% these read in the .nc file and populates "p" with rads, view angles, landfracs, salti etc
   if iUMBCorCLASS > 0
     load_ccast_howard
   else
     load_noaa_class
   end
-
+  %% these read in the .nc file and populates "p" with rads, view angles, landfracs, salti etc
+  %%%%%%%%%%%%%%%%%%%%%%%%%
+  
   %-------------------
   % set header values
   %-------------------
@@ -371,9 +385,10 @@ for fn = iign
   p.rlon = wrapTo180(p.rlon);
   pa = pattr;
 
-  error('this is fake since cannot run set_landfrac_using_L1B_L1C_or_usgs.m ... doing next two lines for testing')
-  %p.landfrac = zeros(size(p.stemp));
-  %p.salti    = zeros(size(p.stemp));
+  %% the rad files have salti and landfrac so no need for zeros
+  %% p.landfrac = zeros(size(p.stemp));
+  %% p.salti    = zeros(size(p.stemp));
+  set_landfrac_using_L1B_L1C_or_usgs
   
   add_the_DanZhou_emis
 

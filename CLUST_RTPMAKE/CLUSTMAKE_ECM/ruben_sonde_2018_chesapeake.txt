@@ -1,7 +1,7 @@
-%% see https://www-air.larc.nasa.gov/cgi-bin/ArcView/owlets.2018?SONDE=1
+%% see https://www-air.larc.nasa.gov/cgi-bin/ArcView/owlets.2018?SONDE=1, thee should be CrIS times
 2018 06 29 186
 2018 06 30 177
 2018 07 01 184
 2018 07 02 175
-2018 07 03 182
-
+2018 07 03 182   %% for Cris testing after Oct 2025 this goes over Antartic and Southern Ocean
+2018 07 02 182   %% this one is just by mistake but goes over land for CRIS

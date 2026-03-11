@@ -41,6 +41,10 @@ p.satzen = single(geo.SatelliteZenithAngle(:)');
 p.satazi = single(geo.SatelliteAzimuthAngle(:)');
 p.solzen = single(geo.SolarZenithAngle(:)');
 p.solazi = single(geo.SolarAzimuthAngle(:)');
+
+p.salti    = single(x.surf_alt(:)');
+p.landfrac = single(x.land_frac(:)');
+
 % Incorrect
 %p.zobs = single(geo.Height(:)');
 % SatelliteRange is zobs for nadir
