@@ -72,4 +72,5 @@ filelist = '/home/sergio/git/rtpmake/CLUST_RTPMAKE/CLUSTMAKE_ECM/mediteraneandus
 filelist = '/home/sergio/git/rtpmake/CLUST_RTPMAKE/CLUSTMAKE_ECM/gravity_waves.txt';
 filelist = '/home/sergio/git/rtpmake/CLUST_RTPMAKE/CLUSTMAKE_ERA/sullivan_ozone_intrusin_aug_2014.txt';
 filelist = '/home/sergio/git/rtpmake/CLUST_RTPMAKE/CLUSTMAKE_ECM/ruben_sonde_2018_chesapeake.txt';
+filelist = '/home/sergio/git/rtpmake/CLUST_RTPMAKE/CLUSTMAKE_ERA_or_ECM_CRIS_FSR/whhhymsie_11_2024.txt';
 

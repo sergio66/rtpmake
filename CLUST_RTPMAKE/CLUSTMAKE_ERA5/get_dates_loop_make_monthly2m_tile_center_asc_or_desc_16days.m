@@ -34,10 +34,14 @@ rtime0 = utc2taiSergio(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),0.00);
 
 %% now we need to get overpass times and solzen angles, just set scanang to 22 deg : these are made by 
 %%  /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/driver_loop_get_asc_desc_solzen_time.m
-load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_412_64x72.mat');  %% 18.00 years, 2002/09-2020/08
-load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_457_64x72.mat');  %% 20.00 years, 2002/09-2022/08
-load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_498_64x72.mat');  %% 21.75 years, 2002/09-2024/06
-load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_502_64x72.mat');  %% 22.00 years, 2002/09-2024/08
+xfile_ADST = '/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_412_64x72.mat';  %% 18.00 years, 2002/09-2020/08
+xfile_ADST = '/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_457_64x72.mat';  %% 20.00 years, 2002/09-2022/08
+xfile_ADST = '/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_498_64x72.mat';  %% 21.75 years, 2002/09-2024/06
+xfile_ADST = '/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_502_64x72.mat';  %% 22.00 years, 2002/09-2024/08
+xfile_ADST = '/home/sergio/git/oem_climate_jacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries//timestepsStartEnd_2002_09_to_2028_0012.mat';          %% 22.00 years, 2002/09-2024/08
+loader = ['load ' xfile_ADST];
+eval(loader);
+
 monitor_memory_whos;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%

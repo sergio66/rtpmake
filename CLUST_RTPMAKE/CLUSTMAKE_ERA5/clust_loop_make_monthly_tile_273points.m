@@ -1,6 +1,9 @@
 %% this is the MOTHER code
 %% this is the MOTHER code
 %% this is the MOTHER code
+%% see Readme_tilecenter_vs_hottest10percent_vs_allpintsintile_for_trends
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% JOB = timestep
 %% takes 3 minutes per rtp set of 4608 profiles, with 13*21 grid points per day for each ERA5 month dataset, that is 900 minutes ... with 16 days that is 15 hours on strowinteract
@@ -15,29 +18,35 @@ if length(JOB) == 0
   JOB = 001;
 end
 
-addpath /asl/matlib/rtptools/
-addpath /asl/matlib/aslutil
-addpath /asl/matlib/h4tools
-addpath /home/sergio/MATLABCODE
-addpath /home/sergio/MATLABCODE/TIME
-addpath /home/sergio/MATLABCODE/PLOTTER
-addpath ../GRIB
-addpath  /asl/s1/sergio/git/matlib   %% this was /home/sergio/MATLABCODE/matlib/clouds/sarta
+% addpath /asl/matlib/rtptools/
+% addpath /asl/matlib/aslutil
+% addpath /asl/matlib/h4tools
+% addpath /home/sergio/MATLABCODE
+% addpath /home/sergio/MATLABCODE/TIME
+% addpath /home/sergio/MATLABCODE/PLOTTER
+% addpath ../GRIB
+% addpath  /asl/s1/sergio/git/matlib   %% this was /home/sergio/MATLABCODE/matlib/clouds/sarta
+addpath ../COMMON_SETTINGS/
+addpath0
 
 system_slurm_stats
 
-iDorA = +1;  %% desc
 iDorA = -1;  %% asc
+iDorA = +1;  %% desc
 
 iDo2m = -1;
 
 iAllChan_or_1231 = -1;  %% only do one channel since this is my "clear BT1231 Q0.90 "
 
-[h,ha,p,pa] = rtpread('/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp');
-if iAllChan_or_1231 < 0
-  [h,p] = subset_rtp_allcloudfields(h,p,[],1291,[]);
+frtpX = '/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp';
+if exist(frtpX)
+  [h,ha,p,pa] = rtpread(frtpX);
+  if iAllChan_or_1231 < 0
+    [h,p] = subset_rtp_allcloudfields(h,p,[],1291,[]);
+  end
 end
 
+%% see /home/sergio/git/oem_climate_jacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/driver_fix_thedata_asc_desc_solzen_time_001_504_64x72.m
 get_dates_loop_make_monthly2m_tile_center_asc_or_desc  %% produces thedata from loading in a .mat file, which has lat,lon,solzen,hour etc for 502 timesteps,72x74 grid centers
 
 %% this gives the 13x21 points in every tile

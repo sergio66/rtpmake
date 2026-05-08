@@ -1,5 +1,6 @@
 %% run with
-%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_jobB.sbatch
+%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_jobB.sbatch 2 for niInterp
+%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_chip.sbatch 4 for iInterp
 %% N1 = 1, N2 = number of files to be processed
 
 %% specify text file which has YY MM DD GG lst that needs to be processed 
@@ -8,15 +9,8 @@
 %%        https://www.ssec.wisc.edu/datacenter/polar_orbit_tracks/data/JPSS-1/
 %%        https://www.ssec.wisc.edu/datacenter/polar_orbit_tracks/data/NPP/    ------------------->>>>>>
 
-addpath /asl/matlib/h4tools
-addpath /asl/matlib/rtptools
-addpath /asl/matlib/aslutil
-addpath /home/sergio/MATLABCODE/TIME
-addpath /home/sergio/MATLABCODE/PLOTTER
-addpath /home/sergio/MATLABCODE/matlib/clouds/sarta/
-addpath /home/sergio/git/rtp_prod2/util
-
-addpath /home/sergio/MATLABCODE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+addpath0
 
 %%  check_all_jobs_done('/asl/s1/sergio/rtp/j1_ccast_hires/allfov/2019/04/25//cloudy_airs_l1c_ecm_sarta_baum_ice.2019.04.25.',240,'.rtp');
 
@@ -25,8 +19,8 @@ system_slurm_stats
 %set_filelist
 
 if ~exist('iInterp')
-  iInterp = +1;
   iInterp = -1;
+  iInterp = +1;
 end
 
 if ~exist('iERAorECM')
@@ -45,8 +39,11 @@ JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 if length(JOB) == 0
   JOB = 120;
   JOB = 214;
-  JOB = 212; JOB = 099; %% LA fires from D. Tobin
+  JOB = 099; %% LA fires from D. Tobin
+  JOB = 180;
 end
+
+warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
 
 %JOB = 53
 
@@ -81,41 +78,13 @@ for iiddloop = 1 : length(ddLoop)
   iSlabCld_CumSumStrowORGeorge = -1; %% aumann, cumsum -1,   cloud at mean of cld profile
   
   yy = yymmdd0(1); mm = yymmdd0(2); dd = yymmdd0(3); gg = iaGlist;
+
+  dout_set
+  fout_set
   
-  if iSNPPorJ1orJ2 == 0
-    NONONOdout = ['/asl/rtp/cris/npp_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-    dout = ['/asl/s1/sergio/rtp/npp_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-  elseif iSNPPorJ1orJ2 == 1
-    NONONOdout = ['/asl/rtp/cris/j1_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-    dout = ['/asl/s1/sergio/rtp/j1_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-  else
-    error('unknow SNPP, J1 or ... ?')
-  end
   if ~exist(dout)
     mker = ['!mkdir -p ' dout];
     eval(mker)
-  end
-
-  if iInterp <= 0  
-    if iERAorECM == 1
-      fout = ['fsr_allfov_era_' num2str(gg,'%03d') '*.rtp'];
-      fout = ['cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr '*.rtp'];
-      fout = ['cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
-    elseif iERAorECM == -1
-      fout = ['fsr_allfov_ecm_' num2str(gg,'%03d') '*.rtp'];
-      fout = ['cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr '*.rtp'];
-      fout = ['cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
-    end
-  else
-    if iERAorECM == 1
-      fout = ['interp_analysis_fsr_allfov_era_' num2str(gg,'%03d') '*.rtp'];
-      fout = ['interp_analysis_cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr '*.rtp'];
-      fout = ['interp_analysis_cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
-    elseif iERAorECM == -1
-      fout = ['interp_analysis_fsr_allfov_ecm_' num2str(gg,'%03d') '*.rtp'];
-      fout = ['interp_analysis_cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr '*.rtp'];
-      fout = ['interp_analysis_cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
-    end
   end
   
   ee = dir([dout '/' fout]);
@@ -127,8 +96,6 @@ for iiddloop = 1 : length(ddLoop)
     end
   
     rtpwrite([dout '/' fout],hd0, ha0, pd0, pa0);
-
-    addpath /home/sergio/MATLABCODE/PLOTTER
 
     i900 = find(hd0.vchan >= 900,1);
     tobs = rad2bt(900,pd0.robs1(i900,:));

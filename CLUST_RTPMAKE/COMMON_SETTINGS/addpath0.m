@@ -97,3 +97,6 @@ addpath ../GRIB
 addpath /home/sergio/git/matlabcode/PLOTTER
 addpath /home/sergio/git/matlabcode/CONVERT_GAS_UNITS/Strow_humidity/convert_humidity/
 
+addpath /home/sergio/git/matlabcode
+addpath /home/sergio/git/matlabcode/PLOTTER
+

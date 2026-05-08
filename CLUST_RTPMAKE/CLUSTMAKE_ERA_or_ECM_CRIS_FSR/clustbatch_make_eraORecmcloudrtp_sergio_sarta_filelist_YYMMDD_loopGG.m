@@ -1,5 +1,5 @@
 %% run with
-%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_jobB.sbatch
+%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_jobB.sbatch 
 %% sbatch --array=1-48 sergio_matlab_jobB.sbatch 
 %% N1 = 1, N2 = number of files to be processed
 
@@ -15,6 +15,7 @@
 %% which says get L1 data from    //sounder.gesdisc.eosdis.nasa.gov/data/JPSS1_Sounder_Level1/SNDRJ1CrISL1B.2/
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+addpath0
 
 system_slurm_stats
 
@@ -37,7 +38,6 @@ end
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 if length(JOB) == 0
   JOB = 1;
-  JOB = 5;  
 end
 %JOB = 20
 
@@ -51,10 +51,12 @@ thefilelist = thefilelist(JOB,1:3);
 
 %%thefilelist = [2019 04 25];
 
-iaGlist = 001 : 240;
 iaGlist = 234;   %% testing
 iaGlist = 236;   %% testing
 iaGlist = 182;   %% testing 
+iaGlist = 001 : 240;
+iaGlist = 180 : 240;
+iaGlist = 220;   %% testing
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% this is for /home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/Various/tonga_volcano_jan2022_jpss.txt : 
@@ -83,45 +85,13 @@ for ggx = 1 : length(iaGlist)
   iSlabCld_CumSumStrowORGeorge = -1; %% aumann, cumsum -1,   cloud at mean of cld profile
   
   yy = yymmdd0(1); mm = yymmdd0(2); dd = yymmdd0(3); gg = iaGlist(ggx);
-  
-  if iSNPPorJ1orJ2 == 0
-    % NONONOdout = ['/asl/rtp/cris/npp_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-    dout = ['/asl/s1/sergio/rtp/npp_ccast_hires/'];
-    dout = ['/umbc/rs/pi_sergio/WorkDirDec2025/sergio_temp_rtp_files/npp_ccast_hires/'];
-    dout = [dout  '/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-  elseif iSNPPorJ1orJ2 == 1
-    % NONONOdout = ['/asl/rtp/cris/j1_ccast_hires/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-    dout = ['/asl/s1/sergio/rtp/j1_ccast_hires/'];
-    dout = ['/umbc/rs/pi_sergio/WorkDirDec2025/sergio_temp_rtp_files/j1_ccast_hires/'];    
-    dout = [dout '/allfov/' num2str(yy,'%04d') '/' num2str(mm,'%02d') '/' num2str(dd,'%02d') '/'];
-  else
-    error('unknow SNPP, J1 or ... ?')
-  end
+
+  dout_set
+  fout_set
+    
   if ~exist(dout)
     mker = ['!mkdir -p ' dout];
     eval(mker)
-  end
-
-  if iInterp <= 0  
-    if iERAorECM == 1
-      fout = ['fsr_allfov_era_' num2str(gg,'%03d') '*.rtp'];
-      fout = ['cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr '*.rtp'];
-      fout = ['cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
-    elseif iERAorECM == -1
-      fout = ['fsr_allfov_ecm_' num2str(gg,'%03d') '*.rtp'];
-      fout = ['cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr '*.rtp'];
-      fout = ['cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
-    end
-  else
-    if iERAorECM == 1
-      fout = ['interp_analysis_fsr_allfov_era_' num2str(gg,'%03d') '*.rtp'];
-      fout = ['interp_analysis_cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr '*.rtp'];
-      fout = ['interp_analysis_cloudy_airs_l1c_era_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
-    elseif iERAorECM == -1
-      fout = ['interp_analysis_fsr_allfov_ecm_' num2str(gg,'%03d') '*.rtp'];
-      fout = ['interp_analysis_cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr '*.rtp'];
-      fout = ['interp_analysis_cloudy_airs_l1c_ecm_sarta_baum_ice' yymmdddggstr num2str(gg,'%03d') '.rtp'];
-    end
   end
   
   ee = dir([dout '/' fout]);
@@ -133,15 +103,28 @@ for ggx = 1 : length(iaGlist)
     end
   
     rtpwrite([dout '/' fout],hd0, ha0, pd0, pa0);
+
     i900 = find(hd0.vchan >= 900,1);
     tobs = rad2bt(900,pd0.robs1(i900,:));
     tclr = rad2bt(900,pd0.sarta_rclearcalc(i900,:));
     tcld = rad2bt(900,pd0.rcalc(i900,:));
-    addpath /home/sergio/MATLABCODE/PLOTTER
     figure(1); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tobs); title('BT 900 obs FSR'); cx1 = caxis; colormap jet
     figure(2); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tclr); title('BT 900 clr');     cx2 = caxis; colormap jet
     figure(3); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tcld); title('BT 900 cld');     cx3 = caxis; colormap jet
-  
+
+%{
+%% CO
+    i2160 = find(hd0.vchan >= 2160.00,1);
+    i2162 = find(hd0.vchan >= 2161.75,1);
+    tobs = rad2bt(2160,pd0.robs1(i2160,:))-rad2bt(2162,pd0.robs1(i2162,:));
+    tclr = rad2bt(2160,pd0.sarta_rclearcalc(i2160,:)) - rad2bt(2162,pd0.sarta_rclearcalc(i2162,:));
+    tcld = rad2bt(2160,pd0.rcalc(i2160,:)) - rad2bt(2162,pd0.rcalc(i2162,:));
+
+    figure(1); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tobs); title('BT 2161 obs FSR'); cx1 = caxis; colormap jet
+    figure(2); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tclr); title('BT 2161 clr');     cx2 = caxis; colormap jet
+    figure(3); clf; scatter_coast(pd0.rlon,pd0.rlat,25,tcld); title('BT 2161 cld');     cx3 = caxis; colormap jet
+%}
+
     cx(1) = min([cx1(1)  cx2(1) cx3(1)]);
     cx(2) = max([cx1(2)  cx2(2) cx3(2)]);
     figure(1); caxis(cx); 

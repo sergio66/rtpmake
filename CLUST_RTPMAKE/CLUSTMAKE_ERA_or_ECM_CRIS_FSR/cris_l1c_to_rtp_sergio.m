@@ -106,7 +106,8 @@ switch SRC{1}
         d.home = '/asl/cris/ccast/sdr45_j01_LR/';
 	d.home = '/umbc/xfs3/strow/asl/cris/';	
     end
-end   
+end
+
 if iUMBCorCLASS < 0
   disp('WARNING : using NOAA CLASS .nc radiance files so L2 and L1 granule numbers will match')
   disp('   see eg /home/sergio/git/matlabcode/L2Readers/L2CRIS_NUCAPS_CLASS/clust_driver_read_cris_nucaps.m')
@@ -119,7 +120,7 @@ if iUMBCorCLASS < 0
   %% https://search.earthdata.nasa.gov/search/granules?p=C1442068434-GES_DISC&pg[0][v]=f&pg[0][gsk]=-start_date&q=CRIS%20JPSS
   %% use   [mmmm,dddd] = doy_to_mmdd(180,2018)   to figure it out   becomes 06/29/2018
   d.home = '/asl/s1/sergio/rtp/JUNK_L1B_JPSS-1/';
-  d.home = '/home/sergio/git/sergio_temp_rtp_files/JUNK_L1B_JPSS-1/';
+  d.home = '/home/sergio/nogit/sergio_temp_rtp_files/JUNK_L1B_JPSS-1/';
   
 else
   disp('WARNING : using UMBC CCAST .mat radiance files so L2 is one granule ahead of L1 mat file')
