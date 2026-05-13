@@ -29,7 +29,9 @@ for yyjunk = 2002 : 2027
   end
 end  
 
-printarray([thedateS thedateE])
+disp('now printing printarray([(1:length(thedateS) thedateS thedateE]) ....')
+printarray([(1:length(thedateS))' thedateS thedateE])
+
 [yyM,mmM,ddM] = addNdays(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),8,firstORend,iPrint);
 rtimeM = utc2taiSergio(yyM,mmM,ddM,12);
 
@@ -37,43 +39,64 @@ fprintf(1,'JOB = %3i spans %4i/%2i/%2i to %4i/%2i/%2i both ends inclusive \n',JO
 fprintf(1,'          midpoint %4i/%2i/%2i \n',yyM,mmM,ddM);
 
 rtime0 = utc2taiSergio(thedateS(JOB,1),thedateS(JOB,2),thedateS(JOB,3),0.00);
+fprintf(1,'JOB = %4i thedateS == %4i %2i %2i \n',JOB,thedateS(JOB,:))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% now we need to get overpass times and solzen angles, just set scanang to 22 deg : these are made by 
 %%  /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/driver_loop_get_asc_desc_solzen_time.m
-%load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_412_64x72.mat');  %% 18.00 years, 2002/09-2020/08
-%load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_457_64x72.mat');  %% 20.00 years, 2002/09-2022/08
-%load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_498_64x72.mat');  %% 21.75 years, 2002/09-2024/06
-load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_502_64x72.mat');  %% 22.00 years, 2002/09-2024/08
+%%  << /home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/driver_fix_thedata_asc_desc_solzen_time_001_526_64x72.m >>
+
+%junk = load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_412_64x72.mat','thedata','iNumTimeSteps');  %% 18.00 years, 2002/09-2020/08
+%junk = load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_457_64x72.mat','thedata','iNumTimeSteps');  %% 20.00 years, 2002/09-2022/08
+%junk = load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_498_64x72.mat','thedata','iNumTimeSteps');  %% 21.75 years, 2002/09-2024/06
+%junk = load('/home/sergio/MATLABCODE/oem_pkg_run_sergio_AuxJacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/asc_desc_solzen_time_502_64x72.mat','thedata','iNumTimeSteps');  %% 22.00 years, 2002/09-2024/08
+junk = load('/home/sergio/git/oem_climate_jacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries//asc_desc_solzen_time_525_64x72.mat','thedata','iNumTimeSteps');                   %% 23.00 years, 2002/09-2025/08
+
+thedata = junk.thedata;
+thedata_iNumTimeSteps = junk.iNumTimeSteps;
+
+clear junk
+
 monitor_memory_whos;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
-%{
-rtime_desc = squeeze(nanmean(squeeze(nanmean(thedata.rtime_desc,1)),1)); [yy_desc,mm_desc,dd_desc] = tai2utcSergio(rtime_desc);
-rtime_asc  = squeeze(nanmean(squeeze(nanmean(thedata.rtime_asc,1)),1));  [yy_asc, mm_asc, dd_asc ] = tai2utcSergio(rtime_asc);
 
-if iDorA > 0
-  if rtimeM >= min(rtime_desc) & rtimeM <= max(rtime_desc)
-    junk = abs(rtime_desc - rtimeM)/1e7;
-    CJOB = find(junk == min(junk));
+iDoThis = -1;
+iDoThis = +1;
+
+if iDoThis > 0
+  %% translate JOB (yy/mm in 12 months)  ---> CJOB (23 timesteps/year)
+  rtime_desc = squeeze(nanmean(squeeze(nanmean(thedata.rtime_desc,1)),1)); [yy_desc,mm_desc,dd_desc] = tai2utcSergio(rtime_desc);
+  rtime_asc  = squeeze(nanmean(squeeze(nanmean(thedata.rtime_asc,1)),1));  [yy_asc, mm_asc, dd_asc ] = tai2utcSergio(rtime_asc);
+
+  yescheck = find(isfinite(yy_desc) & isfinite(yy_asc));
+  %setdiff(1:length(yy_desc),yescheck)    %% 169 and 411
+  
+  if iDorA > 0
+    if rtimeM >= min(rtime_desc) & rtimeM <= max(rtime_desc)
+      junk = abs(rtime_desc - rtimeM)/1e7;
+      CJOB = find(junk == nanmin(junk));
+    else
+      junk = find(mm_desc == mmM);
+      CJOB = junk(end);
+    end
+    cjobYYMMDD = [yy_desc(CJOB) mm_desc(CJOB) dd_desc(CJOB)];
   else
-    junk = find(mm_desc == mmM);
-    CJOB = junk(end);
+    if rtimeM >= min(rtime_asc) & rtimeM <= max(rtime_asc)
+      junk = abs(rtime_asc - rtimeM)/1e7;
+      CJOB = find(junk == nanmin(junk));
+    else
+      junk = find(mm_asc == mmM);
+      CJOB = junk(end);
+    end
+    cjobYYMMDD = [yy_asc(CJOB) mm_asc(CJOB) dd_asc(CJOB)];    
   end
-else
-  if rtimeM >= min(rtime_asc) & rtimeM <= max(rtime_asc)
-    junk = abs(rtime_asc - rtimeM)/1e7;
-    CJOB = find(junk == min(junk));
-  else
-    junk = find(mm_asc == mmM);
-    CJOB = junk(end);
-  end
+
+  fprintf(1,'  JOB = %3i (20 yrs x 12 month/year)            ----> %4i/%2i/%2i \n', JOB,thedateS(JOB,:))
+  fprintf(1,' CJOB = %3i (20 yrs x 23 sixteenday steps/year) ----> %4i/%2i/%2i \n',CJOB,cjobYYMMDD);
 end
-
-fprintf(1,'JOB = %3i (20 yrs x 12 month/year) ----> CJOB = %3i (20 yrs x 23 sixteenday steps/year) \n',JOB,CJOB)
-%}
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 thedata.avgrtime_desc = nanmean(squeeze(nanmean(thedata.rtime_desc,1)),1);
@@ -83,14 +106,17 @@ if iDorA > 0
 else
   JOB_23timesteps = find(thedata.avgrtime_asc >= rtime0,1);
 end
-disp(' ')
-fprintf(1,'JOB = %3i in terms of months corresponds to 16 day timestep number %3i \n',JOB,JOB_23timesteps);
-disp(' ')
-%fprintf(1,'really should set JOB --> JOB_23timesteps below!!! \n')
-JOBx = JOB;             %% this should really be   commented and not used; before Feb 2024 
+% fprintf(1,'really should set JOB --> JOB_23timesteps below!!! \n')
+% JOBx = JOB;             %% this should really be   commented and not used; before Feb 2024 
 
-%JOBx = JOB_23timesteps; %% this should really be uncommented and     used; after  Feb 2024
-%fprintf(1,'done!!!')
+JOBx = JOB_23timesteps; %% this should really be uncommented and     used; after  Feb 2024
+if iDorA > 0
+  xjobYYMMDD = [yy_desc(JOBx) mm_desc(JOBx) dd_desc(JOBx)];
+else  
+  xjobYYMMDD = [yy_asc(JOBx) mm_asc(JOBx) dd_asc(JOBx)];
+end
+
+fprintf(1,' xJOB = %3i (another 20 yrs x 23 sixteenday steps/year) ----> %4i/%2i/%2i \n',JOB_23timesteps,xjobYYMMDD);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

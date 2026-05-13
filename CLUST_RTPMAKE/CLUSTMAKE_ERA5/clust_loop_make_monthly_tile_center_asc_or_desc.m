@@ -1,14 +1,3 @@
-addpath /asl/matlib/rtptools/
-addpath /asl/matlib/aslutil
-addpath /asl/matlib/h4tools
-addpath /home/sergio/MATLABCODE
-addpath /home/sergio/MATLABCODE/TIME
-addpath /home/sergio/MATLABCODE/PLOTTER
-addpath ../GRIB
-addpath /home/sergio/MATLABCODE/matlib/clouds/sarta
-addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
-addpath /home/sergio/MATLABCODE/COLORMAP
-
 %% run with                  sbatch -p cpu2021 --exclude=  --array=220-240 sergio_matlab_jobB.sbatch 4
 %% run with                  sbatch -p cpu2021 --exclude=  --array=241-264 sergio_matlab_jobB.sbatch 4
 %% check success using eg    iaFound = check_all_jobs_done('/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/ERA5/Tile_Center/DESC_WithOLR/randomptera5_tile_center_monthly_',240,'.mat');  %% 20 years 2002/09-2022/08
@@ -20,10 +9,22 @@ addpath /home/sergio/MATLABCODE/COLORMAP
 %% one per month, 20 years of AIRS data so 20x12 = 240 sets of data
 %% one per month, 21 years of AIRS data so 20x12 = 252 sets of data
 %% one per month, 23 years of AIRS data so 20x12 = 276 sets of data
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+addpath0
+
+% clust_loop_make_monthly_tile_center_asc_or_desc : option 4
+%   2002/09 - 2022/08 = 20 yers x 12 = 240
+%   2002/09 - 2025/08 = 23 yers x 12 = 276
+% sbatch  --array=1-276  sergio_matlab_chip.sbatch 4   
+
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
 if length(JOB) == 0
   disp('no input JOB; being set to nYear * 12')
-  JOB = 276;
+  JOB = 276;  %% 12 * 23 years (2002/09 - 2028/08) = 276
+  JOB = 1;
+  JOB = 169;  
 end
 
 %{
@@ -33,9 +34,6 @@ liststr = '/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/E
 iaFound = check_all_jobs_done(liststr,252);
 %}
 
-%JOB = 235
-%JOB = 009
-
 system_slurm_stats
 
 %%% iDorA = -90;  %% asc,  use 1.30 pm for all, use hottest 10% CANNOT DO, see clust_loop_make_monthly_tile_273points.m instead
@@ -43,13 +41,41 @@ system_slurm_stats
 
 iDorA = -10;  %% asc,  use 1.30 pm for all, random pt about tile center
 iDorA = +10;  %% desc, use 1.30 am for all, random pt about tile center  DONE THIS
-iDorA = +1;   %% desc, use 1.30 am for all, tile center
 iDorA = -1;   %% asc,  use 1.30 pm for all, tile center
+iDorA = +1;   %% desc, use 1.30 am for all, tile center
 
 iDo2m = -1;
 iDo2m = +1;
 
-[h,ha,p,pa] = rtpread('/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% see /home/sergio/git/oem_climate_jacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/Code_For_HowardObs_TimeSeries/latB64.mat
+load latB64.mat
+rlon = -180 : +180;          rlat = -90 : +90;
+drlon = 5;                   drlat = 3;
+rlon = -180 : drlon : +180;  rlat = -90 : drlat : +90;
+rlon = rlon;                 rlat = latB2;
+
+x = 0.5*(rlon(1:end-1)+rlon(2:end));  y = 0.5*(rlat(1:end-1)+rlat(2:end));
+
+[Y,X] = meshgrid(y,x);
+Y = Y(:);
+X = X(:);
+plot(X(1:73), Y(1:73),'o')   %% yay so I loop     do outer 1 : 64; do inner 1 : 72;    ?????   .....
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+use_this_rtp = '/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp';
+if exist(use_this_rtp)
+  [h,ha,p,pa] = rtpread(use_this_rtp);
+else
+  fprintf(1,'use_this_rtp = \n       %s DNE  \n generating p.ralt,p.rlon using X Y \n',use_this_rtp)
+  make_p_struct_72x64
+  ha = [];
+  pa = [];  
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 iNewOrOld = +1;
 if iNewOrOld < 0
@@ -67,6 +93,7 @@ iOLR = +1;
 
 fdir0 = '/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/';
 fdir0 = '/asl/s1/sergio/alldata/MakeAvgObsStats2002_2020_startSept2002_v3/';
+fdir0 = '/home/sergio/nogit/TILES/ERA5_profiles/';
 
 if iDorA == +1
   fout = [fdir0 '/TimeSeries/ERA5/Tile_Center/DESC/era5_tile_center_monthly_' num2str(JOB,'%03d') '.mat']; %%% NOTE THIS IS DESC
@@ -105,7 +132,7 @@ end
 
 iDo = +1;
 if exist(fout)
-  fprintf(1,'JOB %3i : avg era timeseries file %s already exists \n',JOB,fout);
+  fprintf(1,'JOB %3i : avg era5 timeseries file %s already exists \n',JOB,fout);
   iDo = -1;
   error('output file exists')
 end
@@ -133,6 +160,37 @@ if iDo > 0
   [yywah,mmwah,ddwah,hhwah] = tai2utcSergio(rtime);
   [yywah,mmwah,ddwah,hhwah] = tai2utcSergio(mean(rtime));
   fprintf(1,' JOB = %3i   rtime = %10.6f  yywah/mmwah/ddwah = %4i/%2i/%2i \n',JOB,mean(rtime),yywah,mmwah,ddwah)
+
+  if ~isfield(pnew_ip,'ptemp')
+    pnew_ip.stemp = [];
+    pnew_ip.ptemp = [];
+    pnew_ip.plevs = [];    
+    pnew_ip.palts = [];
+    pnew_ip.mmw   = [];
+    pnew_ip.gas_1 = [];
+    pnew_ip.gas_2 = [];
+    pnew_ip.gas_3 = [];
+    pnew_ip.gas_4 = [];
+    pnew_ip.gas_5 = [];
+    pnew_ip.gas_6 = [];
+    pnew_ip.gas_9 = [];
+    pnew_ip.gas_12= [];
+    pnew_ip.rcalc = [];
+    pnew_ip.sarta_rclearcalc = [];
+    pnew_ip.cprtop = [];
+    pnew_ip.cprbot = [];
+    pnew_ip.cpsize = [];
+    pnew_ip.cngwat = [];
+    pnew_ip.cfrac  = [];
+    pnew_ip.ctype  = [];            
+    pnew_ip.cprtop2 = [];
+    pnew_ip.cprbot2 = [];
+    pnew_ip.cpsize2 = [];
+    pnew_ip.cngwat2 = [];
+    pnew_ip.cfrac2  = [];
+    pnew_ip.ctype2  = [];
+    pnew_ip.cfrac12 = [];    
+  end
   
   pnew_ip = rmfield(pnew_ip,'stemp');
   pnew_ip = rmfield(pnew_ip,'ptemp');
@@ -173,6 +231,25 @@ if iDo > 0
     cldfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3','CC','CIWC','CLWC','OLR','OLRCS'};
   end
 
+  if isnan(nanmean(pnew_ip.rtime))
+    fprintf(1,'JOB = %3i   isnan(nanmean(pnew_ip.rtime)) is true \n',JOB)
+    pnew_ip.rtime = ones(size(pnew_ip.rtime)) * utc2taiSergio(thedateS(1),thedateS(2),thedateS(3),12.0);
+    if iDorA == 1 | iDorA == +10 | iDorA == +90
+      pnew_ip.rtime = ones(size(pnew_ip.rtime)) * thedata.avgrtime_desc(JOBx-1);    
+      junk = thedata.solzen_desc(:,:,JOBx-1); junk = junk(:);
+      pnew_ip.solzen = junk';
+      junk = thedata.satzen_desc(:,:,JOBx-1); junk = junk(:);
+      pnew_ip.satzen = junk';
+    else
+      pnew_ip.rtime = ones(size(pnew_ip.rtime)) * thedata.avgrtime_asc(JOBx-1);        
+      junk = thedata.solzen_asc(:,:,JOBx-1); junk = junk(:);
+      pnew_ip.solzen = junk';
+      junk = thedata.satzen_asc(:,:,JOBx-1); junk = junk(:);
+      pnew_ip.satzen = junk';
+    end
+    pnew_ip.scanang = saconv(pnew_ip.satzen,pnew_ip.zobs);
+  end
+  
   pnew_ip0 = pnew_ip;
   [pnew_ip,hnew_ip,~,iOLR] = fill_era5_monthly(pnew_ip,hnew_ip,[],iOLR);
 
@@ -200,6 +277,11 @@ if iDo > 0
   %code1 = '/home/sergio/SARTA_CLOUDY/BinV201/xsarta_apr08_m140_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
   %code1 = '/home/chepplew/gitLib/sarta/bin/airs_l1c_2834_cloudy_may19_prod_v3';
   code1 = '/home/sergio/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_jan25_H2020';
+
+  set_path_to_execs
+  code1 = sartaCld;
+  run_sarta.klayers_code = klayers;
+  
   run_sarta.sartaclear_code = code1;
   run_sarta.sartacloud_code = code1;
   run_sarta.co2ppm = co2ppm;

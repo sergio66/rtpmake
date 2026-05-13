@@ -25,8 +25,9 @@ if nargin ~= nargout
            '[p,h,pa]=fill_era5_monthly(p,h,pa) (preferred)\n\tTerminating or also include iOLR'], '\n')
 end
 
-addpath /asl/matlib/aslutil
-addpath /asl/packages/time
+% see eg CLUSTMAKE_ERA5/addpath0.m
+% addpath /asl/matlib/aslutil
+% addpath /asl/packages/time
 
 % Location of grib files
 fhdr = '/asl/models/era5_avg/';                  %% from July 2021
@@ -53,10 +54,10 @@ ystr = timestr(:,1:4);
 mstr = timestr(:,5:6);
 dstr = timestr(:,7:8);
 hstr = timestr(:,9:10);
-yearindex = str2num(ystr);
+yearindex  = str2num(ystr);
 monthindex = str2num(mstr);
-dayindex = str2num(dstr);
-hourindex = str2num(hstr);
+dayindex   = str2num(dstr);
+hourindex  = str2num(hstr);
 
 %% hmmm ... oct 30, 2022
 [boo,~] = size(hstr);
@@ -86,7 +87,8 @@ n = length(u_enames); % Generally 2 names for 1 day's worth of data
 
 fprintf(1,'need to read in %3i ERA5 monthly files \n',n)
 
-load /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA5/era5plevs.mat
+%load /home/sergio/MATLABCODE/RTPMAKE/CLUST_RTPMAKE/CLUSTMAKE_ERA5/era5plevs.mat
+load /home/sergio/git/rtpmake/CLUST_RTPMAKE/CLUSTMAKE_ERA5/era5plevs.mat
 
 for i=1:n
    %fn = fullfile(fhdr,u_enames{i}(1:4),u_enames{i}(5:6),u_enames{i});
@@ -188,6 +190,8 @@ for i=1:n
          rlon = prof.rlon(k);
          rlon(rlon<0) = rlon(rlon<0) + 360;
 
+	 prof.ptime(k) = ones(1,length(k)) * utc2taiSergio(yearindex(1),monthindex(1),dayindex(1),u_hour(jj(1)));
+	 
          try
            %% 2m air and dewpoint temperatures
            prof.d2m(k)   = F(fhi).d2m.ig(rlat,rlon);

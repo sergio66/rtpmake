@@ -74,6 +74,10 @@
 #SBATCH --mem=16000
 
 ########################################################################
+
+source /home/sergio/.bashrc
+
+########################################################################
 ### check the number of input arguments
 if [ $# -gt 0 ]; then
   echo "Your command line contains $# arguments"

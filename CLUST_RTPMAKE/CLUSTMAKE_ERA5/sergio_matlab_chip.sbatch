@@ -1,38 +1,41 @@
 #!/bin/bash
 
+# 2002/09 - 2022/08 = 20 yers x 12 = 240
+# 2002/09 - 2025/08 = 23 yers x 12 = 276
+
 # run this with  sbatch  --array=1-X --output='testslurm' sergio_matlab_chip.sbatch
 # run this with  sbatch  --array=1-Y sergio_matlab_chip.sbatch 1 for filelist
 # run this with  sbatch  --array=1-Z --output='/dev/null' sergio_matlab_chip.sbatch 
-# run this with  sbatch  --array=1-240  sergio_matlab_chip.sbatch 2    for loop over a day
+# run this with  sbatch  --array=1-276  sergio_matlab_chip.sbatch 2    for loop over a day
 
-# run this with  sbatch  --array=1-240  sergio_matlab_chip.sbatch 4    for tile center avg, desc, 20 yearsx12months/yr = 240 : note you need to set iDorA before hand
+# run this with  sbatch  --array=1-276  sergio_matlab_chip.sbatch 4    for tile center avg, desc, 20 yearsx12months/yr = 276 : note you need to set iDorA before hand
 
-# run this with  sbatch  --array=1-240  sergio_matlab_chip.sbatch 5    for tile with 5*3*4*4=250 ERA5 0.25 deg grid points/tile, one per month <<< set quue to medium, time to 24 hours >>>
+# run this with  sbatch  --array=1-276  sergio_matlab_chip.sbatch 5    for tile with 5*3*4*4=250 ERA5 0.25 deg grid points/tile, one per month <<< set quue to medium, time to 24 hours >>>
 # run this with  sbatch  --array=1-24   sergio_matlab_chip.sbatch 15   for putting stats tile with 5*3*4*4=250 ERA5 0.25 deg grid points/tile, one per month <<< set quue to medium, time to 24 hours >>>
-# run this with  sbatch  --array=1-240  sergio_matlab_chip.sbatch 6    for clust_make_monthlyavg_2m.m
+# run this with  sbatch  --array=1-276  sergio_matlab_chip.sbatch 6    for clust_make_monthlyavg_2m.m
 #
 # run this with  sbatch  --array=1-4608 sergio_matlab_chip.sbatch 7    for clustmake_whole_12month_ERA5.m
 # run this with  sbatch  --array=1-64   sergio_matlab_chip.sbatch 8    for cluster_driver_put_together_globalavg_profiles.m
 # run this with  sbatch  --array=1-64   sergio_matlab_chip.sbatch 9    for clustmake_fixNaNbug_2012_average_whole_12month_ERA5.m
-# run this with  sbatch  --array=1-240  sergio_matlab_chip.sbatch 10   for clust_loop_make_monthly_tile_center_D_N_A_sst.m
+# run this with  sbatch  --array=1-276  sergio_matlab_chip.sbatch 10   for clust_loop_make_monthly_tile_center_D_N_A_sst.m
 #
 # run this with  sbatch  --array=1-24   sergio_matlab_chip.sbatch 15   for clust_find_hottest_10percent_from_ERA5clearcalcs.m                  %% trends from ERA5 matched to tile center vs hottest10% vs all points averaged over tile, for trends paper
 # run this with  sbatch  --array=1-10   sergio_matlab_chip.sbatch 16   for clust_driver_load_in_summary_10percent_from_ERA5clearcalc_profile.m %% WV/T trends from ERA5 matched to tile center vs hottest10% vs all points averaged over tile, for trends paper
 #
-# run this with  sbatch  --array=1-240   sergio_matlab_chip.sbatch 17   for clustbatch_make_era5_monthly_surfaceT.m                            %% trends from ERA5 matched to tile center vs hottest10% vs all points averaged over tile, for trends paper
-# run this with  sbatch  --array=1-240   sergio_matlab_chip.sbatch 18   for clustbatch_make_era5_monthly_profileT_WV.m                            %% trends from ERA5 matched to tile center vs hottest10% vs all points averaged over tile, for trends paper
+# run this with  sbatch  --array=1-276   sergio_matlab_chip.sbatch 17   for clustbatch_make_era5_monthly_surfaceT.m                            %% trends from ERA5 matched to tile center vs hottest10% vs all points averaged over tile, for trends paper
+# run this with  sbatch  --array=1-276   sergio_matlab_chip.sbatch 18   for clustbatch_make_era5_monthly_profileT_WV.m                            %% trends from ERA5 matched to tile center vs hottest10% vs all points averaged over tile, for trends paper
 
 ########################################################################
 #  Name of the job:
-#SBATCH --job-name=CLUST_MAKE_ERA_RTP ## name
-#SBATCH -N1                           ## number of job step is to be allocated per instance of matlab
-#SBATCH --cpus-per-task 1             ## tasks per node/number of cores per matlab session will be
+#SBATCH --job-name=CLUST_MAKE_ERA5_RTP ## name
+#SBATCH -N1                            ## number of job step is to be allocated per instance of matlab
+#SBATCH --cpus-per-task 1              ## tasks per node/number of cores per matlab session will be
 
 ##SBATCH --partition=2024              ## desired partition
-#SBATCH --partition=match             ## desired partition
-#SBATCH --cluster=chip-cpu            ## desired cluster
+#SBATCH --partition=match              ## desired partition
+#SBATCH --cluster=chip-cpu             ## desired cluster
 #SBATCH --account=pi_strow
-#SBATCH --qos=shared                  ## qos to get as many cpu2024 as possible, else put pi_strow
+#SBATCH --qos=shared                   ## qos to get as many cpu2024 as possible, else put pi_strow
 
 ########################################################################
 
@@ -84,11 +87,11 @@ elif [[ "$1" -eq "4" ]]; then
   #only have about months 007 to 019 of this
   #srun /usr/ebuild/installs/software/MATLAB/2023b/bin/matlab -nodisplay -r "clust_loop_make_monthly2m_tile_center_asc_or_desc; exit"
 elif [[ "$1" -eq "5" ]]; then
-  echo "cmd line arg = 5, making tile ERA5 monthly individiual ERA5 grid points (240 of them)"
+  echo "cmd line arg = 5, making tile ERA5 monthly individiual ERA5 grid points (276 of them)"
   srun /usr/ebuild/installs/software/MATLAB/2023b/bin/matlab -nodisplay -r "clust_loop_make_monthly_tile_273points; exit"
 
 elif [[ "$1" -eq "15" ]]; then
-  echo "cmd line arg = 15, making tile ERA5 monthly individiual ERA5 grid points (240 of them), put stats together"
+  echo "cmd line arg = 15, making tile ERA5 monthly individiual ERA5 grid points (276 of them), put stats together"
   srun /usr/ebuild/installs/software/MATLAB/2023b/bin/matlab -nodisplay -r "clust_find_hottest_10percent_from_ERA5clearcalcs; exit"
 elif [[ "$1" -eq "16" ]]; then
   echo "cmd line arg = 16, making profile trends, WV/T"

@@ -94,9 +94,11 @@ addpath /home/sergio/git/matlabcode/matlibSergio/matlib/gribtools
 %% addpath /home/sergio/git/matlabcode/matlibSergio/matlib/TIME
 
 addpath ../GRIB
+
+addpath /home/sergio/git/matlabcode/COLORMAP
 addpath /home/sergio/git/matlabcode/PLOTTER
+addpath /home/sergio/git/matlabcode/CONVERT_GAS_UNITS
 addpath /home/sergio/git/matlabcode/CONVERT_GAS_UNITS/Strow_humidity/convert_humidity/
 
 addpath /home/sergio/git/matlabcode
 addpath /home/sergio/git/matlabcode/PLOTTER
-
