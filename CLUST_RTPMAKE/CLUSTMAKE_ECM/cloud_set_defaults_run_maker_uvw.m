@@ -29,8 +29,10 @@ add_the_paths_and_klayers_sarta_execs
 
 if iv5or6 == 5
   theinds = (1 : 2378)';
+  theinds = 1291;  
 else
   theinds = (1 : 2645)';
+  theinds = 1520;    
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -41,14 +43,14 @@ set_run_sarta_options
 
 %% icestr = ['NEWLANDFRAC/cloudy_airs_l1b_ecm' icestr '.'];
 if iv5or6 == 5
-  icestr = ['cloudy_airs_l1b_ecm' icestr '.'];
+  icestruvw = ['uvw_cloudy_airs_l1b_ecm' icestr '.'];
+  icestr    = [    'cloudy_airs_l1b_ecm' icestr '.'];  
 elseif iv5or6 == 6
-  icestr = ['cloudy_airs_l1c_ecm' icestr '.'];
+  icestruvw = ['uvw_cloudy_airs_l1c_ecm' icestr '.'];
+  icestr    = [    'cloudy_airs_l1c_ecm' icestr '.'];  
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% typically iaGList == JOB so this loop runs ONCE .. so you control multiple files via the cluster
 
 for ixx = 1 : length(iaGlist)
   ix = iaGlist(ixx);
@@ -62,7 +64,7 @@ for ixx = 1 : length(iaGlist)
   gstr = num2str(yymmddgg(4),'%03d');
 
   dout_set
-  
+
   if ~exist(fdirOUT)
     mker = ['!mkdir -p ' fdirOUT];
     eval(mker);
@@ -70,21 +72,22 @@ for ixx = 1 : length(iaGlist)
   end
   
   if iSlabCld_CumSumStrowORGeorge == 1
-    fnameOUT= [fdirOUT icestr ystr '.' mstr '.' dstr '.' gstr '.rtp'];
+    fnameOUT    = [fdirOUT icestr    ystr '.' mstr '.' dstr '.' gstr '.rtp'];
+    uvwfnameOUT = [fdirOUT icestruvw ystr '.' mstr '.' dstr '.' gstr '.mat'];    
   else
-    fnameOUT= [fdirOUT icestr ystr '.' mstr '.' dstr '.' gstr '_cumsum_-1.rtp'];
+    fnameOUT    = [fdirOUT icestr    ystr '.' mstr '.' dstr '.' gstr '_cumsum_-1.rtp'];
+    uvwfnameOUT = [fdirOUT icestruvw ystr '.' mstr '.' dstr '.' gstr '_cumsum_-1.mat'];    
   end
 
   eeP = exist(fnameOUT);
+  eeX = exist(uvwfnameOUT);
 
-  if eeP == 0
-    !ls -lt /asl/models/ecmwf
-    !ls -lt /asl/models/ecmwf/2020
-
-    fprintf(1,' making %s \n',fnameOUT);
-    toucher = ['!touch ' fnameOUT];
-    eval(toucher)
-  
+  if eeX == 0 & eeP >= 0
+    fprintf(1,' updating %s using %s \n',uvwfnameOUT,fnameOUT);
+    if eeP > 0
+      [hhx,hhax,ppx, ppax] = rtpread(fnameOUT);
+    end
+    
     year  = yymmddgg(1);
     month = yymmddgg(2);
     day   = yymmddgg(3);
@@ -113,9 +116,9 @@ for ixx = 1 : length(iaGlist)
     elseif iv5or6 == 6
       p = gdata;
     end
-
-    p.pobs = zeros(size(p.solzen));
-    p.upwell = ones(size(p.solzen));
+    
+    p.pobs = zeros(size(p.solazi));
+    p.upwell = ones(size(p.solazi));
     %p.irinst = AIRSinst*ones(1,nobs);
     %p.findex = grannum*ones(1,nobs);
 
@@ -124,35 +127,34 @@ for ixx = 1 : length(iaGlist)
     pa = {{'profiles','rtime','seconds since 1993'}};
     ha = {{'header','hdf file',filename}};
 
-    h.pfields = 5; % (1=prof + 4=IRobs);
-    h.ptype   = 0;
+    h.pfields=5; % (1=prof + 4=IRobs);
 
-    if iv5or6 == 5
-      h.nchan = length(theinds);
-      h.ichan = 1:2378;
-      h.vchan = f(h.ichan);
-    else
-      h.nchan = length(theinds2645);
-      h.ichan = theinds2645;;
-      h.vchan = f2645;
-    end
+    h.nchan = length(theinds);
+    h.ichan = theinds;;
+    h.vchan = f(h.ichan);;
 
-    set_landfrac_using_L1B_L1C_or_usgs
+    pXX = p;
 
     clrfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3'};
     cldfields = {'SP','SKT','10U','10V','TCC','CI','T','Q','O3',...
                  'CC','CIWC','CLWC'};
+    uvwfields = {'SKT','W'};
+    uvwfields = {'U','V','W','PV','D','SP'};
+    
+    %     [h,ha,p,pa] = rtpadd_ecmwf_data(h,ha,p,pa,uvwfields); %%% add on ecm
+    %     u_all = p.grib_U;
+    %     v_all = p.grib_V;
+    %     w_all = p.grib_W;
+    %     p = rmfield(p,'grib_U');
+    %     p = rmfield(p,'grib_V');
+    %     p = rmfield(p,'grib_W');
 
-    %[h,ha,p,pa] = rtpadd_ecmwf_data(h,ha,p,pa,cldfields); %%% add on ecm
-    %[p,h] = sergio_fill_ecmwf(p,h,'/asl/data/ecmwf/',-1);
-    %save test_2002_09_08_g044_sergio.mat p h
+    %% wz([1 2 3],:) = velocities at 250,500,850 mb
 
-which fill_ecmwf
-disp('calling fill_ecmwf')
+    [p,h] = fill_ecmwf(p,h,[],1);
+    p0 = p;
 
-%p00 = p
-
-    [p,h] = fill_ecmwf(p,h);
+%%%%%%%%%%%%%%%%%%%%%%%%%
 
     [xyy,xmm,xdd,xhh] = tai2utcSergio(p.rtime);        %%% <<<<<<<<<<<<<<<<<<<<<<<<<<<<< for SdSM old time
     time_so_far = (xyy-2000) + ((xmm-1)+1)/12;
@@ -180,44 +182,26 @@ disp('calling fill_ecmwf')
     [p2] = driver_sarta_cloud_rtp(h,ha,p,pa,run_sarta);
 
     fnamex = fnameOUT;
-    [h,ha,p2x,pa] = rtptrim_sartacloud(h,ha,p2,pa);
-    rtpwrite(fnamex,h,ha,p2x,pa)
-    fprintf(1,'saved %s \n',fnamex)
+    fnamex = uvwfnameOUT;
 
-    %{
-    i1231 = find(h.vchan >= 1231,1);
-    tobs1231 = real(rad2bt(h.vchan(i1231),p2x.robs1(i1231,:)));
-    tclr1231 = rad2bt(h.vchan(i1231),p2x.sarta_rclearcalc(i1231,:));
-    tcld1231 = rad2bt(h.vchan(i1231),p2x.rcalc(i1231,:));
+    %[h,ha,p2x,pa] = rtptrim_sartacloud(h,ha,p2,pa);
+    if ~exist(fnamex)
+      %rtpwrite(fnamex,h,ha,p2x,pa)
+      [xhd0,xpdmat] = get_richardson_number_levels(h,ha,p2,pa);      
+      saver = ['save ' fnamex ' xhd0 xpdmat '];
+      eval(saver)
+      fprintf(1,'saved %s \n',fnamex)
+      %% plot_richardson_PBLH      
+    else
+      fprintf(1,'%s already exists, not saving \n',fnamex)
+    end
 
-    scatter_coast(p2x.rlon,p2x.rlat,10,tobs1231)
-    scatter_coast(p2x.rlon,p2x.rlat,10,tobs1231-tcld1231); caxis([-10 +10]); colorbar
-    %}   
+%    tobs = rad2bt(1231,p.robs1(1291,:));
+%    tcld = rad2bt(1231,ppx.rcalc(1291,:));
+%    plot(tobs,p.wz,'.',tcld,p.wz,'r.')
 
-    %{
-    addpath /home/sergio/MATLABCODE/matlib/clouds/sarta/
-    addpath /home/sergio/MATLABCODE/matlib/clouds/TCC/
-    tcc1 = tcc_method1(p);
-    tcc2 = tcc_method2(p);
-    [tcc3A,tcc3B] = tcc_method3(p);
+    %rtpwrite(fnamex,h,ha,p2x,pa)
+    %rtpwrite(xfnameOUT,hhx,hhax,ppx,ppax);
 
-figure(1); scatter_coast(p2x.rlon,p2x.rlat,10,tcc1); colormap jet; title('METHOD 1')
-figure(2); scatter_coast(p2x.rlon,p2x.rlat,10,tcc2); colormap jet; title('METHOD 2')
-figure(3); scatter_coast(p2x.rlon,p2x.rlat,10,tcc3A); colormap jet; title('METHOD 3A')
-figure(4); scatter_coast(p2x.rlon,p2x.rlat,10,tcc3B); colormap jet; title('METHOD 3B')
-figure(5); scatter_coast(p2x.rlon,p2x.rlat,10,p.tcc); colormap jet; title('ORIG')
-
-[Y,I] = sort(p.tcc);
-figure(6); plot(p.tcc(I),tcc1(I),'b',p.tcc(I),tcc2(I),'g',p.tcc(I),tcc3A(I),'r',p.tcc(I),tcc3B(I),'m')
-corr1 = linearcorrelation(p.tcc,tcc1);
-corr2 = linearcorrelation(p.tcc,tcc2);
-corr3A = linearcorrelation(p.tcc,tcc3A);
-corr3B = nanlinearcorrelation(p.tcc,tcc3B);
-[corr1 corr2 corr3A corr3B]
-
-    %}
-    
-  else
-    fprintf(1,' %s already exists \n',fnameOUT)
   end
 end

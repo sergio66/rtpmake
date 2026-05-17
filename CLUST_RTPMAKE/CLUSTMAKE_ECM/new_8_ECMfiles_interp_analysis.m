@@ -65,15 +65,15 @@ frac2 = 1-frac1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 disp('doing closest time (default) .. do we really need this???? its just for comparison!!!!')
-[pClosest,hClosest] = fill_ecmwf(p,h);
+[pClosest,hClosest] = fill_ecmwf(p,h,[],iUVW);
 
 disp('doing frac1')
 pB1 = p; pB1.rtime = ones(size(pB1.rtime)) .* tB1;
-  [pB1,hB1] = fill_ecmwf(pB1,h);
+  [pB1,hB1] = fill_ecmwf(pB1,h,[],iUVW);
 
 disp('doing frac2')
 pB2 = p; pB2.rtime = ones(size(pB1.rtime)) .* tB2;      
-[pB2,hB2] = fill_ecmwf(pB2,h);
+[pB2,hB2] = fill_ecmwf(pB2,h,[],iUVW);
 
 if exist('pClosest')
   disp('linearly adding together frac1,frac2')

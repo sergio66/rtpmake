@@ -92,15 +92,26 @@ if [[ "$1" -eq "" ]]; then
 elif [[ "$1" -eq "1" ]]; then
   echo "cmd line arg = 1, filelist run, no Interp"
   srun matlab -nodisplay -r "iInterp = -1; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_filelist; exit"
+
 elif [[ "$1" -eq "2" ]]; then
   echo "cmd line arg = 2, choose day, loop over all granules in the day, noInterp"
-  srun matlab -nodisplay -r "iInterp = -1; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_YYMMDD_loopGG; exit"
+  srun matlab -nodisplay -r "iUVW = -1; iInterp = -1; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_YYMMDD_loopGG; exit"
+elif [[ "$1" -eq "-2" ]]; then
+  echo "cmd line arg = -2, choose day, loop over all granules in the day, noInterp, uvw"
+  srun matlab -nodisplay -r "iUVW = +1; iInterp = -1; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_YYMMDD_loopGG; exit"
+
+
 elif [[ "$1" -eq "3" ]]; then
   echo "cmd line arg = 3, filelist run with interp"
   srun matlab -nodisplay -r "iInterp = 1; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_filelist; exit"
+
 elif [[ "$1" -eq "4" ]]; then
   echo "cmd line arg = 4, choose day, loop over all granules in the day, yes Interp"
-  srun matlab -nodisplay -r "iInterp = 1; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_YYMMDD_loopGG; exit"
+  srun matlab -nodisplay -r "iUVW = -1; iInterp = 1; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_YYMMDD_loopGG; exit"
+elif [[ "$1" -eq "-4" ]]; then
+  echo "cmd line arg = 4, choose day, loop over all granules in the day, yes Interp, uvw"
+  srun matlab -nodisplay -r "iUVW = +1; iInterp = 1; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_YYMMDD_loopGG; exit"
+
 elif [[ "$1" -eq "5" ]]; then
   echo "cmd line arg = 5, filelist sets the day, loop over all granules in the day, yes Interp"
   #srun matlab -nodisplay -r "iInterp = 1; clustbatch_make_eraORecmcloudrtp_sergio_sarta_filelist_YYMMDD_loopGG; exit"   NAME TOO LONG

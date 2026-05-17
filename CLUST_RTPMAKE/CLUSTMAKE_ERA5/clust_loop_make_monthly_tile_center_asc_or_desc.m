@@ -24,7 +24,8 @@ if length(JOB) == 0
   disp('no input JOB; being set to nYear * 12')
   JOB = 276;  %% 12 * 23 years (2002/09 - 2028/08) = 276
   JOB = 1;
-  JOB = 169;  
+  JOB = 169;
+  JOB = 265;    
 end
 
 %{

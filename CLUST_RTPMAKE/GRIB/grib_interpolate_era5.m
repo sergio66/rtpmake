@@ -111,16 +111,28 @@ if iWhich == 0 | iWhich == +1
   end
 end
 
+% see ~/git/era5_pipeline/translate_rad_names.m
+% the variable formerly known as mtnlwrf   (Mean top net long-wave radiation flux)                has been renamed to avg_tnlwrf
+% the variable formerly known as mtnlwrfcs (Mean top net Long-wave radiation flux, CLear Sky)     has been renamed to avg_tnlwrfcs
+% the variable formerly known as msnlwrf   (Mean surface net long-wave radiation flux)            has been renamed to avg_snlwrf
+% the variable formerly known as msnlwrfcs (Mean Surface Net Long-Wave Radiation Flux, Clear Sky) has been renamed to avg_snlwrfcs
+
 %% for when the OLR stuff is available
 if iWhich == 0 | iWhich == -1
 %% for when the OLR stuff is available
   try
-    %% olr and olr_clr, ilr and ilr_clr
+    %% olr and olr_clr, ilr and ilr_clr, on or before 2024/08
     F.olr.ig     = griddedInterpolant(iX,iY,flipud(single(ncread(fn_olr,'mtnlwrf',[1 1 hindex],[Inf Inf 1]))'),'linear');
     F.olr_clr.ig = griddedInterpolant(iX,iY,flipud(single(ncread(fn_olr,'mtnlwrfcs',[1 1 hindex],[Inf Inf 1]))'),'linear');
     F.ilr.ig     = griddedInterpolant(iX,iY,flipud(single(ncread(fn_olr,'msnlwrf',[1 1 hindex],[Inf Inf 1]))'),'linear');
     F.ilr_clr.ig = griddedInterpolant(iX,iY,flipud(single(ncread(fn_olr,'msnlwrfcs',[1 1 hindex],[Inf Inf 1]))'),'linear');
-  end
+  catch
+    %% olr and olr_clr, ilr and ilr_clr, on or after 2024/09
+    F.olr.ig     = griddedInterpolant(iX,iY,flipud(single(ncread(fn_olr,'avg_tnlwrf',[1 1 hindex],[Inf Inf 1]))'),'linear');
+    F.olr_clr.ig = griddedInterpolant(iX,iY,flipud(single(ncread(fn_olr,'avg_tnlwrfcs',[1 1 hindex],[Inf Inf 1]))'),'linear');
+    F.ilr.ig     = griddedInterpolant(iX,iY,flipud(single(ncread(fn_olr,'avg_snlwrf',[1 1 hindex],[Inf Inf 1]))'),'linear');
+    F.ilr_clr.ig = griddedInterpolant(iX,iY,flipud(single(ncread(fn_olr,'avg_snlwrfcs',[1 1 hindex],[Inf Inf 1]))'),'linear');
+  end  
 end
 
 %% from ~/MATLABCODE/matlib/rtp_prod2/grib/grib_interpolate_era.m

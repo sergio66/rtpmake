@@ -1,4 +1,4 @@
-function [hd0, hattr, pd0, pattr, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,rgrans,NWPmodel,iSNPPorJ1orJ2,iInterp)
+function [hd0, hattr, pd0, pattr, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,rgrans,NWPmodel,iSNPPorJ1orJ2,iInterp,iUVW)
 
 tstr = [];
 
@@ -52,18 +52,25 @@ if (nargin == 4)
   NWPmodel = 'era';
   iSNPPorJ1orJ2 = 0;    %SNPP
   iInterp = +1;         %interp the analysis
+  iUVW    = -1;         %no uv,w, at every level
 elseif (nargin == 5)
   % date and granule number so do allsky (sct = scattering)
   prod = 'sct';
   iSNPPorJ1orJ2 = 0;    %SNPP
   iInterp = +1;         %interp the analysis
+  iUVW    = -1;         %no uv,w, at every level  
 elseif (nargin == 6)
   prod = 'sct';
   iInterp = +1;         %interp the analysis
+  iUVW    = -1;         %no uv,w, at every level  
 elseif (nargin == 7)
   prod = 'sct';
+  iUVW    = -1;         %no uv,w, at every level
+elseif (nargin == 8)
+  prod = 'sct';  
 end
-  
+
+
 % Check option: subset or Scattering allsky RTP production.
 if(~ismember(prod,{'clr','sct'})) 
   error('Invalid run type (clear or scattering)');
@@ -355,7 +362,11 @@ for fn = iign
   switch cfg.model
    case 'ecmwf'
      if iInterp <= 0
-       [p,h,pattr]  = fill_ecmwf(p,h,pattr);
+       if uUVW < 0
+         [p,h,pattr]  = fill_ecmwf(p,h,pattr);
+       else
+         [p,h,pattr]  = fill_ecmwf(p,h,pattr,iUVW);
+       end
      else
        new_8_ECMfiles_interp_analysis
      end
@@ -487,7 +498,7 @@ for fn = iign
       p.scanang = saconv(p.satzen,p.zobs);
     end
 
-    [p2] = driver_sarta_cloud_rtp(h,hattr,p,pattr,run_sarta);
+    [p2] = driver_sarta_cloud_rtp(h,hattr,p,pattr,run_sarta);    
     [h,hattr,p2x,pattr] = rtptrim_sartacloud(h,hattr,p2,pattr);
     hd0 = h;
     pd0 = p2x;

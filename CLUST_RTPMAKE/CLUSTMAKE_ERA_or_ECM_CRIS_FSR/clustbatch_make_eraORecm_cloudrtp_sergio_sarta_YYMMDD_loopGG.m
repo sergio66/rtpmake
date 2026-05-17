@@ -1,6 +1,10 @@
 %% run with
-%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_jobB.sbatch 2 for niInterp
-%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_chip.sbatch 4 for iInterp
+%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_jobB.sbatch  2 for niInterp, no uvw
+%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_jobB.sbatch -2 for niInterp, yes uvw
+
+%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_chip.sbatch  4 for iInterp, no uvw
+%% sbatch --array=N1-N2 --output='testslurm' sergio_matlab_chip.sbatch -4 for iInterp, yes uvw
+
 %% N1 = 1, N2 = number of files to be processed
 
 %% specify text file which has YY MM DD GG lst that needs to be processed 
@@ -33,6 +37,11 @@ if ~exist('iSNPPorJ1orJ2')
   iSNPPorJ1orJ2 = +1; %% J1
 end
 
+if ~exist('iUVW')
+  iUVW = -1;   %% do not add in windspeeds u,v,w
+  iUVW = +1;   %% do     add in windspeeds u,v,w  
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
@@ -41,6 +50,7 @@ if length(JOB) == 0
   JOB = 214;
   JOB = 099; %% LA fires from D. Tobin
   JOB = 180;
+  JOB = 200;  
 end
 
 warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
@@ -52,10 +62,24 @@ yymmdd0  = [2022 01 15]; ddLoop = [14 : 22];  %% ECMWF says ATMS shows gravity w
 yymmdd0  = [2019 04 25]; ddLoop = [];  %% HALO day that Eric processed, see ~/MATLABCODE/CRODGERS_FAST_CLOUD/HALO_BdryLayer/Proposal2024/driver_compare_AI.m
 yymmdd0  = [2019 04 26]; ddLoop = [];  %% rather surprisingly, he did this day???
 yymmdd0  = [2025 01 08]; ddLoop = [];  %% FIres over LA, from Dave Tobin
-yymmdd0  = [2024 11 13]; ddLoop = [];  %% FIres over LA, from Dave Tobin
+yymmdd0  = [2024 11 13]; ddLoop = [];  %% WHYMSIE
 
 if length(ddLoop) == 0
   ddLoop = yymmdd0(3);
+end
+
+if iERAorECM == -1
+  cfg.model = 'ecmwf';
+elseif iERAorECM == +1
+  cfg.model = 'era';
+else
+  error('gsk;jksjlksjslkjhs')
+end
+
+if (strcmp(cfg.model,'era') | strcmp(cfg.model,'merra2')) & iUVW > 0
+  cfg.model
+  iUVW
+  error('hmm have not coded this up')
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,23 +104,38 @@ for iiddloop = 1 : length(ddLoop)
   yy = yymmdd0(1); mm = yymmdd0(2); dd = yymmdd0(3); gg = iaGlist;
 
   dout_set
-  fout_set
+  if iUVW < 0
+    fout_set
+  else
+    fout_set_uvw
+  end
   
   if ~exist(dout)
     mker = ['!mkdir -p ' dout];
     eval(mker)
   end
-  
-  ee = dir([dout '/' fout]);
+
+  if iUVW < 0
+    ee = dir([dout '/' fout]);
+  else
+    ee = dir([dout '/' fmatout]);
+  end
   if length(ee) == 0
     if iERAorECM == 1
-      [hd0, ha0, pd0, pa0, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,gg,'era',iSNPPorJ1orJ2,iInterp);
+      [hd0, ha0, pd0, pa0, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,gg,'era',iSNPPorJ1orJ2,iInterp,iUVW);
     elseif iERAorECM == -1  
-      [hd0, ha0, pd0, pa0, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,gg,'ecmwf',iSNPPorJ1orJ2,iInterp);
+      [hd0, ha0, pd0, pa0, tstr] = cris_l1c_to_rtp_sergio(yy,mm,dd,gg,'ecmwf',iSNPPorJ1orJ2,iInterp,iUVW);
     end
-  
-    rtpwrite([dout '/' fout],hd0, ha0, pd0, pa0);
 
+    if iUVW < 0
+      rtpwrite([dout '/' fout],hd0, ha0, pd0, pa0);
+    else
+      [xhd0,xpdmat] = get_richardson_number_levels(hd0,ha0,pd0,pa0);      
+      saver = ['save ' dout '/' fmatout  ' xhd0 xpdmat '];
+      eval(saver)
+      %% plot_richardson_PBLH
+    end
+    
     i900 = find(hd0.vchan >= 900,1);
     tobs = rad2bt(900,pd0.robs1(i900,:));
     tclr = rad2bt(900,pd0.sarta_rclearcalc(i900,:));
@@ -123,9 +162,14 @@ for iiddloop = 1 : length(ddLoop)
     figure(1); caxis(cx); 
     figure(2); caxis(cx); 
     figure(3); caxis(cx); 
-    fprintf(1,'DONE : %s written out  \n',[dout '/' fout])  
+    fprintf(1,'DONE : %s written out  \n',[dout '/' fmatout])  
   else
-    fprintf(1,'%s already exists \n',[dout '/' fout])
+    if iUVW < 0
+      fprintf(1,'%s already exists \n',[dout '/' fout])
+    elseif iUVW > 0
+      fprintf(1,'%s already exists \n',[dout '/' fmatout])
+    end
+    
   end
 
 end

@@ -1,4 +1,4 @@
-function F = grib_interpolate(fn_s,fn_h);
+function F = grib_interpolate(fn_s,fn_h,iUVW);
 % 
 % Inputs: fn_s, fn_h
 %         Netcdf files containing grib1 and grib2 
@@ -13,6 +13,10 @@ function F = grib_interpolate(fn_s,fn_h);
 % in the future.  Minor changes are needed to use this for ERA, etc.
 %
 % L. Strow, June 11, 2014
+
+if nargin == 2
+  iUVW = -1;
+end
 
 F.s_longitude = ncread(fn_s,'longitude');
 F.s_latitude  = ncread(fn_s,'latitude');
@@ -95,6 +99,28 @@ for i=1:length(F.levid)
    F.o3(i).ig = griddedInterpolant(iX,iY,flipud(squeeze(o3(:,:,i))),'linear');
 end
 clear o3
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+if iUVW > 0
+  u = permute(single(ncread(fn_h,'u')),[2,1,3]);
+  for i=1:length(F.levid)
+     F.u(i).ig = griddedInterpolant(iX,iY,flipud(squeeze(u(:,:,i))),'linear');   
+  end
+  clear u
+  
+  v = permute(single(ncread(fn_h,'v')),[2,1,3]);
+  for i=1:length(F.levid)
+     F.v(i).ig = griddedInterpolant(iX,iY,flipud(squeeze(v(:,:,i))),'linear');   
+  end
+  clear v
+  
+  w = permute(single(ncread(fn_h,'w')),[2,1,3]);
+  for i=1:length(F.levid)
+     F.w(i).ig = griddedInterpolant(iX,iY,flipud(squeeze(w(:,:,i))),'linear');   
+  end
+  clear w
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clwc = permute(single(ncread(fn_h,'clwc')),[2,1,3]);
 for i=1:length(F.levid)

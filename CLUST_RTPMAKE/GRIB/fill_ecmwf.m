@@ -5,7 +5,12 @@
 %
 % Modify to include era?
 
-function [prof, head, pattr, iDoneOne, iaDone] = fill_ecmwf(prof, head, pattr);
+function [prof, head, pattr, iDoneOne, iaDone] = fill_ecmwf(prof, head, pattr,iUVW);
+
+if nargin < 4
+  iUVW = -1;
+end
+
 
 profin = prof;
 headin = head;
@@ -112,6 +117,8 @@ for i = 1:n
   % Actually read grib1, grib2 .nc files
   fn_s = [fn '-1.nc'];
   fn_h = [fn '-2.nc'];
+  fprintf(1,'in fill_ecmwf : fn_s,fn_h = %s %s \n',fn_s,fn_h)
+  
   % Do the netcdf files exist?
   if exist(fn_s) == 0 | exist(fn_h) == 0 
     disp(['rtpmake/CLUST_RTPMAKE/GRIB/fill_ecmwf.m : Netcdf grib files missing for root: ' fn])
@@ -126,7 +133,7 @@ for i = 1:n
   if ~strcmp(ename,fn) 
     clear F  % Probably not needed
     disp('New file')
-    F = grib_interpolate(fn_s,fn_h);
+    F = grib_interpolate(fn_s,fn_h,iUVW);
     ename = fn;
   end   
   % Fill rtp fields
@@ -158,8 +165,8 @@ for i = 1:n
    prof.sst     = F.sst.ig(rlat,rlon);
    prof.spres   = F.sp.ig(rlat,rlon);
    prof.stemp   = F.skt.ig(rlat,rlon);
-   wind_v          = F.v10.ig(rlat,rlon);
-   wind_u          = F.u10.ig(rlat,rlon);
+   wind_v       = F.v10.ig(rlat,rlon);
+   wind_u       = F.u10.ig(rlat,rlon);
    prof.wspeed  = sqrt(wind_u.^2 + wind_v.^2);   
    prof.wsource = mod(atan2(single(wind_u), single(wind_v)) * 180/pi,360);
    prof.tcc   = F.tcc.ig(rlat,rlon);
@@ -189,7 +196,19 @@ for i = 1:n
       prof.cc(l,:)    = F.cc(j(l)).ig(rlat,rlon);
       prof.clwc(l,:)  = F.clwc(j(l)).ig(rlat,rlon);
       prof.ciwc(l,:)  = F.ciwc(j(l)).ig(rlat,rlon);
+
+      prof.cc(l,:)    = F.cc(j(l)).ig(rlat,rlon);
+      prof.clwc(l,:)  = F.clwc(j(l)).ig(rlat,rlon);
+      prof.ciwc(l,:)  = F.ciwc(j(l)).ig(rlat,rlon);      
    end
+   if iUVW > 0
+     for l=1:length(F.levid)
+        prof.u(l,:) = F.u(j(l)).ig(rlat,rlon);
+        prof.v(l,:) = F.v(j(l)).ig(rlat,rlon);
+        prof.w(l,:) = F.w(j(l)).ig(rlat,rlon);
+     end
+   end
+     
   % Only want pressure levels in grib file, in order
   % Is this a 91 or 137 level forecast?
   % Note: On June 25, 2013 ECMWF moved to 137 levels, and they selected
@@ -347,8 +366,13 @@ switch nargin
                 'i.e. [p,h,pa] = fill_ecmwf(p,h,pa)\n'])
   case 3
     % set an attribute string to let the rtp know what we have done
-    pattr = set_attr(pattr,'model','ecmwf');
+    if pattr ~= []
+      pattr = set_attr(pattr,'model','ecmwf');
+    end
   case 4
+    if iUVW == +1
+      disp('setting u,v,w')
+    end
     if iDoneOne < 0
       disp('OOPS : could not read in a single ECMWF match file!')
     end
