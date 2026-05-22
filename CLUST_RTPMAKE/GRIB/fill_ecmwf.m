@@ -1,11 +1,11 @@
+function [prof, head, pattr, iDoneOne, iaDone] = fill_ecmwf(prof, head, pattr,iUVW);
+
 % fill_ecmwf.m
 % 
 % L. Strow, 22 Oct 2014
 % S.Machado - tweaks through the years
 %
 % Modify to include era?
-
-function [prof, head, pattr, iDoneOne, iaDone] = fill_ecmwf(prof, head, pattr,iUVW);
 
 if nargin < 4
   iUVW = -1;
@@ -202,6 +202,8 @@ for i = 1:n
       prof.ciwc(l,:)  = F.ciwc(j(l)).ig(rlat,rlon);      
    end
    if iUVW > 0
+     prof.u10 = wind_u;
+     prof.v10 = wind_v;     
      for l=1:length(F.levid)
         prof.u(l,:) = F.u(j(l)).ig(rlat,rlon);
         prof.v(l,:) = F.v(j(l)).ig(rlat,rlon);
@@ -371,7 +373,7 @@ switch nargin
     end
   case 4
     if iUVW == +1
-      disp('setting u,v,w')
+      disp('setting u,v,w,us,vs')
     end
     if iDoneOne < 0
       disp('OOPS : could not read in a single ECMWF match file!')

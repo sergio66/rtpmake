@@ -27,6 +27,7 @@ figure(3); clf
   scatter_coast(xpdmat.rlon,xpdmat.rlat,10,xpdmat.zPBLH_Ri);
   title('PBLH from Ri [meters]')
   colormap jet
+  caxis([0 4])
   
 figure(4); clf
   pcolor(1:length(xpdmat.stemp),nanmean(xpdmat.plevs,2),xpdmat.stable); colorbar; colormap jet; shading interp

@@ -1,19 +1,49 @@
-function [yhd0,ypdmat] = get_richardson_number_layers(h0,p0,xhd0,xpdmat)
+function [yhd0,ypdmat] = get_richardson_number_layers(h0,p0,xhd0,xpdmat,iPlot)
 
 %% assumes hd0,pd0 are for LAYERS profile, and
-%%          xhd0,xpdmat came from corresponding NWP eg [xhd0,xpdmat] = get_richardson_number_levels(hd0,ha0,pd0,pa0);   so are in LEVELS formar
-
+%%         xhd0,xpdmat came from corresponding NWP eg [xhd0,xpdmat] = get_richardson_number_levels(hd0,ha0,pd0,pa0);   so are in LEVELS formar
+%% all salti are in meters
+%% all PBLH are  in meters
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% A Planetary Boundary Layer Height Climatology Derived from ECMWF Reanalysis Data AXEL VON ENGELN and JPAO TEIXEIRA
+%% J Clim, 2013, https://doi.org/10.1175/JCLI-D-12-00385.1
+%% 
+%% Several possibilities exist to determine the PBL height from
+%% atmospheric fields, mostly based on vertical gradients. Within this
+%% study we investigate the following gradient-based methods on profiles
+%% derived from ERA-Interim reanalysis fields: 
+%%   1) minimum gradient of relative humidity, PBLRH, 
+%%   2) maximum gradient of potential temperature, PBLTp, 
+%%   3) maximum gradient of virtual temperature, PBLTv,
+%%   4) minimum gradient of specific humidity q, PBLq, and 
+%%   5) minimum gradient of refractivity N, PBLN.
+%%
+%%      The methods to estimate the PBL height in this
+%%      paper are generally making use of vertical gradients.
+%%      All vertical profiles were thus interpolated to a 20 m
+%%      resolution up to 5 km (a 20-m interpolation assures
+%%      that the underlying ECMWF or sonde resolution is
+%%      kept, but it has no influence on the PBL height calcu-
+%%      lation methods). To avoid selecting a very low PBL
+%%      height caused by temperature inversions near the sur-
+%%      face, we excluded all data below 50 m in our analysis,
+%%      again both in ECMWF and in sonde data.
+%%
+%%   and now I have
+%%   6) compute Bulk Richardon Ri and see where it crosss a threshold
+%%
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %{
+VERSION 1
 
+JPSS-1 2024/11/13
 g180 : Antartica and Southern Ocean mix
 g200 : mostly ocean off California
 g209 : mostly Nepal and India, some Arabian Sea
 g210 : mostly Indian Ocean
-
-load /home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13//interp_analysis_uvw_cloudy_airs_l1c_ecm_sarta_baum_ice.2024.11.13.200.mat   %% this gives levels_h0,levels_pdmat0
-load /home/sergio/nogit/sergio_temp_rtp_files/singlefootprintretrievals_ccast_hires_jpss1/2024/11/13/interp_analysis_ecm_retr200_cris_-1_iDET_4_iStemp_ColWV_21_iCenterFov_-1_iCO2_Yes_No_Switch_-1_singlelayerclouds.mat
 
 gran = 180;
 loader = ['load /home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13//interp_analysis_uvw_cloudy_airs_l1c_ecm_sarta_baum_ice.2024.11.13.' num2str(gran) '.mat']; eval(loader)
@@ -28,6 +58,26 @@ pecm.gas_1 = poemNew.gas_1_OEMinitialization;
 
 [yhd0,ypdmat] = get_richardson_number_layers(hoemNew,poemNew,xhd0,xpdmat)
 [zhd0,zpdmat] = get_richardson_number_layers(hoemNew,pecm,xhd0,xpdmat)
+%}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%{
+VERSION 2
+
+JPSS-1 2024/11/13
+g180 : Antartica and Southern Ocean mix
+g200 : mostly ocean off California
+g209 : mostly Nepal and India, some Arabian Sea
+g210 : mostly Indian Ocean
+
+gran = 180;
+wspeedfile = ['/home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13//interp_analysis_uvw_cloudy_airs_l1c_ecm_sarta_baum_ice.2024.11.13.' num2str(gran) '.mat'];
+loader = ['load /home/sergio/nogit/sergio_temp_rtp_files/singlefootprintretrievals_ccast_hires_jpss1/2024/11/13/'];
+  loader = [loader '/interp_analysis_ecm_retr' num2str(gran) '_cris_-1_iDET_4_iStemp_ColWV_21_iCenterFov_-1_iCO2_Yes_No_Switch_-1_singlelayerclouds.mat']; eval(loader)
+
+addpath /umbc/rs/pi_sergio/WorkDirDec2025/matlabcode/PBL_Retrievals/HALO_BdryLayer/PBL_Hgt_from_poemNew/
+[pumbc,pecm,pbulkRI] = driver_compute_PBLH_poemNew(hoemNew,poemNew,wspeedfile);
 %}
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -69,7 +119,13 @@ from 0.5 to 3.0 depending on the specific study
 %}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
+
+%if max(xpdmat.zPBLH_Ri) > 100
+%  %% they are in km!!!!!!!    
+%  xpdmat.zPBLH_Ri = xpdmat.zPBLH_Ri/1000;
+%  xpdmat.salti    = xpdmat.salti/1000;      
+%end
+
 if h0.ptype < 1
   error('need h0.ptype == 1,2 == LAYERS')
 end
@@ -107,7 +163,10 @@ ypdmat.landfrac = y2pd0.landfrac;
 ypdmat.spres    = y2pd0.spres;
 ypdmat.salti    = y2pd0.salti;
 ypdmat.stemp    = y2pd0.stemp;
-ypdmat.wspeed   = y2pd0.wspeed;
+
+ypdmat.wspeed   = xpdmat.wspeed;
+ypdmat.u10      = xpdmat.u10;
+ypdmat.v10      = xpdmat.v10;
 
 %disp('warning ... using ECMWF stemp')
 %ypdmat.stemp    = xpdmat.stemp;
@@ -158,6 +217,12 @@ end
 ypdmat.gg = nan(size(ypdmat.ptemp));
 ypdmat.gg(1:mmx,:) = ggLAY;
 
+[rhLAY] = layeramt2RH(y2hd0,ypdmat);
+
+[mmx,nnx] = size(ggLAY);
+ypdmat.rh = nan(size(ypdmat.ptemp));
+ypdmat.rh(1:mmx,:) = ggLAY;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % more /home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/klayersV205_140levs/Doc/gas_units_code.txt
 %         21   mass mixing ratio in (g/g) or (kg/kg), dry air
@@ -184,6 +249,30 @@ for ii = 1 : nn
   ypdmat.stemp_pot(ii)     = ypdmat.surf_Tvirtual(ii) .* ((P0./ypdmat.spres(ii)).^Rd_Cp);
 end
 
+set_Ri_critical
+
+for ii = 1 : nn
+  %% these are after klayers
+  nlevs = y2pd0.nlevs(ii);
+  plevs = y2pd0.plevs(1:nlevs,ii);
+  zalts = y2pd0.palts(1:nlevs,ii);
+  
+  nlays = y2pd0.nlevs(ii)-1;
+  plays = y2pd0.plays(1:nlays,ii);
+  zalts = interp1(log(plevs),zalts,log(plays),[],'extrap');
+  ypdmat.zalts(:,ii) = nan;
+  ypdmat.zalts(1:nlays,ii) = zalts;  
+end  
+
+%size(ypdmat.Tvirtual)
+[mmm,nnn] = size(ypdmat.zalts);
+ypdmat.staticE = nan(size(ypdmat.Tvirtual));
+if iVers_Ri == 1
+  cp = 1004.7;   %J/kg/K
+  ypdmat.surf_staticE     = cp * ypdmat.surf_Tvirtual     + g * ypdmat.salti;
+  ypdmat.staticE(1:mmm,:) = cp * ypdmat.Tvirtual(1:mmm,:) + g * ypdmat.zalts(1:mmm,:);
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% convert to Ri =  g     (Tpot(z)-Tpot0)*(z-z0)
@@ -192,12 +281,6 @@ end
 %%
 %% where Tpot0,zpot0 = potential temp at surface, surface altitude
 %% units m/s2 K m / (K m2/s2) = m2/s2/(m2/s2) = []
-
-% Select a critical Richardson number. While 0.25 is common, studies
-% suggest using 0.24 for strong stable layers, 0.31 for weak stable,
-% and 0.39 for unstable conditions for better accuracy.
-
-RiCritical = 0.27;
 
 % The bulk Richardson number (R_{ib}) can be negative near the
 % surface, specifically in convective conditions where the surface is
@@ -215,13 +298,12 @@ RiCritical = 0.27;
 MALR = 6;
 DALR = 10;
 
-speed_sqr = (ypdmat.u).^2 + (ypdmat.v).^2;
+%speed_sqr = (ypdmat.u).^2 + (ypdmat.v).^2;  WRONG before 5/20/26
+speed_sqr = (ypdmat.u - ypdmat.u10).^2 + (ypdmat.v - ypdmat.v10).^2;
 	       
 [mm,nn] = size(ypdmat.gas_1);  %% 101 x 12150 for klayers
 
 ypdmat.Ri    = nan(size(ypdmat.gas_1));
-ypdmat.zalts = nan(size(ypdmat.gas_1));
-
 ypdmat.lapse = nan(size(ypdmat.gas_1));
 
 for ii = 1 : nn
@@ -232,16 +314,31 @@ for ii = 1 : nn
 
   nlays = y2pd0.nlevs(ii)-1;
   plays = y2pd0.plays(1:nlays,ii);
-  zalts = interp1(log(plevs),zalts,log(plays),[],'extrap');
-  ypdmat.zalts(:,ii) = nan;
-  ypdmat.zalts(1:nlays,ii) = zalts;  
+  zalts = ypdmat.zalts(1:nlays,ii);
   
   s2    = speed_sqr(1:nlays,ii);
   tp    = ypdmat.ptemp_pot(1:nlays,ii);
   tps   = ypdmat.stemp_pot(ii);
-  ypdmat.Ri(1:nlays,ii) = (tp - tps) .* (zalts - ypdmat.salti(ii));
-  ypdmat.Ri(1:nlays,ii) = g ./ tps ./s2 .* ypdmat.Ri(1:nlays,ii);
 
+  if iVers_Ri == 0
+    %% simmpler one
+    %% ypdmat.Ri(1:nlays,ii) = (tp - tps) .* (zalts - ypdmat.salti(ii));  %% Siedel has (tp-tps)*(z-zs)
+    %% WRONG before 5/20/26 : Bulk Ri method of Vogelezang and Holtslag [1996], referenced in 
+    %% Dian Siedel (2012), Climatology of the planetary boundary layer over the
+    %% continentalUnited States and Europe, JOURNAL OF GEOPHYSICAL
+    %% RESEARCH, VOL. 117, D17106, doi:10.1029/2012JD018143, 2012    
+    ypdmat.Ri(1:nlays,ii) = (tp - tps) .* (zalts);  %% Davy only has (tp-tps)*(z)
+    ypdmat.Ri(1:nlays,ii) = g ./ tps ./s2 .* ypdmat.Ri(1:nlays,ii);
+  elseif iVers_Ri == 1
+    %% harder one, with static energy
+    %% https://www.ecmwf.int/sites/default/files/elibrary/2017/17736-part-iv-physical-processes.pdf#section.3.10
+    %% pg 50 of IFS DOCUMENTATION – Cy43r3 Operational implementation 11 July 2017, PART IV: PHYSICAL PROCESSES
+    %%   3.10.1 Diagnostic boundary layer height, eqn 3.90
+    ypdmat.Ri(1:nlays,ii) = (ypdmat.staticE(1:nlays,ii) + ypdmat.surf_staticE(ii)) - g * (ypdmat.zalts(1:nlays,ii) + ypdmat.salti(ii));    
+    ypdmat.Ri(1:nlays,ii) = (ypdmat.staticE(1:nlays,ii) - ypdmat.surf_staticE(ii)) ./ ypdmat.Ri(1:nlays,ii);
+    ypdmat.Ri(1:nlays,ii) = 2 * g ./ s2 .* ypdmat.Ri(1:nlays,ii) .* (ypdmat.zalts(1:nlays,ii) - ypdmat.salti(ii));    
+  end
+  
   numer = diff(ypdmat.ptemp(1:nlays,ii));      %% dT  [K]
   denom = diff(zalts/1000);                    %% dz [km]  	       
   xlapse = numer./denom;                       %% K/km
@@ -253,69 +350,74 @@ for ii = 1 : nn
   boo = find(ypdmat.lapse(1:nlays,ii) > DALR);                               ypdmat.stable(boo,ii) = +1;  %% absolutely unstable, Rising air is warmer than its surroundings and continues to rise, forming convective clouds (e.g., cumulus).
   boo = find(MALR <= ypdmat.lapse(1:nlays,ii) & ypdmat.lapse(1:nlays,ii) <= DALR); ypdmat.stable(boo,ii) = 0;   %% conditionally unstable, Stable if air is unsaturated, but unstable if forced to saturation.
   boo = find(abs(DALR - ypdmat.lapse(1:nlays,ii)) <= 0.01);                  ypdmat.stable(boo,ii) = -2;  %% neutral,  A lifted parcel stays at the new altitude
-  
-  wah = ypdmat.Ri(1:nlays,ii);
-  good = find(wah >= RiCritical);
-  good = good(end);
-  ypdmat.zPBLH_Ri_coarse(ii) = zalts(good);
-  ypdmat.pPBLH_Ri_coarse(ii) = interp1(zalts,plays,ypdmat.zPBLH_Ri_coarse(ii),[],'extrap');
 
   levels_n    = xpdmat.nlevs(ii);
   levels_alts = xpdmat.zalts(1:levels_n,ii);
   levels_pres = xpdmat.plevs(1:levels_n,ii);
-  wah = interp1(zalts,ypdmat.Ri(1:nlays,ii),levels_alts,[],'extrap');
+
+  wah = ypdmat.Ri(1:nlays,ii);
   good = find(wah >= RiCritical);
-  good = good(end);
-  ypdmat.zPBLH_Ri(ii) = levels_alts(good);
-  ypdmat.pPBLH_Ri(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');  
-end
+  if length(good) > 10
+    good = good(end);
+    ypdmat.zPBLH_Ri_coarse(ii) = zalts(good);
+    ypdmat.pPBLH_Ri_coarse(ii) = interp1(zalts,plays,ypdmat.zPBLH_Ri_coarse(ii),[],'extrap');
 
-ocean = find(xpdmat.landfrac == 0);
-land  = find(xpdmat.landfrac > 0.90);
-if length(ocean)/length(xpdmat.landfrac) < 0.01
-  ocean = land;
-elseif length(land)/length(xpdmat.landfrac) < 0.01
-  land = ocean;
-end
-
-figure(1); clf; scatter_coast(xpdmat.rlon,xpdmat.rlat,50,xpdmat.zPBLH_Ri);                   title('PBLH Ri from ECMWF');  cx = caxis;
-figure(2); clf; scatter_coast(xpdmat.rlon,xpdmat.rlat,50,ypdmat.zPBLH_Ri);                   title('PBLH Ri from UMBC');   caxis(cx);
-figure(3); clf; scatter_coast(xpdmat.rlon,xpdmat.rlat,50,xpdmat.zPBLH_Ri-ypdmat.zPBLH_Ri);   title('PBLH Ri ECMWF-UMBC'); colormap(usa2); caxis([-1 +1]*1500)
-figure(4); clf; dz = -2000 : 100 : +2000; plot(dz,histc(xpdmat.zPBLH_Ri-ypdmat.zPBLH_Ri,dz));title('PBLH Ri ECMWF-UMBC'); grid;
-  fprintf(1,'mean(NWP = UMBC) = %8.6f m, std(NWP - UMBC) = %8.6f \n',mean(xpdmat.zPBLH_Ri-ypdmat.zPBLH_Ri),std(xpdmat.zPBLH_Ri-ypdmat.zPBLH_Ri))
-
-figure(5); clf; plot(-diff(xpdmat.zalts(:,6000))/1000,xpdmat.zalts(2:91,6000)/1000,'bo-',-diff(ypdmat.zalts(:,6000))/1000,ypdmat.zalts(2:101,6000)/1000,'rx-')
-  axis([0 2 0 5]); ylabel('hgt [km]'); xlabel('laayer thickness or diff between levels [km]'); legend('NWP levels xpdmat','UMBC layers ypdmat');
-figure(6); clf; plot(xpdmat.Ri(:,6000),xpdmat.zalts(:,6000)/1000,'bo-',ypdmat.Ri(:,6000),ypdmat.zalts(:,6000)/1000,'rx-')
-  axis([-2 2 0 5]); ylabel('hgt [km]'); xlabel('Ri []'); plotaxis2; legend('NWP levels xpdmat','UMBC layers ypdmat');
-
-figure(5); clf; plot(-diff(nanmean(xpdmat.zalts(:,ocean),2))/1000,nanmean(xpdmat.zalts(2:91,ocean),2)/1000,'bo-',-diff(nanmean(ypdmat.zalts(:,ocean),2))/1000,nanmean(ypdmat.zalts(2:101,ocean),2)/1000,'rx-')
-  axis([0 2 0 5]); ylabel('hgt [km]'); xlabel('laayer thickness or diff between levels [km]'); legend('NWP levels xpdmat','UMBC layers ypdmat');
-figure(6); clf; plot(nanmean(xpdmat.Ri(:,ocean),2),nanmean(xpdmat.zalts(:,ocean),2)/1000,'bo-',nanmean(ypdmat.Ri(:,ocean),2),nanmean(ypdmat.zalts(:,ocean),2)/1000,'rx-')
-  axis([-2 2 0 5]); ylabel('hgt [km]'); xlabel('Ri []'); plotaxis2; legend('NWP levels xpdmat','UMBC layers ypdmat');
-
-figure(7); clf; plot(nanmean(xpdmat.ptemp(:,ocean),2),nanmean(xpdmat.zalts(:,ocean),2)/1000,'bo-',nanmean(ypdmat.ptemp(:,ocean),2),nanmean(ypdmat.zalts(:,ocean),2)/1000,'rx-')
-  axis([200 300 0 15]); ylabel('hgt [km]'); xlabel('T(z) [K]'); plotaxis2; legend('NWP levels xpdmat','UMBC layers ypdmat');
-  axis([290 300 0 2])
-figure(8); clf; semilogx(nanmean(xpdmat.gas_1(:,ocean),2),nanmean(xpdmat.zalts(:,ocean),2)/1000,'bo-',nanmean(ypdmat.gg(:,ocean),2),nanmean(ypdmat.zalts(:,ocean),2)/1000,'rx-')
-  axis([0.001 0.1 0 15]); ylabel('hgt [km]'); xlabel('WV MR [g/g]'); plotaxis2; legend('NWP levels xpdmat','UMBC layers ypdmat');
-  axis([0.01 0.02 0 2])
-
-lev_speed = sqrt((xpdmat.u).^2 + (xpdmat.v).^2);
-lay_speed = sqrt((ypdmat.u).^2 + (ypdmat.v).^2);
-figure(9); clf; plot(nanmean(lev_speed(:,ocean),2),nanmean(xpdmat.zalts(:,ocean),2)/1000,'bo-',nanmean(lay_speed(:,ocean),2),nanmean(ypdmat.zalts(:,ocean),2)/1000,'rx-')
-  axis([0 10 0 15]); ylabel('hgt [km]'); xlabel('windspeed [m/s]'); plotaxis2; legend('NWP levels xpdmat','UMBC layers ypdmat');
-  axis([0 10 0 2])
-
-  %{
-figure(7); clf; semilogy(nanmean(xpdmat.ptemp(:,ocean),2),nanmean(xpdmat.plevs(:,ocean),2),'bo-',nanmean(ypdmat.ptemp(:,ocean),2),nanmean(ypdmat.plays(:,ocean),2),'rx-')
-  axis([250 300 500 1050]); ylabel('hgt [km]'); xlabel('T(z) [K]'); plotaxis2; legend('NWP levels xpdmat','UMBC layers ypdmat'); set(gca,'ydir','reverse')
-figure(8); clf; semilogx(nanmean(xpdmat.gas_1(:,ocean),2),nanmean(xpdmat.plevs(:,ocean),2),'bo-',nanmean(ypdmat.gg(:,ocean),2),nanmean(ypdmat.plays(:,ocean),2),'rx-')
-  axis([0.001 0.1 500 1050]); ylabel('hgt [km]'); xlabel('WV MR [g/g]'); plotaxis2; legend('NWP levels xpdmat','UMBC layers ypdmat'); set(gca,'ydir','reverse')
-%}
+    wah = interp1(zalts,ypdmat.Ri(1:nlays,ii),levels_alts,[],'extrap');
+    good = find(wah >= RiCritical);
+    good = good(end);
+    ypdmat.zPBLH_Ri(ii) = levels_alts(good);
+    ypdmat.pPBLH_Ri(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
+  else
+    ypdmat.zPBLH_Ri_coarse(ii) = NaN;
+    ypdmat.pPBLH_Ri_coarse(ii) = NaN;
+    ypdmat.zPBLH_Ri(ii) = NaN;
+    ypdmat.pPBLH_Ri(ii) = NaN;
+  end
   
-%iPlot = -1;
-%if iPlot > 0
-%  plot_richardson_PBLH
-%end
+  wah = interp1(zalts,ypdmat.gg(1:nlays,ii),levels_alts,[],'extrap');  %% find min gradient in z
+  wah = gradient(wah,levels_alts);
+  %good = find(wah == min(wah) & (levels_alts-ypdmat.salti(ii))/1000 <= 4.0,1);
+  gah = find((levels_alts-ypdmat.salti(ii))/1000 <= 4);
+  good = find(wah(gah) == min(wah(gah)),1);    
+  ypdmat.zPBLH_gg(ii) = levels_alts(gah(good));
+  ypdmat.pPBLH_gg(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
+  
+  wah = interp1(zalts,ypdmat.rh(1:nlays,ii),levels_alts,[],'extrap');  %% find min gradient in z
+  wah = gradient(wah,levels_alts);
+  %good = find(wah == min(wah) & (levels_alts-ypdmat.salti(ii))/1000 <= 4.0,1);
+  gah = find((levels_alts-ypdmat.salti(ii))/1000 <= 4);
+  good = find(wah(gah) == min(wah(gah)),1);    
+  ypdmat.zPBLH_rh(ii) = levels_alts(gah(good));
+  ypdmat.pPBLH_rh(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
+  
+  wah = interp1(zalts,ypdmat.Tvirtual(1:nlays,ii),levels_alts,[],'extrap');  %% find max gradient in z
+  wah = gradient(wah,levels_alts);
+  %good = find(wah == max(wah) & (levels_alts-ypdmat.salti(ii))/1000 <= 4.0,1);    
+  gah = find((levels_alts-ypdmat.salti(ii))/1000 <= 4);
+  good = find(wah(gah) == max(wah(gah)),1);
+  ypdmat.zPBLH_Tvir(ii) = levels_alts(gah(good));
+  ypdmat.pPBLH_Tvir(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
 
+  wah = interp1(zalts,ypdmat.ptemp_pot(1:nlays,ii),levels_alts,[],'extrap');  %% find max gradient in z
+  wah = gradient(wah,levels_alts);
+  %good = find(wah == max(wah) & (levels_alts-ypdmat.salti(ii))/1000 <= 4.0,1);
+  gah = find((levels_alts-ypdmat.salti(ii))/1000 <= 4);
+  good = find(wah(gah) == max(wah(gah)),1);
+  ypdmat.zPBLH_Tpot(ii) = levels_alts(gah(good));
+  ypdmat.pPBLH_Tpot(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
+    
+end
+
+ypdmat.zPBLH_Tpot = ypdmat.zPBLH_Tpot/1000;
+ypdmat.zPBLH_Tvir = ypdmat.zPBLH_Tvir/1000;
+ypdmat.zPBLH_gg   = ypdmat.zPBLH_gg/1000;
+ypdmat.zPBLH_rh   = ypdmat.zPBLH_rh/1000;
+ypdmat.zPBLH_Ri   = ypdmat.zPBLH_Ri/1000;
+ypdmat.salti      = ypdmat.salti/1000;
+
+if nargin == 4
+  iPlot = -1;
+end
+if iPlot > 0
+  plot_richardson_PBLH_layers
+end

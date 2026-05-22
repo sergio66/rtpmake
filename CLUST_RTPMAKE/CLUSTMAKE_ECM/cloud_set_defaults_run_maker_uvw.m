@@ -187,11 +187,17 @@ for ixx = 1 : length(iaGlist)
     %[h,ha,p2x,pa] = rtptrim_sartacloud(h,ha,p2,pa);
     if ~exist(fnamex)
       %rtpwrite(fnamex,h,ha,p2x,pa)
-      [xhd0,xpdmat] = get_richardson_number_levels(h,ha,p2,pa);      
-      saver = ['save ' fnamex ' xhd0 xpdmat '];
+      [xhd0,xpdmat] = get_richardson_number_levels(h,ha,p2,pa);
+      set_Ri_critical      
+      saver = ['save ' fnamex ' xhd0 xpdmat RiCritical iVers_Ri'];
       eval(saver)
       fprintf(1,'saved %s \n',fnamex)
-      %% plot_richardson_PBLH      
+      %% plot_richardson_PBLH
+
+      %%
+      %% see /umbc/rs/pi_sergio/WorkDirDec2025/matlabcode/PBL_Retrievals/HALO_BdryLayer/PBL_Hgt_from_poemNew/cluster_driver_compute_PBLH_poemNew.m
+      %%   for use of [yhd0,ypdmat] = get_richardson_number_layers(hoemNew,poemNew,xhd0,xpdmat,iPlot);
+      %%   saved into eg fnameOUT = ['/home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13/retr_cloudy_airs_l1c_ecm_sarta_baum_ice.2024.11.13.' num2str(gran,'%03d') '_layers_PBLH_Ri.mat'];      
     else
       fprintf(1,'%s already exists, not saving \n',fnamex)
     end

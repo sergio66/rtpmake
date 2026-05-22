@@ -2,7 +2,11 @@ function [xhd0,xpdmat] = get_richardson_number_levels(hd0,ha0,pd0,pa0);
 
 %% assumes hd0,pd0 are for LEVELS profile
 %% easiest to use this in eg clustbatch_make_eraORecm_cloudrtp_sergio_sarta_YYMMDD_loopGG.m
+%% all salti are in meters
+%% all PBLH are  in meters
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
 %{
 addpath0
 
@@ -51,6 +55,8 @@ if ~isfield(pd0,'u')
   pd0.w = zeros(size(pd0.ptemp));
   pd0.v = zeros(size(pd0.ptemp));
   pd0.u = ones(size(pd0.ptemp)) * 10;
+  pd0.u10 = ones (size(pd0.ptemp)) * 8;
+  pd0.v10 = ones (size(pd0.ptemp)) * 8;    
 end
 
 xpdmat.robs1   = x1pd0.robs1;
@@ -73,10 +79,16 @@ xpdmat.landfrac = x2pd0.landfrac;
 xpdmat.spres    = x2pd0.spres;
 xpdmat.salti    = x2pd0.salti;
 xpdmat.stemp    = x2pd0.stemp;
+
+%% wind velocity (u,v,w) at 91 levels
 xpdmat.u        = pd0.u;
 xpdmat.v        = pd0.v;
 xpdmat.w        = pd0.w;     
+
+%% wind velocity (u,v,w) at 10 m
 xpdmat.wspeed   = x2pd0.wspeed;
+xpdmat.u10       = pd0.u10;
+xpdmat.v10       = pd0.v10;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % more /home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/klayersV205_140levs/Doc/gas_units_code.txt
@@ -107,6 +119,38 @@ for ii = 1 : nn
   xpdmat.stemp_pot(ii)     = xpdmat.surf_Tvirtual(ii) .* ((P0./xpdmat.spres(ii)).^Rd_Cp);
 end
 
+set_Ri_critical
+
+for ii = 1 : nn
+  %% these are after klayers
+  nlevs = x2pd0.nlevs(ii);
+  plevs = x2pd0.plevs(1:nlevs,ii);
+  zalts = x2pd0.palts(1:nlevs,ii);
+  
+  %% these are before klayers ie raw sonde or NWP
+  NNlevs = pd0.nlevs(ii);
+  PPlevs = pd0.plevs(1:NNlevs,ii);
+  xpdmat.zalts(1:NNlevs,ii) = interp1(log(plevs),zalts,log(PPlevs),[],'extrap');
+end  
+
+if iVers_Ri == 1
+  cp = 1004.7;   %J/kg/K
+  xpdmat.surf_staticE = cp * xpdmat.surf_Tvirtual + g * xpdmat.salti;
+  xpdmat.staticE      = cp * xpdmat.Tvirtual      + g * xpdmat.zalts;
+end
+
+% debug
+% if iVers_Ri == 1
+%   pcolor((xpdmat.staticE - cp*xpdmat.ptemp_pot)./xpdmat.staticE);
+%   shading interp; colorbar
+% 
+%   plot(nanmean((xpdmat.staticE - cp*xpdmat.ptemp_pot)./xpdmat.staticE,2),nanmean(xpdmat.zalts,2)/1000)
+%   axis([-1/2 +1/2 0 20])
+%   title('frac error  staticE - cp*Tpot')
+%   plotaxis2; xlabel('frac error'); ylabel('hgt km')
+%   keyboard_nowindow  
+% end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% convert to Ri =  g     (Tpot(z)-Tpot0)*(z-z0)
@@ -115,12 +159,6 @@ end
 %%
 %% where Tpot0,zpot0 = potential temp at surface, surface altitude
 %% units m/s2 K m / (K m2/s2) = m2/s2/(m2/s2) = []
-
-% Select a critical Richardson number. While 0.25 is common, studies
-% suggest using 0.24 for strong stable layers, 0.31 for weak stable,
-% and 0.39 for unstable conditions for better accuracy.
-
-RiCritical = 0.27;
 
 % The bulk Richardson number (R_{ib}) can be negative near the
 % surface, specifically in convective conditions where the surface is
@@ -138,12 +176,12 @@ RiCritical = 0.27;
 MALR = 6;
 DALR = 10;
 
-speed_sqr = (xpdmat.u).^2 + (xpdmat.v).^2;
+%speed_sqr = (xpdmat.u).^2 + (xpdmat.v).^2;  WRONG before 5/20/26
+speed_sqr = (xpdmat.u - xpdmat.u10).^2 + (xpdmat.v - xpdmat.v10).^2;
 	       
 [mm,nn] = size(xpdmat.gas_1);  %% 91 x 12150 for NWP, but for sondes can be any number  of levels, esp if this is regr49.iprtp or ecm83.ip.rtp
 
 xpdmat.Ri    = nan(size(xpdmat.gas_1));
-xpdmat.zalts = nan(size(xpdmat.gas_1));
 xpdmat.lapse = nan(size(xpdmat.gas_1));
 
 for ii = 1 : nn
@@ -153,15 +191,36 @@ for ii = 1 : nn
   zalts = x2pd0.palts(1:nlevs,ii);
 
   %% these are before klayers ie raw sonde or NWP
-  
   NNlevs = pd0.nlevs(ii);
   PPlevs = pd0.plevs(1:NNlevs,ii);
-  xpdmat.zalts(1:NNlevs,ii) = interp1(log(plevs),zalts,log(PPlevs),[],'extrap');
+  %% xpdmat.zalts(1:NNlevs,ii) = interp1(log(plevs),zalts,log(PPlevs),[],'extrap');
   s2    = speed_sqr(1:NNlevs,ii);
   tp    = xpdmat.ptemp_pot(1:NNlevs,ii);
   tps   = xpdmat.stemp_pot(ii);
-  xpdmat.Ri(1:NNlevs,ii) = (tp - tps) .* (xpdmat.zalts(1:NNlevs,ii) - xpdmat.salti(ii));
-  xpdmat.Ri(1:NNlevs,ii) = g ./ tps ./s2 .* xpdmat.Ri(1:NNlevs,ii);
+  
+  if iVers_Ri == 0
+    %% simpler one
+    %% xpdmat.Ri(1:NNlevs,ii) = (tp - tps) .* (xpdmat.zalts(1:NNlevs,ii) - xpdmat.salti(ii));  %% Siedel has (tp-tps)*(z-zs)
+    %% WRONG before 5/20/26 : Bulk Ri method of Vogelezang and Holtslag [1996], referenced in 
+    %% Dian Siedel (2012), Climatology of the planetary boundary layer over the
+    %% continentalUnited States and Europe, JOURNAL OF GEOPHYSICAL
+    %% RESEARCH, VOL. 117, D17106, doi:10.1029/2012JD018143, 2012    
+    xpdmat.Ri(1:NNlevs,ii) = (tp - tps) .* (xpdmat.zalts(1:NNlevs,ii));  %% Davy only has (tp-tps)*(z)
+    xpdmat.Ri(1:NNlevs,ii) = g ./ tps ./s2 .* xpdmat.Ri(1:NNlevs,ii);
+  elseif iVers_Ri == 1
+    %% harder one, with static energy
+    %% https://www.ecmwf.int/sites/default/files/elibrary/2017/17736-part-iv-physical-processes.pdf#section.3.10
+    %% pg 50 of IFS DOCUMENTATION – Cy43r3 Operational implementation 11 July 2017, PART IV: PHYSICAL PROCESSES
+    %%   3.10.1 Diagnostic boundary layer height, eqn 3.90    
+    xpdmat.Ri(1:NNlevs,ii) = (xpdmat.staticE(1:NNlevs,ii) + xpdmat.surf_staticE(ii)) - g * (xpdmat.zalts(1:NNlevs,ii) + xpdmat.salti(ii));
+    xpdmat.Ri(1:NNlevs,ii) = (xpdmat.staticE(1:NNlevs,ii) - xpdmat.surf_staticE(ii)) ./ xpdmat.Ri(1:NNlevs,ii);
+    xpdmat.Ri(1:NNlevs,ii) = 2 * g ./ s2 .* xpdmat.Ri(1:NNlevs,ii) .* (xpdmat.zalts(1:NNlevs,ii) - xpdmat.salti(ii));
+
+    %axpdmat.Ri(1:NNlevs,ii) = (tp - tps) .* (xpdmat.zalts(1:NNlevs,ii) - xpdmat.salti(ii));  %% Davy only has (tp-tps)*(z)
+    %axpdmat.Ri(1:NNlevs,ii) = g ./ tps ./s2 .* axpdmat.Ri(1:NNlevs,ii);
+    %plot(xpdmat.Ri(1:NNlevs,ii),xpdmat.zalts(1:NNlevs,ii)/1000,'bx-',axpdmat.Ri(1:NNlevs,ii),xpdmat.zalts(1:NNlevs,ii)/1000,'rx-'); axis([-40 120 0 10])    
+    %keyboard_nowindow
+  end
 
   numer = diff(xpdmat.ptemp(1:NNlevs,ii));      %% dT  [K]
   denom = diff(xpdmat.zalts(1:NNlevs,ii)/1000); %% dz [km]  	       
@@ -174,6 +233,10 @@ for ii = 1 : nn
   boo = find(xpdmat.lapse(1:NNlevs,ii) > DALR);                               xpdmat.stable(boo,ii) = +1;  %% absolutely unstable, Rising air is warmer than its surroundings and continues to rise, forming convective clouds (e.g., cumulus).
   boo = find(MALR <= xpdmat.lapse(1:NNlevs,ii) & xpdmat.lapse(1:NNlevs,ii) <= DALR); xpdmat.stable(boo,ii) = 0;   %% conditionally unstable, Stable if air is unsaturated, but unstable if forced to saturation.
   boo = find(abs(DALR - xpdmat.lapse(1:NNlevs,ii)) <= 0.01);                  xpdmat.stable(boo,ii) = -2;  %% neutral,  A lifted parcel stays at the new altitude
+
+  %if iVers_Ri == 1
+  %  plot(xpdmat.Ri(1:NNlevs,ii),xpdmat.zalts(1:NNlevs,ii)/1000); title([num2str(ii) ' ' num2str(xpdmat.salti(ii))] ); axis([0 1 0 5]); disp('ret to continue'); pause
+  %end
   
   wah = xpdmat.Ri(1:NNlevs,ii);
   good = find(wah >= RiCritical);
@@ -182,8 +245,11 @@ for ii = 1 : nn
   xpdmat.pPBLH_Ri(ii) = interp1(xpdmat.zalts(1:NNlevs,ii),PPlevs,xpdmat.zPBLH_Ri(ii),[],'extrap');
 end
 
+xpdmat.zPBLH_Ri   = xpdmat.zPBLH_Ri/1000;
+xpdmat.salti      = xpdmat.salti/1000;
+
 iPlot = -1;
 if iPlot > 0
-  plot_richardson_PBLH
+  plot_richardson_PBLH_levels
 end
 
