@@ -75,13 +75,14 @@
 
 RiCritical = 0.27;   %% I used this initially, looks like it is a little too high
 
+RiCritical = 0.20;   %% try this since I am still 25% too high (UMBC_PBLH = 1.25 ERA5_PBLH, but I still think this is not low enough
+
 RiCritical = 0.25;   %% ERA5 uses this, but they also have a surface friction velocity term in denom   u^2 + v^2 + b ustar^2
                      %% where ustar = surfae friction velocity, b is a coeff accoounting for this (so effectively I have b=0)
                      %% results in 0.06 km lowering of PBLH over ocean
 
-RiCritical = 0.20;   %% try this since I am still 25% too high (UMBC_PBLH = 1.25 ERA5_PBLH, but I still think this is not low enough
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 iVers_Ri = 0;    %% simple one,  from Richard Davy, J. Clim, 2018 and Dian Siedel,  JGR-Atmos, 2012, uses potential temp
 iVers_Ri = 1;    %% fancier one, from Xingya Xi , JGR_Atmos 2024 (and ERA5)                          uses staticE
+%iVers_Ri = 2;    %% fancier one, from Xingya Xi , JGR_Atmos 2024 (and ERA5)                          uses staticE, and with diff(numer)/diff(denom) rather than bulk
 

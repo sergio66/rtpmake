@@ -74,7 +74,8 @@
 #### https://hpc-community.unige.ch/t/srun-fatal-slurm-mem-per-cpu-slurm-mem-per-gpu-and-slurm-mem-per-node-are-mutually-exclusive/722/5
 ##  This is in MB, less aggressive
 #SBATCH --mem=16000
-
+#SBATCH --output=/home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13/MAXTRY/CLUST_MAKE_CRIS_RTP-%j.out
+#SBATCH --error=/home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13/MAXTRY/CLUST_MAKE_CRIS_RTP-%j.err
 ########################################################################
 
 source /home/sergio/.bashrc

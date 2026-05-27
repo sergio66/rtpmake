@@ -146,6 +146,7 @@ yhd0.gunit = h0.gunit(1);
 ypdmat.robs1   = y2pd0.robs1;
 ypdmat.rcalc   = y2pd0.rcalc;
 
+ypdmat.palts   = y2pd0.palts;
 ypdmat.plevs   = y2pd0.plevs;
 ypdmat.nlevs   = y2pd0.nlevs;
 ypdmat.ptemp   = y2pd0.ptemp;
@@ -168,15 +169,49 @@ ypdmat.wspeed   = xpdmat.wspeed;
 ypdmat.u10      = xpdmat.u10;
 ypdmat.v10      = xpdmat.v10;
 
+ypdmat.mmw = mmwater_rtp(h0,p0);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %disp('warning ... using ECMWF stemp')
 %ypdmat.stemp    = xpdmat.stemp;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ypdmat.u        = pd0.u;
 %ypdmat.v        = pd0.v;
 %ypdmat.w        = pd0.w;     
+
 if ~isfield(ypdmat,'plays')
   ypdmat.plays = plevs2plays(ypdmat.plevs);
 end
+
+%[size(ypdmat.plevs) size(ypdmat.palts)]
+for ii = 1 : length(p0.stemp)
+  n2lays = ypdmat.nlevs(ii)-1;
+  p2lays = ypdmat.plays(1:n2lays,ii);
+  t2temp = ypdmat.ptemp(1:n2lays,ii);
+  
+  nlays = p0.nlevs(ii)-1;
+  numer = p0.spres(ii) - p0.plevs(nlays,ii);
+  denom = p0.plevs(nlays+1,ii) - p0.plevs(nlays,ii);  
+  ypdmat.fracL(ii) = numer/denom;
+  junk = p0.spres(ii) - p0.plevs(nlays,ii);
+  junk = junk/log(p0.spres(ii)/p0.plevs(nlays,ii));
+  
+  ypdmat.oldPlaysL(ii)   = ypdmat.plays(nlays,ii);
+  ypdmat.newPlaysL(ii)   = junk;
+  ypdmat.plays(nlays,ii) = junk;
+
+  ypdmat.oldPtempL(ii)   = p0.ptemp(nlays,ii);
+  ypdmat.ptemp(nlays,ii) = interp1(log(p2lays),t2temp,log(junk),[],'extrap');
+  ypdmat.newPtempL(ii)   = ypdmat.ptemp(nlays,ii);
+  
+  ypdmat.oldPlevsLp1(ii) = p0.plevs(nlays+1,ii);
+  ypdmat.oldPaltsLp1(ii) = p0.palts(nlays+1,ii);  
+  ypdmat.plevs(nlays+1,ii) = p0.spres(ii);
+  ypdmat.palts(nlays+1,ii) = p0.salti(ii)+0.1;
+
+  ypdmat.gas_1(nlays,ii) = ypdmat.gas_1(nlays,ii) * ypdmat.fracL(ii);
+end
+%[size(ypdmat.plevs) size(ypdmat.palts)]
 
 ypdmat.u = nan(size(ypdmat.ptemp));
 ypdmat.v = nan(size(ypdmat.ptemp));
@@ -211,7 +246,28 @@ if y2hd0.gunit(1) ~= 1
   error('need gunit = 1 for gasID = 1 ---> then we convert to gunit 21 g/g');
 end
 
-[ggLAY,ppmvLAY,ppmvAVG,ppmvMAX,pavgLAY,tavgLAY,ppmv500,ppmv75,ppmvSURF] = layers2gg(y2hd0,ypdmat,1:length(ypdmat.stemp),1);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%{
+see ../COMMON_SETTINGS/testing_layers2gg_layers2sphum_conversions.m
+%}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[ggLAY1,ppmvLAY,ppmvAVG,ppmvMAX,pavgLAY,tavgLAY,ppmv500,ppmv75,ppmvSURF] = layers2gg(y2hd0,ypdmat,1:length(ypdmat.stemp),1);
+
+dpjunk = zeros(101,length(p0.stemp));
+dpjunk(1:100,:) = diff(p0.plevs,1)*100;  %% change mb to Pa
+ggLAY2 = molecules_to_mixratio(ypdmat.gas_1,abs(dpjunk));
+
+dLjunk = zeros(101,length(p0.stemp));
+dLjunk(1:100,:) = abs(diff(p0.palts,1));      %% in meteres
+[ggLAY2,qqLAY2] = recover_q_from_forward(p0.gas_1,p0.plays*100,p0.ptemp,abs(dLjunk),p0.nlevs-1);  %% gg is mass mix ratio while qq is sp. humidity
+
+[mmjunk,nnjunk] = size(ggLAY1);
+if mmjunk ~= (max(p0.nlevs)-1)
+  error('sizess do not jive')
+end  
+ggLAY = ggLAY1;             %% mine
+ggLAY = ggLAY2(1:mmjunk,:); %% claude
 
 [mmx,nnx] = size(ggLAY);
 ypdmat.gg = nan(size(ypdmat.ptemp));
@@ -221,7 +277,7 @@ ypdmat.gg(1:mmx,:) = ggLAY;
 
 [mmx,nnx] = size(ggLAY);
 ypdmat.rh = nan(size(ypdmat.ptemp));
-ypdmat.rh(1:mmx,:) = ggLAY;
+ypdmat.rh(1:mmx,:) = rhLAY;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % more /home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/klayersV205_140levs/Doc/gas_units_code.txt
@@ -235,8 +291,9 @@ Rd_Cp = 0.286;      %% Rd/Cp
 P0    = 1000;       %% mb
 g     = 9.81;       %% m/s2
 
-ypdmat.Tvirtual = ypdmat.ptemp .* (1 + 0.61 * ypdmat.gg);   %% Tvirtual = T (1 + 0.61 r) where r is mix ratio in g/g or kg/kg
-ypdmat.ptemp_pot = ypdmat.Tvirtual .* ((P0./ypdmat.plays).^Rd_Cp);
+ypdmat.ptemp_pot = ypdmat.ptemp  .* ((P0./ypdmat.plevs).^Rd_Cp);            %% use air temp
+ypdmat.Tvirtual  = ypdmat.ptemp .* (1 + 0.61 * ypdmat.gg);                  %% Tvirtual = T (1 + 0.61 r) where r is mix ratio in g/g or kg/kg
+ypdmat.Tvirtual_potential = ypdmat.Tvirtual .* ((P0./ypdmat.plays).^Rd_Cp); %% uses virtual temp
 
 nn = length(ypdmat.stemp);
 for ii = 1 : nn
@@ -303,8 +360,8 @@ speed_sqr = (ypdmat.u - ypdmat.u10).^2 + (ypdmat.v - ypdmat.v10).^2;
 	       
 [mm,nn] = size(ypdmat.gas_1);  %% 101 x 12150 for klayers
 
-ypdmat.Ri    = nan(size(ypdmat.gas_1));
-ypdmat.lapse = nan(size(ypdmat.gas_1));
+ypdmat.Ri        = nan(size(ypdmat.gas_1));
+ypdmat.lapserate = nan(size(ypdmat.gas_1));
 
 for ii = 1 : nn
   %% these are after klayers
@@ -317,7 +374,7 @@ for ii = 1 : nn
   zalts = ypdmat.zalts(1:nlays,ii);
   
   s2    = speed_sqr(1:nlays,ii);
-  tp    = ypdmat.ptemp_pot(1:nlays,ii);
+  tp    = ypdmat.Tvirtual_potential(1:nlays,ii);
   tps   = ypdmat.stemp_pot(ii);
 
   if iVers_Ri == 0
@@ -342,21 +399,24 @@ for ii = 1 : nn
   numer = diff(ypdmat.ptemp(1:nlays,ii));      %% dT  [K]
   denom = diff(zalts/1000);                    %% dz [km]  	       
   xlapse = numer./denom;                       %% K/km
-  ypdmat.lapse(1:nlays,ii) = -interp1(log(meanvaluebin(plays)),xlapse,log(plays),[],'extrap');   %% environment lapse rate
+  ypdmat.lapserate(1:nlays,ii) = -interp1(log(meanvaluebin(plays)),xlapse,log(plays),[],'extrap');   %% environment lapse rate
 
   %% stability
-  ypdmat.stable(1:nlays,ii) = nan(nlays,1);
-  boo = find(ypdmat.lapse(1:nlays,ii) < MALR);                               ypdmat.stable(boo,ii) = -1;  %% absolutely stable, Rising air is colder than its surroundings and sinks, regardless of moisture content. Typical in inversion layers.
-  boo = find(ypdmat.lapse(1:nlays,ii) > DALR);                               ypdmat.stable(boo,ii) = +1;  %% absolutely unstable, Rising air is warmer than its surroundings and continues to rise, forming convective clouds (e.g., cumulus).
-  boo = find(MALR <= ypdmat.lapse(1:nlays,ii) & ypdmat.lapse(1:nlays,ii) <= DALR); ypdmat.stable(boo,ii) = 0;   %% conditionally unstable, Stable if air is unsaturated, but unstable if forced to saturation.
-  boo = find(abs(DALR - ypdmat.lapse(1:nlays,ii)) <= 0.01);                  ypdmat.stable(boo,ii) = -2;  %% neutral,  A lifted parcel stays at the new altitude
+  ypdmat.stability(1:nlays,ii) = nan(nlays,1);
+  boo = find(ypdmat.lapserate(1:nlays,ii) < MALR);                               ypdmat.stability(boo,ii) = -1;  %% absolutely stable, Rising air is colder than its surroundings and sinks, regardless of moisture content.
+                                                                                                                 %% Typical in inversion layers.
+  boo = find(ypdmat.lapserate(1:nlays,ii) > DALR);                               ypdmat.stability(boo,ii) = +1;  %% absolutely unstable, Rising air warmer than surroundings, continues to rise, forming convective clouds (e.g., cumulus).
+  boo = find(MALR <= ypdmat.lapserate(1:nlays,ii) & ypdmat.lapserate(1:nlays,ii) <= DALR); ypdmat.stability(boo,ii) = 0;   %% conditionally unstable, Stable if air is unsaturated, but unstable if forced to saturation.
+  boo = find(abs(DALR - ypdmat.lapserate(1:nlays,ii)) <= 0.01);                  ypdmat.stability(boo,ii) = -2;  %% neutral,  A lifted parcel stays at the new altitude
 
   levels_n    = xpdmat.nlevs(ii);
   levels_alts = xpdmat.zalts(1:levels_n,ii);
   levels_pres = xpdmat.plevs(1:levels_n,ii);
 
+  dzalts = ypdmat.zalts(1:nlays,ii) - ypdmat.salti(ii);  
   wah = ypdmat.Ri(1:nlays,ii);
-  good = find(wah >= RiCritical);
+  %good = find(wah >= RiCritical);
+  good = find(wah >= RiCritical & dzalts/1000 <= 4);  
   if length(good) > 10
     good = good(end);
     ypdmat.zPBLH_Ri_coarse(ii) = zalts(good);
@@ -372,15 +432,28 @@ for ii = 1 : nn
     ypdmat.pPBLH_Ri_coarse(ii) = NaN;
     ypdmat.zPBLH_Ri(ii) = NaN;
     ypdmat.pPBLH_Ri(ii) = NaN;
+
+    %maybe just substitue this with PBLH_Tvir or something?????
+    ypdmat.zPBLH_Ri_coarse(ii) = ypdmat.salti(ii) + 10;
+    ypdmat.pPBLH_Ri_coarse(ii) = 0.99999 * ypdmat.spres(ii);
+    ypdmat.zPBLH_Ri(ii) = ypdmat.salti(ii) + 10;
+    ypdmat.pPBLH_Ri(ii) = 0.99999 * xpdmat.spres(ii);
+
   end
+
+  moo = abs(plays -xpdmat.pPBLH_Ri(ii));
+  moo = find(moo == min(moo),1);
+  ypdmat.lapserate_at_pPBLH_Ri(ii) = ypdmat.lapserate(moo,ii);
+  ypdmat.stability_at_pPBLH_Ri(ii) = ypdmat.stability(moo,ii);    
   
+  %%%%%%%%%%%%%%%%%%%%%%%%%
   wah = interp1(zalts,ypdmat.gg(1:nlays,ii),levels_alts,[],'extrap');  %% find min gradient in z
   wah = gradient(wah,levels_alts);
   %good = find(wah == min(wah) & (levels_alts-ypdmat.salti(ii))/1000 <= 4.0,1);
   gah = find((levels_alts-ypdmat.salti(ii))/1000 <= 4);
   good = find(wah(gah) == min(wah(gah)),1);    
   ypdmat.zPBLH_gg(ii) = levels_alts(gah(good));
-  ypdmat.pPBLH_gg(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
+  ypdmat.pPBLH_gg(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_gg(ii),[],'extrap');
   
   wah = interp1(zalts,ypdmat.rh(1:nlays,ii),levels_alts,[],'extrap');  %% find min gradient in z
   wah = gradient(wah,levels_alts);
@@ -388,7 +461,7 @@ for ii = 1 : nn
   gah = find((levels_alts-ypdmat.salti(ii))/1000 <= 4);
   good = find(wah(gah) == min(wah(gah)),1);    
   ypdmat.zPBLH_rh(ii) = levels_alts(gah(good));
-  ypdmat.pPBLH_rh(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
+  ypdmat.pPBLH_rh(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_rh(ii),[],'extrap');
   
   wah = interp1(zalts,ypdmat.Tvirtual(1:nlays,ii),levels_alts,[],'extrap');  %% find max gradient in z
   wah = gradient(wah,levels_alts);
@@ -396,16 +469,22 @@ for ii = 1 : nn
   gah = find((levels_alts-ypdmat.salti(ii))/1000 <= 4);
   good = find(wah(gah) == max(wah(gah)),1);
   ypdmat.zPBLH_Tvir(ii) = levels_alts(gah(good));
-  ypdmat.pPBLH_Tvir(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
+  ypdmat.pPBLH_Tvir(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Tvir(ii),[],'extrap');
 
-  wah = interp1(zalts,ypdmat.ptemp_pot(1:nlays,ii),levels_alts,[],'extrap');  %% find max gradient in z
+  wah = interp1(zalts,ypdmat.Tvirtual_potential(1:nlays,ii),levels_alts,[],'extrap');  %% find max gradient in z
   wah = gradient(wah,levels_alts);
   %good = find(wah == max(wah) & (levels_alts-ypdmat.salti(ii))/1000 <= 4.0,1);
   gah = find((levels_alts-ypdmat.salti(ii))/1000 <= 4);
   good = find(wah(gah) == max(wah(gah)),1);
   ypdmat.zPBLH_Tpot(ii) = levels_alts(gah(good));
-  ypdmat.pPBLH_Tpot(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
-    
+  ypdmat.pPBLH_Tpot(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Tpot(ii),[],'extrap');
+  %%%%%%%%%%%%%%%%%%%%%%%%%
+
+  pblhx = compute_pblh(ypdmat.zalts(1:nlays,ii),ypdmat.ptemp(1:nlays,ii),ypdmat.plays(1:nlays,ii),...
+                       ypdmat.gg(1:nlays,ii),ypdmat.u(1:nlays,ii),ypdmat.v(1:nlays,ii),...
+		       ypdmat.stemp(ii),[ypdmat.u10(ii) ypdmat.v10(ii)],ypdmat.landfrac(ii));
+  ypdmat.zPBLH_Ri(ii) = pblhx;
+  ypdmat.pPBLH_Ri(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
 end
 
 ypdmat.zPBLH_Tpot = ypdmat.zPBLH_Tpot/1000;
@@ -414,6 +493,12 @@ ypdmat.zPBLH_gg   = ypdmat.zPBLH_gg/1000;
 ypdmat.zPBLH_rh   = ypdmat.zPBLH_rh/1000;
 ypdmat.zPBLH_Ri   = ypdmat.zPBLH_Ri/1000;
 ypdmat.salti      = ypdmat.salti/1000;
+
+%figure(4); scatter_coast(ypdmat.rlon,ypdmat.rlat,50,ypdmat.zPBLH_Ri); caxis([0 4]); ax = axis; title('PBLH km')
+%figure(5); scatter_coast(ypdmat.rlon,ypdmat.rlat,50,ypdmat.stemp); title('SKT')
+%figure(6); scatter_coast(ypdmat.rlon,ypdmat.rlat,50,ypdmat.mmw);   title('mmw'); caxis([0 30])
+%ix = 96; figure(7); scatter_coast(ypdmat.rlon,ypdmat.rlat,50,sqrt(ypdmat.u(ix,:).^2 + ypdmat.v(ix,:).^2)); axis(ax); title('Speed')
+%keyboard_nowindow
 
 if nargin == 4
   iPlot = -1;

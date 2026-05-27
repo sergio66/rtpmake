@@ -87,8 +87,8 @@ xpdmat.w        = pd0.w;
 
 %% wind velocity (u,v,w) at 10 m
 xpdmat.wspeed   = x2pd0.wspeed;
-xpdmat.u10      = pd0.u10;
-xpdmat.v10      = pd0.v10;
+xpdmat.u10       = pd0.u10;
+xpdmat.v10       = pd0.v10;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % more /home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/klayersV205_140levs/Doc/gas_units_code.txt
@@ -109,7 +109,7 @@ if hd0.gunit(1) ~= 21
   error('need gunit = 21 for gasID = 1');
 end
 
-xpdmat.ptemp_pot = xpdmat.ptemp .* ((P0./xpdmat.plevs).^Rd_Cp);          %% use air temp
+xpdmat.ptemp_pot = xpdmat.Tvirtual .* ((P0./xpdmat.plevs).^Rd_Cp);       %% use air temp
 xpdmat.Tvirtual  = xpdmat.ptemp .* (1 + 0.61 * xpdmat.gas_1);            %% Tvirtual = T (1 + 0.61 r) where r is mix ratio in g/g or kg/kg
 xpdmat.Tvirtual_potential = xpdmat.ptemp .* ((P0./xpdmat.plevs).^Rd_Cp); %% uses virtual temp
 
@@ -152,7 +152,7 @@ end
 %   keyboard_nowindow  
 % end
 
-%% Tivvacgar19* bonjour
+Tivvacgar19* bonjour
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -233,9 +233,8 @@ for ii = 1 : nn
     denom = diff(xs2);
     xxpdmat.Ri(2:NNlevs,ii) = g ./ tp(2:NNlevs,ii) .* dz .* numer ./denom;
 
-    pblhx = compute_pblh(xpdmat.zalts(1:NNlevs,ii),xpdmat.ptemp(1:NNlevs,ii),xpdmat.plevs(1:NNlevs,ii),...
-		         xpdmat.gas_1(1:NNlevs,ii),xpdmat.u(1:NNlevs,ii),xpdmat.v(1:NNlevs,ii),...
-  		         xodmat.stemp(ii), xodmat.wspeed(ii),xpdmat.landfrac(ii));			 
+    pblhx = pblh(xpdmat.zalts(1:NNlevs,ii),xpdmat.ptemp(1:NNlevs,ii),xpdmat.plevs(1:NNlevs,ii),...
+		 xpdmat.gas_1(1:NNlevs,ii),xpdmat.u(1:NNlevs,ii),xpdmat.v(1:NNlevs,ii))
   end		 
 
   numer = diff(xpdmat.ptemp(1:NNlevs,ii));      %% dT  [K]
@@ -267,14 +266,7 @@ for ii = 1 : nn
     xpdmat.zPBLH_Ri(ii) = xpdmat.salti(ii) + 10;
     xpdmat.pPBLH_Ri(ii) = 0.99999 * xpdmat.spres(ii);
   end
-
-  pblhx = compute_pblh(xpdmat.zalts(1:NNlevs,ii),xpdmat.ptemp(1:NNlevs,ii),xpdmat.plevs(1:NNlevs,ii),...
-		       xpdmat.gas_1(1:NNlevs,ii),xpdmat.u(1:NNlevs,ii),xpdmat.v(1:NNlevs,ii),...
-		       xpdmat.stemp(ii),[xpdmat.u10(ii) xpdmat.v10(ii)],xpdmat.landfrac(ii));		       
-  xpdmat.zPBLH_Ri(ii) = pblhx;
-  xpdmat.pPBLH_Ri(ii) = interp1(xpdmat.zalts(1:NNlevs,ii),PPlevs,xpdmat.zPBLH_Ri(ii),[],'extrap');  
-
-  %{
+  
   if ii == 1 & iVers_Ri == 1
     axpdmat.Ri(1:NNlevs,ii) = (tp - tps) .* (xpdmat.zalts(1:NNlevs,ii) - xpdmat.salti(ii));  %% Davy only has (tp-tps)*(z)
     %axpdmat.Ri(1:NNlevs,ii) = g ./ tps ./s2 .* axpdmat.Ri(1:NNlevs,ii);
@@ -291,8 +283,7 @@ for ii = 1 : nn
     plot(xpdmat.ptemp(1:NNlevs,ii),xpdmat.zalts(1:NNlevs,ii)/1000,'bx-',xpdmat.Tvirtual_potential(1:NNlevs,ii),xpdmat.zalts(1:NNlevs,ii)/1000,'bx-')
     keyboard_nowindow
   end
-  %}
-  
+
   moo = abs(PPlevs -xpdmat.pPBLH_Ri(ii));
   moo = find(moo == min(moo),1);
   xpdmat.lapserate_at_pPBLH_Ri(ii) = xpdmat.lapserate(moo,ii);

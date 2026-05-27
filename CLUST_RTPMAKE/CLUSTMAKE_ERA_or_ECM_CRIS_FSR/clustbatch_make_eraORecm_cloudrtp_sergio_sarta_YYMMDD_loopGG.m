@@ -50,9 +50,10 @@ if length(JOB) == 0
   JOB = 214;
   JOB = 099; %% LA fires from D. Tobin
   JOB = 180;
-  JOB = 200;
   JOB = 21;
-  JOB = 23;      
+  JOB = 49;   %% daytime Australia, getting veddy veddy high PBLH
+  JOB = 48;   %% daytime Australia, getting veddy veddy high PBLH
+  JOB = 213;  
 end
 
 warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
@@ -142,6 +143,8 @@ for iiddloop = 1 : length(ddLoop)
       %% see /umbc/rs/pi_sergio/WorkDirDec2025/matlabcode/PBL_Retrievals/HALO_BdryLayer/PBL_Hgt_from_poemNew/cluster_driver_compute_PBLH_poemNew.m
       %%   for use of [yhd0,ypdmat] = get_richardson_number_layers(hoemNew,poemNew,xhd0,xpdmat,iPlot);
       %%   saved into eg fnameOUT = ['/home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13/retr_cloudy_airs_l1c_ecm_sarta_baum_ice.2024.11.13.' num2str(gran,'%03d') '_layers_PBLH_Ri.mat'];
+
+      figure(4); clf; scatter_coast(xpdmat.rlon,xpdmat.rlat,50,xpdmat.zPBLH_Ri/1000); title('Ri PBLH [km]')
     end
     
     i900 = find(hd0.vchan >= 900,1);
