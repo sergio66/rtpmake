@@ -46,7 +46,8 @@ g209 : mostly Nepal and India, some Arabian Sea
 g210 : mostly Indian Ocean
 
 gran = 180;
-loader = ['load /home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13//interp_analysis_uvw_cloudy_airs_l1c_ecm_sarta_baum_ice.2024.11.13.' num2str(gran) '.mat']; eval(loader)
+%% airs_l1c ---> cris_fsr
+loader = ['load /home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13//interp_analysis_uvw_cloudy_cris_fsr_ecm_sarta_baum_ice.2024.11.13.' num2str(gran) '.mat']; eval(loader)
 loader = ['load /home/sergio/nogit/sergio_temp_rtp_files/singlefootprintretrievals_ccast_hires_jpss1/2024/11/13/'];
   loader = [loader '/interp_analysis_ecm_retr' num2str(gran) '_cris_-1_iDET_4_iStemp_ColWV_21_iCenterFov_-1_iCO2_Yes_No_Switch_-1_singlelayerclouds.mat']; eval(loader)
 
@@ -71,8 +72,9 @@ g200 : mostly ocean off California
 g209 : mostly Nepal and India, some Arabian Sea
 g210 : mostly Indian Ocean
 
+%% airs_l1c ---> cris_fsr
 gran = 180;
-wspeedfile = ['/home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13//interp_analysis_uvw_cloudy_airs_l1c_ecm_sarta_baum_ice.2024.11.13.' num2str(gran) '.mat'];
+wspeedfile = ['/home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13//interp_analysis_uvw_cloudy_cris_fsr_ecm_sarta_baum_ice.2024.11.13.' num2str(gran) '.mat'];
 loader = ['load /home/sergio/nogit/sergio_temp_rtp_files/singlefootprintretrievals_ccast_hires_jpss1/2024/11/13/'];
   loader = [loader '/interp_analysis_ecm_retr' num2str(gran) '_cris_-1_iDET_4_iStemp_ColWV_21_iCenterFov_-1_iCO2_Yes_No_Switch_-1_singlelayerclouds.mat']; eval(loader)
 
@@ -163,7 +165,8 @@ ypdmat.rlat    = y2pd0.rlat;
 ypdmat.landfrac = y2pd0.landfrac;
 ypdmat.spres    = y2pd0.spres;
 ypdmat.salti    = y2pd0.salti;
-ypdmat.stemp    = y2pd0.stemp;
+ypdmat.stemp    = xpdmat.stemp;  %% use ECM stemp
+ypdmat.stemp    = y2pd0.stemp;   %% use input (probably retrieved) stemp
 
 ypdmat.wspeed   = xpdmat.wspeed;
 ypdmat.u10      = xpdmat.u10;
@@ -256,14 +259,16 @@ see ../COMMON_SETTINGS/testing_layers2gg_layers2sphum_conversions.m
 
 dpjunk = zeros(101,length(p0.stemp));
 dpjunk(1:100,:) = diff(p0.plevs,1)*100;  %% change mb to Pa
-ggLAY2 = molecules_to_mixratio(ypdmat.gas_1,abs(dpjunk));
+ggLAY2 = molecules_to_mixratio(ypdmat.gas_1,abs(dpjunk),ypdmat.nlevs-1,1);
 
 dLjunk = zeros(101,length(p0.stemp));
 dLjunk(1:100,:) = abs(diff(p0.palts,1));      %% in meteres
 [ggLAY2,qqLAY2] = recover_q_from_forward(p0.gas_1,p0.plays*100,p0.ptemp,abs(dLjunk),p0.nlevs-1);  %% gg is mass mix ratio while qq is sp. humidity
 
 [mmjunk,nnjunk] = size(ggLAY1);
-if mmjunk ~= (max(p0.nlevs)-1)
+if mmjunk < (max(p0.nlevs)-1)
+  size(ggLAY1)
+  (max(p0.nlevs)-1)
   error('sizess do not jive')
 end  
 ggLAY = ggLAY1;             %% mine
@@ -276,8 +281,9 @@ ypdmat.gg(1:mmx,:) = ggLAY;
 [rhLAY] = layeramt2RH(y2hd0,ypdmat);
 
 [mmx,nnx] = size(ggLAY);
+[mmxx,nnxx] = size(rhLAY);
 ypdmat.rh = nan(size(ypdmat.ptemp));
-ypdmat.rh(1:mmx,:) = rhLAY;
+ypdmat.rh(1:min(mmx,mmxx),:) = rhLAY(1:min(mmx,mmxx),:);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % more /home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/klayersV205_140levs/Doc/gas_units_code.txt
@@ -308,6 +314,7 @@ end
 
 set_Ri_critical
 
+ypdmat.zalts = nan(size(y2pd0.plevs));
 for ii = 1 : nn
   %% these are after klayers
   nlevs = y2pd0.nlevs(ii);
@@ -355,9 +362,10 @@ end
 MALR = 6;
 DALR = 10;
 
-%speed_sqr = (ypdmat.u).^2 + (ypdmat.v).^2;  WRONG before 5/20/26
-speed_sqr = (ypdmat.u - ypdmat.u10).^2 + (ypdmat.v - ypdmat.v10).^2;
-	       
+speed_sqr = (ypdmat.u).^2 + (ypdmat.v).^2;                           %% WRONG before 5/20/26 but retry here, no diff from above
+speed_sqr = (ypdmat.u - ypdmat.u10).^2 + (ypdmat.v - ypdmat.v10).^2; %% hmm this gives a 0.5 km bias in PBLH!
+ypdmat.speed_sqr = speed_sqr;
+
 [mm,nn] = size(ypdmat.gas_1);  %% 101 x 12150 for klayers
 
 ypdmat.Ri        = nan(size(ypdmat.gas_1));
@@ -478,21 +486,50 @@ for ii = 1 : nn
   good = find(wah(gah) == max(wah(gah)),1);
   ypdmat.zPBLH_Tpot(ii) = levels_alts(gah(good));
   ypdmat.pPBLH_Tpot(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Tpot(ii),[],'extrap');
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  %% this is just a routine to compute PBLH from derivatives of WV (RH or SH) and T (virtual temp or potential temp)
+  pblhx = compute_pblh_Ri(ypdmat.zalts(1:nlays,ii),ypdmat.ptemp(1:nlays,ii),ypdmat.plays(1:nlays,ii),...
+                         ypdmat.gg(1:nlays,ii),ypdmat.u(1:nlays,ii),ypdmat.v(1:nlays,ii),...
+			 ypdmat.stemp(ii),[ypdmat.u10(ii) ypdmat.v10(ii)],ypdmat.landfrac(ii));
+ 
   %%%%%%%%%%%%%%%%%%%%%%%%%
 
-  pblhx = compute_pblh(ypdmat.zalts(1:nlays,ii),ypdmat.ptemp(1:nlays,ii),ypdmat.plays(1:nlays,ii),...
-                       ypdmat.gg(1:nlays,ii),ypdmat.u(1:nlays,ii),ypdmat.v(1:nlays,ii),...
-		       ypdmat.stemp(ii),[ypdmat.u10(ii) ypdmat.v10(ii)],ypdmat.landfrac(ii));
   ypdmat.zPBLH_Ri(ii) = pblhx;
   ypdmat.pPBLH_Ri(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+  %%% now check if ypdmat.zPBLH_Ri <= 4 km
+  ypdmat.zPBLH_Ri_truecrossing_Rcrit(ii) = ypdmat.zPBLH_Ri(ii);
+  ypdmat.pPBLH_Ri_truecrossing_Rcrit(ii) = ypdmat.pPBLH_Ri(ii);
+  if (ypdmat.zPBLH_Ri(ii)-ypdmat.salti(ii) <= 4000)
+    %% no need to do anything
+  else
+    %% adjust to make sure PBLH from Ri(z) < 4 km
+    %% see jpss gran 48, fov 12150, 2024/11/13 over Australia land
+    %%   Ri starts out negative, starts swinging towards zeros but at 3.8 km there is a lot of windsherar and windspeed starts dripping, so Ri swings towards-ve value again
+    %%   it only becomes >= 0.25 at about 8 km when windspees have increased enough
+    dz = ypdmat.zalts(1:nlays,ii) - ypdmat.salti(ii);
+    RR = ypdmat.Ri(1:nlays,ii);
+    boo = find(dz <= 4000);
+    RRX = abs(RR(boo)-RiCritical);
+    moo = find(RRX == min(RRX));
+    moo = moo(end);
+    ypdmat.zPBLH_Ri(ii) = ypdmat.zalts(boo(moo),ii);
+    ypdmat.pPBLH_Ri(ii) = interp1(levels_alts,levels_pres,ypdmat.zPBLH_Ri(ii),[],'extrap');
+  end
+  
 end
 
-ypdmat.zPBLH_Tpot = ypdmat.zPBLH_Tpot/1000;
-ypdmat.zPBLH_Tvir = ypdmat.zPBLH_Tvir/1000;
-ypdmat.zPBLH_gg   = ypdmat.zPBLH_gg/1000;
-ypdmat.zPBLH_rh   = ypdmat.zPBLH_rh/1000;
-ypdmat.zPBLH_Ri   = ypdmat.zPBLH_Ri/1000;
-ypdmat.salti      = ypdmat.salti/1000;
+ypdmat.zPBLH_Tpot                  = ypdmat.zPBLH_Tpot/1000;
+ypdmat.zPBLH_Tvir                  = ypdmat.zPBLH_Tvir/1000;
+ypdmat.zPBLH_gg                    = ypdmat.zPBLH_gg/1000;
+ypdmat.zPBLH_rh                    = ypdmat.zPBLH_rh/1000;
+ypdmat.zPBLH_Ri_truecrossing_Rcrit = ypdmat.zPBLH_Ri_truecrossing_Rcrit/1000;  %% this is what you get from crossing Ri(z) at Ri_crtical
+ypdmat.zPBLH_Ri                    = ypdmat.zPBLH_Ri/1000;       %% if ypdmat.zPBLH_Ri_truecrossing_Rcrit > 4, this is where Ri is minimum between 0-4 km
+ypdmat.salti                       = ypdmat.salti/1000;
 
 %figure(4); scatter_coast(ypdmat.rlon,ypdmat.rlat,50,ypdmat.zPBLH_Ri); caxis([0 4]); ax = axis; title('PBLH km')
 %figure(5); scatter_coast(ypdmat.rlon,ypdmat.rlat,50,ypdmat.stemp); title('SKT')

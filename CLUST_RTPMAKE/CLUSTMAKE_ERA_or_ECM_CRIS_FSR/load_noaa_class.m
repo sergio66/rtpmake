@@ -53,6 +53,8 @@ p.atrack = int32( 1 + floor((iobs-1)/(nfov*nfor)) );
 p.xtrack = int32( 1 + mod(floor((iobs-1)/9),30) );
 p.ifov = int32( 1 + mod(iobs-1,9) );
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 sg = 2;       % number of src guard chans
 dg = nguard;  % number of dst guard chans
 
@@ -88,6 +90,8 @@ p.robs1(di, :) = single(rtmp(si, :));
 di = nLW + nMW + 4 * dg + di;
 rtmp = reshape(rSW, length(vSW), nobs);
 p.robs1(di, :) = single(rtmp(si, :));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % set to 1, for now
 p.robsqual = zeros(1, nobs, 'single');
@@ -165,6 +169,20 @@ pattr={{'profiles' 'iudef(1,:)' 'Dust flag:[1=true,0=false,-1=land,-2=cloud,-3=b
 
 noise = [nLW(:,1,1); nMW(:,1,1); nSW(:,1,1)];
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%{
+to make userLWMWSW.mat can also look at    /home/sergio/git/ftc_dev/test_crisL2100_H2020_vs_H2024.m
+addpath ~/git/matlabcode/matlibSergio/matlib2025/cris/
+ng = 4;
+[n1,n2,n3,userLW,userMW,userSW,ichan_hires] = cris_highres_chans(ng);
+
+then
+  nguard = 2;
+  h.ichan = cris_ichan(nguard, 2, nLW, nMW, nSW);
+  h.vchan = cris_vchan(nguard, userLW, userMW, userSW);
+%}
+
 if ~exist('userLWMWSW.mat')
   old = load('/asl/cris/ccast/sdr45_j01_HR/2023/001/CrIS_SDR_j01_s45_d20230101_t2312080_g233_v20d.mat','userLW','userMW','userSW');
   userLW = old.userLW;
@@ -175,3 +193,8 @@ if ~exist('userLWMWSW.mat')
 else
   load userLWMWSW.mat
 end
+
+scatter_coast(p.rlon,p.rlat,10,rad2bt(1231,p.robs1(729,:)));
+title('probably BT1231 obs')
+pause(0.1); 
+%error('ldgsk;skg;gks')

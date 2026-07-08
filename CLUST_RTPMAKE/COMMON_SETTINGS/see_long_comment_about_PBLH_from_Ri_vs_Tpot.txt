@@ -1,0 +1,235 @@
+%% A Planetary Boundary Layer Height Climatology Derived from ECMWF Reanalysis Data AXEL VON ENGELN and JPAO TEIXEIRA
+%% J Clim, 2013, https://doi.org/10.1175/JCLI-D-12-00385.1
+%% 
+%% Several possibilities exist to determine the PBL height from
+%% atmospheric fields, mostly based on vertical gradients. Within this
+%% study we investigate the following gradient-based methods on profiles
+%% derived from ERA-Interim reanalysis fields: 
+%%   1) minimum gradient of relative humidity, PBLRH, 
+%%   2) maximum gradient of potential temperature, PBLTp, 
+%%   3) maximum gradient of virtual temperature, PBLTv,
+%%   4) minimum gradient of specific humidity q, PBLq, and 
+%%   5) minimum gradient of refractivity N, PBLN.
+%%   6) New one, from Bulk Richardson  
+%%
+%%      The methods to estimate the PBL height in this
+%%      paper are generally making use of vertical gradients.
+%%      All vertical profiles were thus interpolated to a 20 m
+%%      resolution up to 5 km (a 20-m interpolation assures
+%%      that the underlying ECMWF or sonde resolution is
+%%      kept, but it has no influence on the PBL height calcu-
+%%      lation methods). To avoid selecting a very low PBL
+%%      height caused by temperature inversions near the sur-
+%%      face, we excluded all data below 50 m in our analysis,
+%%      again both in ECMWF and in sonde data.
+%%
+%%   and now I have
+%%   6) compute Bulk Richardon Ri and see where it crosss a threshold
+%%
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%{
+To determine the Planetary Boundary Layer Height PBLH or H
+from the bulk Richardson number Ri_{B}, you must find the height
+at which the cumulative Ri_{B} from the surface exceeds a critical
+value, typically Ri_{Bc} \approx 0.25.
+
+The method involves interpolating between model levels where
+Ri_{B} crosses this threshold.Steps to Determine PBLH
+HCalculate Ri_{B} Profiles:
+
+Compute the bulk Richardson number from the surface z_{0} up to
+several heights z using:Ri_{B}(z)=\frac{g}{\theta
+_{vs}}\frac{(\theta _{v}(z)-\theta
+_{vs})(z-z_{0})}{u(z)^{2}+v(z)^{2}}g: Gravity 9.81 \,
+m/s^2\theta _{vs}: Virtual potential temperature at the
+surface\theta_v(z): Virtual potential temperature at height
+zu, v: Horizontal wind components
+
+Define Critical Value Ri_{Bc}: Select a critical Richardson
+number. While 0.25 is common, studies suggest using 0.24 for
+strong stable layers, 0.31 for weak stable, and 0.39 for
+unstable conditions for better accuracy.
+
+Identify the Height: Find the lowest level z where Ri_B(z) \ge Ri_{Bc}
+
+Interpolate: Linearly interpolate between the height below the
+threshold and the height above it to find the exact height H
+
+Context-Specific ConsiderationsUrban Areas: When dealing with urban
+roughness sublayers, the formula is modified to account for
+displacement height d and surface parameters.
+
+Stable vs. Unstable: For stable boundary layers, Ri_{Bc} can range
+from 0.5 to 3.0 depending on the specific study
+%}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+
+See A high-resolution planetary boundary layer height seasonal climatology
+from GNSS radio occultations by Peter Kalmus Chi O. Ao. Kuo-Nung Wanga Maria Paola Manzi Joao Teixeira a
+https://doi.org/10.1016/j.rse.2022.113037
+
+Ri is entirely negative in the boundary layer :
+dTvpot is -17 to -18 K near the surface — the virtual potential%}
+%temperature at the surface (stemp_pot = 329.8 K) is much warmer than
+%the air above (Tvpot ≈ 312 K). This is a very unstable convective
+%boundary layer (hot Australian land surface, stemp=326.6K vs air at
+%~312K). For unstable conditions Ri is negative throughout the BL and
+%never crosses +0.25 — that's physically correct but your code only
+%looks for Ri >= RiCritical = 0.25.
+
+%  For unstable/convective BL (Ri < 0 everywhere),
+%  you need a different PBLH method. The standard approach:
+%  matlab
+
+% For unstable conditions (all Ri < 0 near surface):
+% Use the most negative Ri as PBLH (maximum instability)
+% OR use the gradient methods (Tvir, q) which work for all stabilities
+
+if all(Ri_nearSfc < RiCritical)
+    % Convective BL - Ri method fails
+    % Fall back to virtual temperature gradient method
+    zPBLH = zPBLH_Tvir;   % already computed in your code!
+else
+    % Stable/neutral BL - Ri threshold crossing works
+    good = find(Ri >= RiCritical & dz <= 4000);
+    zPBLH = zalts(good(1));   % FIRST crossing, not last!
+end
+
+% The key insight from the data is that your sample profile is a
+% convective/unstable BL — Ri is negative everywhere near the surface
+% because the surface (329.8K potential temp) is much hotter than the
+% air above (~312K). Ri will never cross +0.25 in these conditions.
+
+so the real issue is hot desert daytime convective profiles where Ri
+is negative throughout the BL and never crosses +0.25, giving zPBLH_Ri_truecrossing_Rcrit = NaN
+(or being set to salti + 10 from the else branch at line 444).
+This is physically correct behavior — the bulk Ri method simply doesn't work
+for strongly unstable convective BLs. It's designed for stable/neutral BLs. ECMWFknows
+this and that's why they add the ustar term you mentioned — it prevents Ri from going
+infinitely negative near the surface and gives a more sensible PBLH even in convective conditions.
+
+Your options:
+
+Option 1 — Add ustar term (proper fix):
+
+% Vogelezang & Holtslag (1996) formulation
+b     = 100;     % typical value
+ustar = 0.3;     % surface friction velocity - ideally from NWP, else estimate
+speed_sqr_VH = (u - u10).^2 + (v - v10).^2 + b * ustar^2;
+% This floors the denominator, preventing Ri -> -inf near surface
+
+Option 2 — For convective profiles, fall back to gradient methods:
+% Detect convective profile: surface much warmer than air above
+dTvpot_surf = ypdmat.Tvirtual_potential(nlays,ii) - ypdmat.stemp_pot(ii);
+if dTvpot_surf < -5    % strongly unstable
+    % Ri method unreliable - use virtual temp gradient instead
+    ypdmat.zPBLH_Ri_truecrossing_Rcrit(ii) = ypdmat.zPBLH_Tvir(ii);
+    ypdmat.pPBLH_Ri_truecrossing_Rcrit(ii) = ypdmat.pPBLH_Tvir(ii);
+else
+    % Stable/neutral - normal Ri threshold search
+    ...
+end
+
+Option 3 — Use minimum Ri within 0-4km as proxy for convective PBLH:
+b% For unstable profiles, PBLH ≈ where Ri is least negative (closest to 0)
+boo = find(dz <= 4000);
+[~, moo] = min(abs(Ri_up(boo)));   % closest to zero = top of unstable layer
+zPBLH = zalts_up(boo(moo));
+
+For your hot desert daytime case, Option 2 is probably cleanest —
+detect the convective regime and use zPBLH_Tvir which you're already computing.
+That method works well for both stable and unstable BLs.
+
+For a diagnostic output, your current approach is fine:
+
+Stable/neutral BL (nighttime, ocean) → Ri method works well,
+good agreement with ERA5
+Convective BL (hot desert daytime) → Ri method gives >4km,
+cap at 4km kicks in, gives a reasonable if imprecise estimate
+The 300m difference vs ERA5 for the sample profile is well within the uncertainty of any PBLH method
+
+The honest thing to do is just flag the convective cases in your output so users know the Ri method is less reliable there:
+
+Here's a summary of what changed:
+Lines 426-448 (Ri threshold search):
+
+length(good) > 10 → length(good) >= 1 — was requiring 10+ crossings which is way too strict
+Added comment explaining why good(end) is correct for descending zalts
+Refined the fine-grid search to also cap at 4km (was missing this before)
+Fallback now sets proper NaN without the bogus salti + 10 placeholder
+
+Lines 503-521 (post-compute_pblh adjustment):
+
+Detects convective regime via dTvpot_surf < -5K
+Convective (flag=2): falls back to zPBLH_Tpot — physically the best method for unstable BLs
+Wind shear (flag=3): keeps the min|Ri-RiCritical| fallback from your original code
+Good crossing (flag=0): no change
+
+New PBLH_Ri_flag — lets you filter by method in downstream analysis:
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Over land PBLH ranges from 2 to 3 km, with higher values over desert and arid regions during summer. GitHub
+The typical 2pm local time pattern over land looks like this:
+Hot deserts (Sahara, Arabian, Australian, SW USA):
+
+Highest PBLH globally: 3-5 km, occasionally up to 6km in extreme cases
+Exactly the regime causing your 0.5km high bias
+
+Tropical rainforest (Amazon, Congo, SE Asia):
+
+1-2 km — high moisture suppresses deep convection, BL stays shallow
+
+Temperate land (Europe, eastern USA, China):
+
+1.5-2.5 km in summer, 0.5-1 km in winter
+
+High latitude land (Canada, Siberia):
+
+0.5-1.5 km in summer, very shallow in winter
+
+Semi-arid/savanna (Sahel, southern Africa, India):
+
+2-3 km daytime
+
+So your 0.5km high bias over land daytime is actually quite reasonable
+given that your retrieved surface temps are better than ECMWF over hot
+surfaces — you're probably closest to truth over the desert regions
+where ECMWF land surface temps are worst. The paper by Seidel et al.
+compares ERA5, MERRA-2, JRA-55,
+and NCEP-2 and finds large spatial and temporal dependence in daytime
+BLH with maxima over hot land surfaces — consistent with what you're seeing. ECMWF Confluence
+
+This is a schematic based on the radiosonde climatology literature —
+not pixel-perfect geography but it captures the key features. The hot
+desert regions (Sahara, Arabian Peninsula, Australian interior, SW USA)
+dominate with 3.5–5+ km PBLH at 2pm, which is exactly where your 0.5km high bias shows up.
+Tropical rainforests stay shallow (1–1.5km) despite the heat due to high moisture
+suppressing convective growth. Temperate land sits in the middle at 1.5–2.5km.
+
+The paper I cited in the figure caption is:
+Seidel et al. (2021) —
+"Investigation of near-global daytime boundary layer height using...
+high-resolution radiosondes: first results and comparison with ERA5,...
+MERRA-2, JRA-55, and NCEP-2 reanalyses", Atmospheric Chemistry and ...
+						     Physics, 21,17079–17097.
+The DOI is: https://doi.org/10.5194/acp-21-17079-2021
+
+That's the paper that appeared in my search results from the ACP
+journal. However I should be honest — the schematic values I drew are
+my synthesis of the literature
+broadly (including that paper plus the ICESat-2/CATS paper and others)
+, not a direct reproduction of a figure from Seidel et al. The general
+pattern is well established across multiple studies,
+but if you want to cite specificnumbers for a paper,
+I'd recommend fetching that ACP article directly and using their Figure 2 (ERA5 global BLH map) or Figure 3 (radiosonde site
+
+Front. Remote Sens., 12 September 2021
+Sec. Lidar Sensing
+Volume 2 - 2021 | https://doi.org/10.3389/frsen.2021.716951
+Planetary Boundary Layer Height Estimates From ICESat-2 and CATSBackscatter Measurements
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,0 +1,20 @@
+Context for new chat:
+Working on PBLH (planetary boundary layer height) retrieval using bulk Richardson number, comparing against ERA5.
+Setup:
+
+Satellite IR retrieval gives T(z), WV(z), O3(z), surface temp on ~280 channels, 100 layers, 0.125km vertical resolution in lower atmosphere
+Wind profiles u(z), v(z) interpolated from ECMWF operational forecast (91 levels)
+PBLH computed via bulk Ri number, ECMWF IFS eqn 3.90 (Vogelezang & Holtslag 1996), using virtual dry static energy s_v = cp*Tv + g*hbl
+Code: get_richardson_number_layers_v2.m
+
+Current problem:
+
+ERA5 37-level PBLH comparison gave poor results over land (too coarse)
+Now have ERA5 137-level profiles downloaded but spot checks still give poor PBLH over land
+Suspicion: either eqn 3.90 implementation still has a bug, or ERA5 blh field cannot be reproduced offline from archived T/q/u/v profiles (computed online inside model with more info)
+
+
+Key finding from last session:
+
+For one Egypt profile: both ECMWF and retrieved Ri gave PBLH ~2km but ERA5 blh = 0.72km
+Suggests ERA5 blh uses internal model turbulence scheme output, not simple offline Ri from archived profiles

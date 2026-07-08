@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# run this with   sbatch -p cpu2021 --array=1-X --output='testslurm' sergio_matlab_jobB.sbatch
-# run this with   sbatch -p cpu2021 --array=1-Z --output='/dev/null' sergio_matlab_jobB.sbatch 
+# run this with   kleenslurm; sbatch --partition=2024 --array=1-X --output='testslurm' sergio_matlab_chip.sbatch
+# run this with   kleenslurm; sbatch --partition=2024 --array=1-Z --output='/dev/null' sergio_matlab_chip.sbatch 
 #
-# run this with   sbatch -p cpu2021 --array=1-Y   sergio_matlab_jobB.sbatch 1       for filelist, no interp
-# run this with   sbatch -p cpu2021 --array=1-Y   sergio_matlab_jobB.sbatch 3       for filelist, with interp analysis
+# run this with   kleenslurm; sbatch --partition=2024 --array=1-Y   sergio_matlab_chip.sbatch 1       for filelist, no interp
+# run this with   kleenslurm; sbatch --partition=2024 --array=1-Y   sergio_matlab_chip.sbatch 3       for filelist, with interp analysis
 #
-# run this with   sbatch -p cpu2021 --array=1-240 sergio_matlab_jobB.sbatch 2       for loop over a day, no interp
-# run this with   sbatch -p cpu2021 --array=1-240 sergio_matlab_jobB.sbatch 4       for loop over a day, with interp analysis
-# run this with   sbatch -p cpu2021 --array=1-240 sergio_matlab_jobB.sbatch -4      for loop over a day, with interp analysis, uvw
-# run this with   sbatch -p cpu2021 --array=1-240 sergio_matlab_jobB.sbatch -44     for loop over a day, with interp analysis, uvw, update compute_PBLH
+# run this with   kleenslurm; sbatch --partition=2024 --array=1-240 sergio_matlab_chip.sbatch 2       for loop over a day, no interp
+# run this with   kleenslurm; sbatch --partition=2024 --array=1-240 sergio_matlab_chip.sbatch 4       for loop over a day, with interp analysis
+# run this with   kleenslurm; sbatch --partition=2024 --array=1-240 sergio_matlab_chip.sbatch -4      for loop over a day, with interp analysis, uvw <<<< USE THIS TO MAKE INITIAL xpdmat >>>>
+# run this with   kleenslurm; sbatch --partition=2024 --array=1-240 sergio_matlab_chip.sbatch -44     for loop over a day, with interp analysis, uvw, update compute_PBLH_Ri
 
-# run this with   sbatch -p cpu2021 --array=1-Y   sergio_matlab_jobB.sbatch 5       for loop over a day, with interp analysis, but you can give a whole bunch of days thru a filelist
-# run this with   sbatch -p cpu2021 --array=1-240 sergio_matlab_jobB.sbatch 4       for making uniform clear from allfov
+# run this with   kleenslurm; sbatch --partition=2024 --array=1-Y   sergio_matlab_chip.sbatch 5       for loop over a day, with interp analysis, but you can give a whole bunch of days thru a filelist
+# run this with   kleenslurm; sbatch --partition=2024 --array=1-240 sergio_matlab_chip.sbatch 4       for making uniform clear from allfov
 
 ########################################################################
 
@@ -110,7 +110,7 @@ elif [[ "$1" -eq "4" ]]; then
   echo "cmd line arg = 4, choose day, loop over all granules in the day, yes Interp"
   srun matlab -nodisplay -r "iUVW = -1; iInterp = 1; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_YYMMDD_loopGG; exit"
 elif [[ "$1" -eq "-4" ]]; then
-  echo "cmd line arg = 4, choose day, loop over all granules in the day, yes Interp, uvw"
+  echo "cmd line arg = 4, choose day, loop over all granules in the day, yes Interp, uvw   THIS IS THE ONE TO USE"
   srun matlab -nodisplay -r "iUVW = +1; iInterp = 1; clustbatch_make_eraORecm_cloudrtp_sergio_sarta_YYMMDD_loopGG; exit"
 elif [[ "$1" -eq "-44" ]]; then
   echo "cmd line arg = 4, choose day, loop over all granules in the day, yes Interp, uvw"

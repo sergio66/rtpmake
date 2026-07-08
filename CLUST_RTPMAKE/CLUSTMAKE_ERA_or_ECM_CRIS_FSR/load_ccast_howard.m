@@ -58,8 +58,14 @@ p.atrack = int32( 1 + floor((iobs-1)/(nfov*nfor)) );
 p.xtrack = int32( 1 + mod(floor((iobs-1)/9),30) );
 p.ifov = int32( 1 + mod(iobs-1,9) );
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sg = 2;       % number of src guard chans
 dg = nguard;  % number of dst guard chans
+
+%% see load_noaa_class.m
+% vLW = x.wnum_lw;
+% vMW = x.wnum_mw;
+% vSW = x.wnum_sw;
 
 % true channel set sizes
 nLW = length(vLW) - 2 * sg;
@@ -85,6 +91,7 @@ p.robs1(di, :) = single(rtmp(si, :));
 di = nLW + nMW + 4 * dg + di;
 rtmp = reshape(rSW, length(vSW), nobs);
 p.robs1(di, :) = single(rtmp(si, :));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % set to 1, for now
 p.robsqual = zeros(1, nobs, 'single');

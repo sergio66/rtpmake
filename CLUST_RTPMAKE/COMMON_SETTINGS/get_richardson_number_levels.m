@@ -8,6 +8,13 @@ function [xhd0,xpdmat] = get_richardson_number_levels(hd0,ha0,pd0,pa0);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
 %{
+
+JPSS-1 2024/11/13
+g180 : Antartica and Southern Ocean mix
+g200 : mostly ocean off California
+g209 : mostly Nepal and India, some Arabian Sea
+g210 : mostly Indian Ocean
+
 addpath0
 
 [hd0,ha0,pd0,pa0] = rtpread('/home/sergio/git/matlabcode/REGR_PROFILES_SARTA/REGR49_PROFILES_for_kCARTA_breakouts_for_SARTA/regr49_1013_385ppm.ip.rtp');
@@ -20,6 +27,7 @@ pd0.rcalc = ones(size(pd0.stemp))*ttorad(1231,290);
 [xhd0,xpdmat] = get_richardson_number_levels(hd0,ha0,pd0,pa0);
 %}
   
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
 if hd0.ptype > 0
   error('need hd0.ptype == 0 == LEVELS')
@@ -152,8 +160,6 @@ end
 %   keyboard_nowindow  
 % end
 
-%% Tivvacgar19* bonjour
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% convert to Ri =  g     (Tpot(z)-Tpot0)*(z-z0)
@@ -233,7 +239,7 @@ for ii = 1 : nn
     denom = diff(xs2);
     xxpdmat.Ri(2:NNlevs,ii) = g ./ tp(2:NNlevs,ii) .* dz .* numer ./denom;
 
-    pblhx = compute_pblh(xpdmat.zalts(1:NNlevs,ii),xpdmat.ptemp(1:NNlevs,ii),xpdmat.plevs(1:NNlevs,ii),...
+    pblhx = compute_pblh_Ri(xpdmat.zalts(1:NNlevs,ii),xpdmat.ptemp(1:NNlevs,ii),xpdmat.plevs(1:NNlevs,ii),...
 		         xpdmat.gas_1(1:NNlevs,ii),xpdmat.u(1:NNlevs,ii),xpdmat.v(1:NNlevs,ii),...
   		         xodmat.stemp(ii), xodmat.wspeed(ii),xpdmat.landfrac(ii));			 
   end		 
@@ -268,9 +274,9 @@ for ii = 1 : nn
     xpdmat.pPBLH_Ri(ii) = 0.99999 * xpdmat.spres(ii);
   end
 
-  pblhx = compute_pblh(xpdmat.zalts(1:NNlevs,ii),xpdmat.ptemp(1:NNlevs,ii),xpdmat.plevs(1:NNlevs,ii),...
-		       xpdmat.gas_1(1:NNlevs,ii),xpdmat.u(1:NNlevs,ii),xpdmat.v(1:NNlevs,ii),...
-		       xpdmat.stemp(ii),[xpdmat.u10(ii) xpdmat.v10(ii)],xpdmat.landfrac(ii));		       
+  pblhx = compute_pblh_Ri(xpdmat.zalts(1:NNlevs,ii),xpdmat.ptemp(1:NNlevs,ii),xpdmat.plevs(1:NNlevs,ii),...
+  		          xpdmat.gas_1(1:NNlevs,ii),xpdmat.u(1:NNlevs,ii),xpdmat.v(1:NNlevs,ii),...
+		          xpdmat.stemp(ii),[xpdmat.u10(ii) xpdmat.v10(ii)],xpdmat.landfrac(ii));		       
   xpdmat.zPBLH_Ri(ii) = pblhx;
   xpdmat.pPBLH_Ri(ii) = interp1(xpdmat.zalts(1:NNlevs,ii),PPlevs,xpdmat.zPBLH_Ri(ii),[],'extrap');  
 

@@ -30,7 +30,7 @@ figure(3); clf
   caxis([0 4])
   
 figure(4); clf
-  pcolor(1:length(xpdmat.stemp),nanmean(xpdmat.plevs,2),xpdmat.stable); colorbar; colormap jet; shading interp
+  pcolor(1:length(xpdmat.stemp),nanmean(xpdmat.plevs,2),xpdmat.stability); colorbar; colormap jet; shading interp
   set(gca,'yscale','log'); set(gca,'ydir','reverse')
   caxis([-2 +2]); colormap(usa2)
   title('stability +1=US, 0=CS, -1=AS, -2=N')
@@ -41,7 +41,7 @@ figure(4); clf
 DALR = 10;  %% dry adiatic lapse rate
 MALR = 6;   %% moist adiatic lapse rate
 figure(5); clf
-  semilogy(nanmean(xpdmat.lapse(:,ocean),2),nanmean(xpdmat.plevs(:,ocean),2),'b',nanmean(xpdmat.lapse(:,land),2),nanmean(xpdmat.plevs(:,land),2),'r')
+  semilogy(nanmean(xpdmat.lapserate(:,ocean),2),nanmean(xpdmat.plevs(:,ocean),2),'b',nanmean(xpdmat.lapserate(:,land),2),nanmean(xpdmat.plevs(:,land),2),'r')
      ylim([10 1000]); set(gca,'ydir','reverse');   xlim([-4 12])
   plotaxis2; xlabel('lapse rate [K/km]'); ylabel('P [mb]');
   line([MALR MALR],[0.005 1100],'color','b'); text(4,50,'Moist LR','color','b');   text(4.00,75,'Stable','color','b');    text(4.00,25, 'S = -1','color','b'); 
@@ -65,8 +65,8 @@ figure(7); clf
   colormap jet
 
 figure(8); clf
-  [mm,nn] = size(xpdmat.lapse);
-  yyaxis left;  semilogy(nanmean(xpdmat.lapse(:,ocean),2),nanmean(xpdmat.plevs(:,ocean),2),'b');
+  [mm,nn] = size(xpdmat.lapserate);
+  yyaxis left;  semilogy(nanmean(xpdmat.lapserate(:,ocean),2),nanmean(xpdmat.plevs(:,ocean),2),'b');
     ylim([10 1000]); set(gca,'ydir','reverse'); axis([-4 12 500 1050]); set(gca, 'XAxisLocation', 'bottom'); xlabel('Lapse rate K/km')
   yyaxis right; semilogy(nanmean(xpdmat.Ri(:,ocean),2),nanmean(xpdmat.plevs(:,ocean),2),'r');
     ylim([10 1000]); set(gca,'ydir','reverse');    axis([-4 12 500 1050]); set(gca, 'XAxisLocation', 'top');    xlabel('Bulk Ri number'); 
@@ -75,11 +75,11 @@ figure(8); clf
   legend('Ocean Lapse rate K/km','Ocean Bulk Richardon number','location','best')
 
 figure(8); clf
-  [mm,nn] = size(xpdmat.lapse);
+  [mm,nn] = size(xpdmat.lapserate);
   ax1 = gca;
   ax1.Position = [0.15, 0.15, 0.75, 0.75]; 
   
-  yyaxis left;  semilogy(nanmean(xpdmat.lapse(:,ocean),2),nanmean(xpdmat.plevs(:,ocean),2),'b'); set(gca,'ydir','reverse'); axis([-4 12 500 1050]);
+  yyaxis left;  semilogy(nanmean(xpdmat.lapserate(:,ocean),2),nanmean(xpdmat.plevs(:,ocean),2),'b'); set(gca,'ydir','reverse'); axis([-4 12 500 1050]);
     xlabel('Ocean Lapse rate K/km','color','blue')
   yyaxis right; semilogy(nanmean(xpdmat.Ri(:,ocean),2),nanmean(xpdmat.plevs(:,ocean),2),'r',0.27*ones(1,mm),nanmean(xpdmat.plevs,2),'r');
     set(gca,'ydir','reverse');    axis([-4 12 500 1050]);
@@ -100,3 +100,30 @@ figure(8); clf
   % 3. Synchronize both X-axes
   linkaxes([ax1, ax2], 'x');
   legend('(b) Lapse rate K/km','(r) Bulk Richardon number','location','best')
+
+figure(9); clf
+  [mm,nn] = size(xpdmat.lapserate);
+  ax1 = gca;
+  ax1.Position = [0.15, 0.15, 0.75, 0.75]; 
+  
+  yyaxis left;  semilogy(nanmean(xpdmat.lapserate(:,ocean),2)+280,nanmean(xpdmat.plevs(:,ocean),2),'b'); set(gca,'ydir','reverse'); axis([250 300 500 1050]);
+    xlabel('280 + Ocean Lapse rate K/km','color','blue')
+  yyaxis right; semilogy(nanmean(xpdmat.ptemp(:,ocean),2),nanmean(xpdmat.plevs(:,ocean),2),'r',0.27*ones(1,mm),nanmean(xpdmat.plevs,2),'r');
+    set(gca,'ydir','reverse');    axis([250 300 500 1050]);
+
+  %plotaxis2;
+  line([280 280],log([500 1050]),'color','k')
+
+  % 2. Create the secondary top axes
+  ax2 = axes('Position', ax1.Position, ...
+           'XAxisLocation', 'top', ...
+           'YAxisLocation', 'right', ... % Match right side to avoid extra lines
+           'Color', 'none')
+
+  % Add the top label
+  xlabel(ax2, 'Ocean T(z)','color','red'); 
+
+
+  % 3. Synchronize both X-axes
+  %linkaxes([ax1, ax2], 'x');
+  legend('(b) 280+Lapse rate K/km','(r) T(z)','location','best')

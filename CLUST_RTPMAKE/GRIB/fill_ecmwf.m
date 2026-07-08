@@ -11,7 +11,6 @@ if nargin < 4
   iUVW = -1;
 end
 
-
 profin = prof;
 headin = head;
 
@@ -61,6 +60,8 @@ fhdr = '/umbc/rs/strow/asl/ecmwf/'; %% Sad Nov2025-Jan2026
 ename = '';  % This should be placed outside a rtp file loop
 
 mtime = tai2dnum(profin.rtime);
+% Round to get 8 forecast hours per day
+rmtime = round(mtime*8)/8;
 
 % Get a cell array of ecmwf grib files for each time
 % I think this will be BROKEN if using datetime above!!
@@ -69,18 +70,21 @@ enames = get_ecmwf_enames(mtime);
 
 % Find the unique grib files and indices that go with them
 [u_enames, ia, ic] = unique(enames);
-%u_enames
+u_enames
 n = length(u_enames);
 fprintf(1,'need to deal with %3i ecmwf files \n',n);
 skipped = 0;
 
 % Loop over unique grib file names
 iDoneOne = -1;
+
 for i = 1:n
   % Build file name from parts
   fne = ['UAD' u_enames{i} '001'];
   e_mth_year = datestr(mtime(ia(i)),'yyyymm');
+  e_ymd      = datestr(mtime(ia(i)),'yyyymmdd');  
   fn = fullfile(fhdr,e_mth_year(1:4),e_mth_year(5:6),fne);
+    
   fprintf(1,'ecmwf file name fn = %s \n',fn);
 
   %% this ptime can mess up eg when looking at fovs on 12/31, about 23-24 hrs

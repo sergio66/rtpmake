@@ -186,8 +186,13 @@ for ixx = 1 : length(iaGlist)
 
     %[h,ha,p2x,pa] = rtptrim_sartacloud(h,ha,p2,pa);
     if ~exist(fnamex)
+
+      p2 = quick_get_ERA5_pblh(p2);
+      
       %rtpwrite(fnamex,h,ha,p2x,pa)
-      [xhd0,xpdmat] = get_richardson_number_levels(h,ha,p2,pa);
+      %[xhd0,xpdmat] = get_richardson_number_levels(h,ha,p2,pa);
+      %[xhd0,xpdmat] = get_richardson_number_levels_v2(h,ha,p2,pa);
+      [xhd0,xpdmat] = get_richardson_number_levels_v3(h,ha,p2,pa,-1);      
       set_Ri_critical      
       saver = ['save ' fnamex ' xhd0 xpdmat RiCritical iVers_Ri'];
       eval(saver)

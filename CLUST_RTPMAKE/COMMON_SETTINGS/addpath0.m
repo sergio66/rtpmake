@@ -93,7 +93,8 @@ addpath /home/sergio/git/matlabcode/matlibSergio/matlib/rtptools
 addpath /home/sergio/git/matlabcode/matlibSergio/matlib/gribtools
 %% addpath /home/sergio/git/matlabcode/matlibSergio/matlib/TIME
 
-addpath ../GRIB
+addpath /home/sergio/git/rtpmake/CLUST_RTPMAKE/GRIB
+%addpath /home/sergio/git/rtpmake/CLUST_RTPMAKE/COMMON_SETTINGS
 
 addpath /home/sergio/git/matlabcode/COLORMAP
 addpath /home/sergio/git/matlabcode/PLOTTER
@@ -102,3 +103,4 @@ addpath /home/sergio/git/matlabcode/CONVERT_GAS_UNITS/Strow_humidity/convert_hum
 
 addpath /home/sergio/git/matlabcode
 addpath /home/sergio/git/matlabcode/PLOTTER
+

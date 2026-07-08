@@ -83,6 +83,7 @@ RiCritical = 0.25;   %% ERA5 uses this, but they also have a surface friction ve
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 iVers_Ri = 0;    %% simple one,  from Richard Davy, J. Clim, 2018 and Dian Siedel,  JGR-Atmos, 2012, uses potential temp
-iVers_Ri = 1;    %% fancier one, from Xingya Xi , JGR_Atmos 2024 (and ERA5)                          uses staticE
-%iVers_Ri = 2;    %% fancier one, from Xingya Xi , JGR_Atmos 2024 (and ERA5)                          uses staticE, and with diff(numer)/diff(denom) rather than bulk
+%iVers_Ri = 1;    %% fancier one, from Xingya Xi , JGR_Atmos 2024 (and ERA5)                          uses staticE Default May 2026
+
+%iVers_Ri = 2;    %% fancier one, from Xingya Xi , JGR_Atmos 2024 (and ERA5)                         uses staticE, and with diff(numer)/diff(denom) rather than bulk
 

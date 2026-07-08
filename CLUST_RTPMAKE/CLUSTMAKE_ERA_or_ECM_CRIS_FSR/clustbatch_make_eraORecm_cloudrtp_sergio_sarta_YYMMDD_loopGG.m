@@ -16,7 +16,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 addpath0
 
-%%  check_all_jobs_done('/asl/s1/sergio/rtp/j1_ccast_hires/allfov/2019/04/25//cloudy_airs_l1c_ecm_sarta_baum_ice.2019.04.25.',240,'.rtp');
+%% airs_l1c ---> cris_fsr
+%%  check_all_jobs_done('/asl/s1/sergio/rtp/j1_ccast_hires/allfov/2019/04/25//cloudy_cris_fsr_ecm_sarta_baum_ice.2019.04.25.',240,'.rtp');
 
 system_slurm_stats
 
@@ -51,9 +52,17 @@ if length(JOB) == 0
   JOB = 099; %% LA fires from D. Tobin
   JOB = 180;
   JOB = 21;
+
+  %%% these are JPSS CRIS 2024/11/13
   JOB = 49;   %% daytime Australia, getting veddy veddy high PBLH
   JOB = 48;   %% daytime Australia, getting veddy veddy high PBLH
-  JOB = 213;  
+  JOB = 213;  %% S.Africa to Antartica, ocean
+  JOB = 200;  %% california, ocean
+  JOB = 210;  %% indian ocean near india
+  JOB = 118;  %% africa
+  JOB = 203;  %% pacific ocean near Mexico and CA
+  JOB = 235;  %% pacific oean near samoa? nah???!! middle of nowhere
+
 end
 
 warning('off', 'MATLAB:imagesci:hdfeos:removalWarningHDFSW');
@@ -88,7 +97,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 for iiddloop = 1 : length(ddLoop)
-  yymmdd0 = [yymmdd0(1:2) ddLoop(iiddloop)]
+  yymmdd0 = [yymmdd0(1:2) ddLoop(iiddloop)];
 
   thefilelist = yymmdd0;
   iaGlist  = 001 : 240;
@@ -96,6 +105,7 @@ for iiddloop = 1 : length(ddLoop)
   gg = iaGlist;
   
   yymmdddggstr = ['.' num2str(thefilelist(1),'%04d') '.' num2str(thefilelist(2),'%02d') '.' num2str(thefilelist(3),'%02d') '.'];
+  fprintf(1,'yymmdd0 gg = %4i/%2i/%2i %3i \n',yymmdd0,gg);
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   iPertTCC = +1;  %% use tcc model 1 (best so far)
@@ -133,7 +143,22 @@ for iiddloop = 1 : length(ddLoop)
     if iUVW < 0
       rtpwrite([dout '/' fout],hd0, ha0, pd0, pa0);
     else
-      [xhd0,xpdmat] = get_richardson_number_levels(hd0,ha0,pd0,pa0);
+
+      pd0 = quick_get_ERA5_pblh(pd0);
+      
+      %[xhd0,xpdmat] = get_richardson_number_levels(hd0,ha0,pd0,pa0);
+      %[xhd0,xpdmat] = get_richardson_number_levels_v2(hd0,ha0,pd0,pa0);
+      [xhd0,xpdmat] = get_richardson_number_levels_v3(hd0,ha0,pd0,pa0,-1);
+
+      figure(1); scatter_coast(pd0.rlon,pd0.rlat,20,pd0.stemp);                          title('ERA5 SKT [K]')
+      if isfield(pd0,'pblh_nwp')
+        figure(2); scatter_coast(pd0.rlon,pd0.rlat,20,pd0.pblh_nwp);                     title('ERA5 OFFICIAL PBLH [km]'); caxis([0 4])
+      end
+      %%% p.salti is in meters but xpdmat.salti o is in km
+      figure(3); scatter_coast(pd0.rlon,pd0.rlat,20,xpdmat.zPBLH_Ri-xpdmat.salti);       title('SERGIO PBLH [km] '); caxis([0 4])
+      figure(4); scatter_coast(pd0.rlon,pd0.rlat,20,xpdmat.PBLH_Ri_flag);                title('SERGIO PBLH flag'); 
+      %keyboard_nowindow
+
       set_Ri_critical
       saver = ['save ' dout '/' fmatout  ' xhd0 xpdmat RiCritical iVers_Ri'];
       eval(saver)      
@@ -142,9 +167,9 @@ for iiddloop = 1 : length(ddLoop)
       %%
       %% see /umbc/rs/pi_sergio/WorkDirDec2025/matlabcode/PBL_Retrievals/HALO_BdryLayer/PBL_Hgt_from_poemNew/cluster_driver_compute_PBLH_poemNew.m
       %%   for use of [yhd0,ypdmat] = get_richardson_number_layers(hoemNew,poemNew,xhd0,xpdmat,iPlot);
-      %%   saved into eg fnameOUT = ['/home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13/retr_cloudy_airs_l1c_ecm_sarta_baum_ice.2024.11.13.' num2str(gran,'%03d') '_layers_PBLH_Ri.mat'];
+      %%   saved into eg fnameOUT = ['/home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires/allfov/2024/11/13/retr_cloudy_cris_fsr_ecm_sarta_baum_ice.2024.11.13.' num2str(gran,'%03d') '_layers_PBLH_Ri.mat'];
 
-      figure(4); clf; scatter_coast(xpdmat.rlon,xpdmat.rlat,50,xpdmat.zPBLH_Ri/1000); title('Ri PBLH [km]')
+      figure(4); clf; scatter_coast(xpdmat.rlon,xpdmat.rlat,50,xpdmat.zPBLH_Ri-xpdmat.salti); title('Ri PBLH [km]'); caxis([0 4])
     end
     
     i900 = find(hd0.vchan >= 900,1);
@@ -176,6 +201,8 @@ for iiddloop = 1 : length(ddLoop)
     if iUVW < 0    
       fprintf(1,'DONE : %s written out  \n',[dout '/' fout])
     else
+      %% mv /home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires//allfov/2024/11/13//interp_analysis_uvw_cloudy_cris_fsr_ecm_sarta_baum_ice.2024.11.13.* \
+      %%    /home/sergio/nogit/sergio_temp_rtp_files/j1_ccast_hires//allfov/2024/11/13/T2TRY0/.
       fprintf(1,'DONE : %s written out  \n',[dout '/' fmatout])
     end
     

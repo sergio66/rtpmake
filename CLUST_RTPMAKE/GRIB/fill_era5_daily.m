@@ -10,8 +10,10 @@ sfc = read_netcdf_lls('/asl/models/era5/2014/01/20140102_sfc.nc');
 
 function [prof, head, pattr] = fill_era5_daily(prof, head, pattr);
 
-addpath /asl/matlib/aslutil
-addpath /asl/packages/time
+%addpath /asl/matlib/aslutil
+%addpath /asl/packages/time
+%addpath /asl/matlib/aslutil
+%addpath /asl/packages/time
 
 %{
 if nargin ~= nargout
@@ -20,12 +22,12 @@ if nargin ~= nargout
            '[p,h,pa]=fill_era5_daily(p,h,pa) (preferred)\n\tTerminating'], '\n');
 end
 %}
-
-addpath /asl/matlib/aslutil
-addpath /asl/packages/time
-
-% Location of grib files
-fhdr = '/asl/models/era5/';   %% from Oct 2019 - 
+  
+% Location of nc files
+fhdr = '/asl/data/era5/';            %% from Oct 2019 -
+fhdr = '/asl/models/era5/';          %% from Oct 2019 -
+fhdr = '/umbc/rs/strow/asl/era5/';   %% Sad Nov2025-Jan2026
+fhdr = '/umbc/rs/strow/asl/ERA5/';   %% A new Beginning
 
 ename = '';  % This should be placed outside a rtp file loop
 mtime = tai2dnum(prof.rtime);
@@ -33,16 +35,17 @@ mtime = tai2dnum(prof.rtime);
 % Get a cell array of ecmwf grib files for each time
 % I think this will be BROKEN if using datetime above!!
 % enames = get_ecmwf_enames(mtime,prof.rtime);
-enames = get_era5_daily_enames(mtime);
+enames = get_era5_daily_enames(mtime,fhdr);
 
 % Get a cell array of era grib files for each time
-% Round to get 4 forecast hours per day
+% Round to get 8 forecast hours per day
 rmtime = round(mtime*8)/8;
 timestr = datestr(rmtime,'yyyymmddhh');
 ystr = timestr(:,1:4);
 mstr = timestr(:,5:6);
 dstr = timestr(:,7:8);
 hstr = timestr(:,9:10);
+
 yearindex = str2num(ystr);
 dayindex = str2num(dstr);
 hourindex = str2num(hstr);
@@ -72,33 +75,22 @@ for i=1:n
    end
    % If the filename has changed, re-load F   
    if ~strcmp(ename,fn) 
-      clear F  % Probably not needed
-      %disp('New ERA5 monthly file'); %for debugging
-      if ~exist(fn_2m,'file')
-        disp('did not find 2m file ....')
-        F(1) = grib_interpolate_era(fn_sfc,fn_lev,1);
-        F(2) = grib_interpolate_era(fn_sfc,fn_lev,2);
-        F(3) = grib_interpolate_era(fn_sfc,fn_lev,3);
-        F(4) = grib_interpolate_era(fn_sfc,fn_lev,4);
-        F(5) = grib_interpolate_era(fn_sfc,fn_lev,5);
-        F(6) = grib_interpolate_era(fn_sfc,fn_lev,6);
-        F(7) = grib_interpolate_era(fn_sfc,fn_lev,7);
-        F(8) = grib_interpolate_era(fn_sfc,fn_lev,8);
-        ename = fn;
-      else
-        disp('yay, did find 2m file ....')
-        F(1) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,1);
-        F(2) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,2);
-        F(3) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,3);
-        F(4) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,4);
-        F(5) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,5);
-        F(6) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,6);
-        F(7) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,7);
-        F(8) = grib_interpolate_era5(fn_sfc,fn_lev,fn_2m,8);
-        ename = fn;
-      end
-     end   
+     clear F  % Probably not needed
+     %disp('New ERA5 monthly file'); %for debugging
+     disp('found sfc and lvl137 files .... forming F(1),F(2) .... F(8) ')
+     F(1) = grib_interpolate_era5x(fn_sfc,fn_lev,1);
+     F(2) = grib_interpolate_era5x(fn_sfc,fn_lev,2);
+     F(3) = grib_interpolate_era5x(fn_sfc,fn_lev,3);
+     F(4) = grib_interpolate_era5x(fn_sfc,fn_lev,4);
+     F(5) = grib_interpolate_era5x(fn_sfc,fn_lev,5);
+     F(6) = grib_interpolate_era5x(fn_sfc,fn_lev,6);
+     F(7) = grib_interpolate_era5x(fn_sfc,fn_lev,7);
+     F(8) = grib_interpolate_era5x(fn_sfc,fn_lev,8);
+     ename = fn;
+   end   
 
+   disp('done, now looping over profiles matched to 8 hours and pulling out scalar/level fields')
+   
    % Fill rtp fields
    m = find( ic == i );  % indices of first era file
    %   fhi = 0;   % this was new on Jul 20, 2015!
@@ -117,25 +109,31 @@ for i=1:n
          % Assume rtp lat/lon are +-180??  Need to be 0-360 for grib interpolation
          rlat = prof.rlat(k);
          rlon = prof.rlon(k);
-         rlon(rlon<0) = rlon(rlon<0) + 360;
+	 
+	 %rlon(rlon<0) = rlon(rlon<0) + 360;
+	 rlon = wrapTo180(rlon);
 
-         if exist(fn_2m)
-           try
-             %% 2m air and dewpoint temperatures
-             prof.d2m(k)   = F(fhi).d2m.ig(rlat,rlon);
-             prof.t2m(k)   = F(fhi).t2m.ig(rlat,rlon);
-           end
-         end
-
-         prof.spres(k)   = F(fhi).sp.ig(rlat,rlon);
-         prof.stemp(k)   = F(fhi).skt.ig(rlat,rlon);
-         wind_v          = F(fhi).v10.ig(rlat,rlon);
-         wind_u          = F(fhi).u10.ig(rlat,rlon);
-         prof.wspeed(k)  = sqrt(wind_u.^2 + wind_v.^2);
-         prof.wsource(k) = mod(atan2(single(wind_u), single(wind_v)) * 180/pi,360);
-         prof.tcc(k)     = F(fhi).tcc.ig(rlat,rlon);
-         ci_udef = 1;
-         prof.udef(ci_udef,k) = F(fhi).ci.ig(rlat,rlon);
+%         if exist(fn_2m)
+%           try
+%             %% 2m air and dewpoint temperatures
+%             prof.d2m(k)   = F(fhi).d2m.ig(rlat,rlon);
+%             prof.t2m(k)   = F(fhi).t2m.ig(rlat,rlon);
+%           end
+%         end
+	 
+         prof.spres(k)    = F(fhi).sp.ig(rlat,rlon);
+         prof.stemp(k)    = F(fhi).skt.ig(rlat,rlon);
+         wind_v           = F(fhi).v10.ig(rlat,rlon);
+         wind_u           = F(fhi).u10.ig(rlat,rlon);
+         prof.wspeed(k)   = sqrt(wind_u.^2 + wind_v.^2);
+         prof.wsource(k)  = mod(atan2(single(wind_u), single(wind_v)) * 180/pi,360);
+	 prof.u10(k)      = wind_u;
+	 prof.v10(k)      = wind_v;	 
+         prof.tcc(k)      = F(fhi).tcc.ig(rlat,rlon);
+         prof.pblh_nwp(k) = F(fhi).pblh_nwp.ig(rlat,rlon)/1000;	 %%% change to km
+         prof.t2m(k)      = F(fhi).t2m.ig(rlat,rlon);	 
+         %ci_udef = 1;
+         %prof.udef(ci_udef,k) = F(fhi).ci.ig(rlat,rlon);
 
          % Estimate model grid centers used
          gdlat = abs(nanmean(diff(F(fhi).h_latitude)));  % lat spacing
@@ -156,6 +154,9 @@ for i=1:n
             prof.cc(l,k)    = F(fhi).cc(j(l)).ig(rlat,rlon);
             prof.clwc(l,k)  = F(fhi).clwc(j(l)).ig(rlat,rlon);
             prof.ciwc(l,k)  = F(fhi).ciwc(j(l)).ig(rlat,rlon);
+            prof.u(l,k)  = F(fhi).u(j(l)).ig(rlat,rlon);
+            prof.v(l,k)  = F(fhi).v(j(l)).ig(rlat,rlon);
+            prof.w(l,k)  = F(fhi).w(j(l)).ig(rlat,rlon);
          end
 % Only want pressure levels in grib file, in order
          xtemp = p137_ecmwf(prof.spres(k));  % all 137 pressure levels         
@@ -228,6 +229,9 @@ if isfield(prof,'cc')
     %say(['Replaced ' int2str(nbad) ' CC > 1 fields'])
   end
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
 if isfield(prof,'cc')
   ibad = find(prof.cc < 0);
   nbad = length(ibad);
@@ -244,14 +248,45 @@ if isfield(prof,'ciwc')
     % say(['Replaced ' int2str(nbad) ' CIWC > 1 fields'])
   end
 end
-if isfield(prof,'clwcc')
-  ibad = find(prof.clwcc < 0);
+if isfield(prof,'clwc')
+  ibad = find(prof.clwc < 0);
   nbad = length(ibad);
   if (nbad > 0)
     prof.clwc(ibad) = 0;
     % say(['Replaced ' int2str(nbad) ' CLWC > 1 fields'])
   end
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if isfield(prof,'u')
+  ibad = find(abs(prof.u) > 100);
+  nbad = length(ibad);
+  if (nbad > 0)
+    prof.u(ibad) = 0;
+    % say(['Replaced ' int2str(nbad) ' U > 1 fields'])
+  end
+end
+if isfield(prof,'v')
+  ibad = find(abs(prof.v) > 100);  
+  ibad = find(prof.v < 0);
+  nbad = length(ibad);
+  if (nbad > 0)
+    prof.v(ibad) = 0;
+    % say(['Replaced ' int2str(nbad) ' V > 1 fields'])
+  end
+end
+
+if isfield(prof,'w')
+  ibad = find(abs(prof.w) > 100);  
+  nbad = length(ibad);
+  if (nbad > 0)
+    prof.w(ibad) = 0;
+    % say(['Replaced ' int2str(nbad) ' W > 1 fields'])
+  end
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
 
 switch nargin
   case 2

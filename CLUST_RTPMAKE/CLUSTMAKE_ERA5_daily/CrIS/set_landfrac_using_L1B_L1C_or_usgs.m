@@ -1,0 +1,1 @@
+../../COMMON_SETTINGS/set_landfrac_using_L1B_L1C_or_usgs.m

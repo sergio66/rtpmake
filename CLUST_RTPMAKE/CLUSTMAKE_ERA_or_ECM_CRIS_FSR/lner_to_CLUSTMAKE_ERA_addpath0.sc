@@ -17,16 +17,16 @@ echo "these are initial files, make sure they are SYMBOLIC LINKS and NOT actual 
 ls -lt set_path_to_danz.m addpath0.m add_the_paths_and_klayers_sarta_execs.m set_path_to_execs.m set_filelist.m \
       set_run_sarta_options.m  set_landfrac_using_L1B_L1C_or_usgs.m test_tcc.m read_in_L1B_or_L1C.m onetime.txt \
       add_the_DanZhou_emis.m sarta_chans_for_l1c.mat \
-      plot_richardson_PBLH_layers.m get_richardson_number_levels.m get_richardson_number_layers.m set_Ri_critical.m compute_pblh.m
+      plot_richardson_PBLH_layers.m get_richardson_number_levels*.m get_richardson_number_layers*.m set_Ri_critical.m compute_pblh_Ri.m
 read -p "Press [Enter] key to continue if they do not exist or they are SYMBOLIC LINKS ... (Ctrl C) if they are actual files"
 
 echo "now setting symbolic links to files in COMMON_SETTINGS"
 
 rm set_path_to_danz.m addpath0.m add_the_paths_and_klayers_sarta_execs.m set_path_to_execs.m set_filelist.m \
    set_run_sarta_options.m set_landfrac_using_L1B_L1C_or_usgs.m test_tcc.m read_in_L1B_or_L1C.m onetime.txt \
-   add_the_DanZhou_emis.m sarta_chans_for_l1c.mat compute_pblh.m
+   add_the_DanZhou_emis.m sarta_chans_for_l1c.mat compute_pblh_Ri.m get_richardson_number_levels*.m get_richardson_number_layers*.m
 
-rm get_richardson_number_levels.m get_richardson_number_layers.m plot_richardson_PBLH_layers.m plot_richardson_PBLH_levels.m set_Ri_critical.m compute_pblh.m
+rm get_richardson_number_levels*.m get_richardson_number_layers*.m plot_richardson_PBLH_layers.m plot_richardson_PBLH_levels.m set_Ri_critical.m compute_pblh_Ri.m
 
 #########################
 
@@ -43,12 +43,16 @@ ln -s ../COMMON_SETTINGS/sarta_chans_for_l1c.mat                   .
 ln -s ../COMMON_SETTINGS/set_landfrac_using_L1B_L1C_or_usgs.m      .
 ln -s ../COMMON_SETTINGS/set_run_sarta_options.m                   .
 
-ln -s ../COMMON_SETTINGS/get_richardson_number_levels.m            .
 ln -s ../COMMON_SETTINGS/get_richardson_number_layers.m            .
+ln -s ../COMMON_SETTINGS/get_richardson_number_layers_v2.m         .
+ln -s ../COMMON_SETTINGS/get_richardson_number_layers_v3.m         .
+ln -s ../COMMON_SETTINGS/get_richardson_number_levels.m            .
+ln -s ../COMMON_SETTINGS/get_richardson_number_levels_v2.m         .
+ln -s ../COMMON_SETTINGS/get_richardson_number_levels_v3.m         .
 ln -s ../COMMON_SETTINGS/plot_richardson_PBLH_layers.m             .
 ln -s ../COMMON_SETTINGS/plot_richardson_PBLH_levels.m             .
 ln -s ../COMMON_SETTINGS/set_Ri_critical.m                         .
-ln -s ../COMMON_SETTINGS/compute_pblh.m                            .
+ln -s ../COMMON_SETTINGS/compute_pblh_Ri.m                         .
 
 ln -s /home/sergio/git/matlabcode/matlibSergio/matlib/clouds/TCC/test_tcc.m . 
 
@@ -57,4 +61,4 @@ ln -s /home/sergio/git/matlabcode/matlibSergio/matlib/clouds/TCC/test_tcc.m .
 ls -lt set_path_to_danz.m addpath0.m add_the_paths_and_klayers_sarta_execs.m set_path_to_execs.m set_filelist.m \
       set_run_sarta_options.m  set_landfrac_using_L1B_L1C_or_usgs.m test_tcc.m read_in_L1B_or_L1C.m onetime.txt \
       add_the_DanZhou_emis.m sarta_chans_for_l1c.mat \
-      get_richardson_number_layers.m get_richardson_number_levels.m plot_richardson_PBLH_layers.m plot_richardson_PBLH_levels.m set_Ri_critical.m compute_pblh.m
+      get_richardson_number_layers*.m get_richardson_number_levels*.m plot_richardson_PBLH_layers.m plot_richardson_PBLH_levels.m set_Ri_critical.m compute_pblh_Ri.m

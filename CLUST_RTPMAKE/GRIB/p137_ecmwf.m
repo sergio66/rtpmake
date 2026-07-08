@@ -20,6 +20,7 @@ function p = p137_ecmwf(psfc, lhalf);
 % http://www.ecmwf.int/products/data/technical/model_levels/model_def_91.html
 % for 137 levels
 % http://old.ecmwf.int/products/data/technical/model_levels/model_def_137.html
+% https://confluence.ecmwf.int/display/UDOC/L137+model+level+definitions = latest wiki
 %
 % Note:  a91 & b91 are in Pascal's, so you will see some *100 and
 %        /100's in the code to switch from hPa to Pa.

@@ -18,7 +18,6 @@ HDFSW will be removed in a future release. Use MATLAB.IO.HDFEOS.SW instead.
 %}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 iv5or6 = 5;   %% AIRS L1B
 iv5or6 = 6;   %% AIRS L1C
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -41,13 +40,14 @@ set_run_sarta_options
 
 % this is set in calling routine cloud_set_defaults_run_makerBLAH.m
 
-%% icestr = ['NEWLANDFRAC/cloudy_airs_l1b_ecm' icestr '.'];
+%% airs_l1c,airs_l1b  ---> cris_fsr
+%% icestr = ['NEWLANDFRAC/cloudy_cris_fsr_ecm' icestr '.'];
 if iv5or6 == 5
-  icestruvw = ['uvw_cloudy_airs_l1b_ecm' icestr '.'];
-  icestruvw = [    'cloudy_airs_l1b_ecm' icestr '.'];  
+  icestruvw = ['uvw_cloudy_cris_fsr_ecm' icestr '.'];
+  icestruvw = [    'cloudy_cris_fsr_ecm' icestr '.'];  
 elseif iv5or6 == 6
-  icestruvw = ['uvw_cloudy_airs_l1c_ecm' icestr '.'];
-  icestr    = [    'cloudy_airs_l1c_ecm' icestr '.'];  
+  icestruvw = ['uvw_cloudy_cris_fsr_ecm' icestr '.'];
+  icestr    = [    'cloudy_cris_fsr_ecm' icestr '.'];  
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
