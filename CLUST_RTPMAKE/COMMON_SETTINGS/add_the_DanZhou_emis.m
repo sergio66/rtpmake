@@ -10,6 +10,7 @@
 
 if exist([set_path_to_danz '/danz_interpolant.mat'])
   [p,pa] = rtp_add_emis(p,pa);
+  p = fix_nan_emis(p);  
 else  
   disp('no /asl/data/iremis/danz/danz_interpolant.mat so skip rtp_add_emis  ... fix paths in set_path_to_danz.m. ... for now use constant emis')
   disp('no /asl/data/iremis/danz/danz_interpolant.mat so skip rtp_add_emis  ... fix paths in set_path_to_danz.m. ... for now use constant emis')
