@@ -1,0 +1,48 @@
+See https://www.earthdata.nasa.gov/centers/mls-sips/data-access-tools?title=&items_per_page=10&search_fulltext=&combine=&page=45%2C0&order=title_1&sort=asc
+MLS L3 on 5x4 deg grids
+
+0) login to NASA EarthData
+Download Data. You will need to log in with a free NASA Earthdata Login Account to approve the download script or access the direct HTTPS links.
+Note that T and O3 are complete but the WV line sensor not working well after 2023 so there may be WV data gaps
+
+1) go to NASA Earthdata Search Portal.
+
+2) search for ML3MBO3_005 (22 granules from 2004 to now)
+  Found in https://search.earthdata.nasa.gov/search/granules?p=C2042568830-GES_DISC&q=ML3MBO3_005
+  Click "Download all"
+  It makes a script for you, see eg
+  Goto /umbc/xfs3/strow/asl/mls/V005/ML3MBO3_005 and run it
+    [sergio@chip-login2 ML3MBO3_005]$ ls -lt *.nc | wc -l
+    22
+   cp /umbc/xfs3/strow/asl/mls/V005/ML3MBO3_005/download_o3.sc download_o3.sc
+
+3) search for ML3MBT_005 (22 granules from 2004 to now)
+  Found in https://search.earthdata.nasa.gov/search/granules?p=C2042569256-GES_DISC&q=ML3MBT_005
+  Click "Download all"
+  It makes a script for you, see eg
+  Goto /umbc/xfs3/strow/asl/mls/V005/ML3MBT_005 and run it
+    [sergio@chip-login2 ML3MBT_005]$ ls -lt *.nc | wc -l
+    22
+   cp /umbc/xfs3/strow/asl/mls/V005/ML3MBT_005/download_t.sc download_t.sc
+
+4) search for ML3MBH2O_005 (22 granules from 2004 to now)
+  Found in https://search.earthdata.nasa.gov/search/granules?p=C2042569256-GES_DISC&q=ML3MBT_005
+  Click "Download all"
+  It makes a script for you, see eg
+  Goto /umbc/xfs3/strow/asl/mls/V005/ML3MBH2O_005 and run it
+    [sergio@chip-login2 ML3MBH2O_005]$ ls -lt *.nc | wc -l
+    22
+   cp /umbc/xfs3/strow/asl/mls/V005/ML3MBH2O_005/download_wv.sc download_wv.sc
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ozone
+  ML3MBO3_004
+  https://data.nasa.gov/dataset/mls-aura-level-3-monthly-binned-ozone-o3-mixing-ratio-on-assorted-grids-v004-ml3mbo3-at-ge-b61c3
+
+  Data Source: Derived from standard Level 2 vertical ozone profiles measured by the 240 GHz radiometer on the Earth Observing System (EOS) Aura satellite.
+
+  https://www.earthdata.nasa.gov/data/catalog/ges-disc-ml3mbo3-004
+    2004-08-02 to 2023-12-31
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

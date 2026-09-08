@@ -31,3 +31,8 @@ sartaclr_bin.fsr  = '/home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/b
 sartasct_bin.fsr  = '/home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_crisg4_hires_jan25_H2020_iceGHMbaum_wdrop_ddust_sc_hg3_newFeb2025';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% for SHIS
+sartaclr_bin.shis = '/home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_aug26_H2024_aircraft_20km';
+sartasct_bin.shis = '/home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/JACvers/bin/jac_airs_l1c_2834_cloudy_aug26_H2024_aircraft_20km';
+klayers_shis      = '/home/sergio/git/SARTA_CLOUDY_RTP_KLAYERS_NLEVELS/KLAYERS_CHepplew_PBL/klayersV205/BinV221/klayers_aircraft_20km'; 

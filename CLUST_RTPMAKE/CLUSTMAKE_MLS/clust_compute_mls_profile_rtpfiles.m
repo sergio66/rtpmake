@@ -1,44 +1,97 @@
 %{
 MLS data in /asl/xfs3/mls
+MLS data in /umbc/xfs3/strow/asl/mls
 %}
+
+mlsdata = '/asl/xfs3/mls/';                  vers = '004'; xyvers = 'v04';
+mlsdata = '/umbc/xfs3/strow/asl/mls/V004/';  vers = '004'; xyvers = 'v04';
+
+mlsdata = '/umbc/xfs3/strow/asl/mls/V005/';  vers = '005'; xyvers = 'v05';
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-addpath /asl/matlib/h4tools
-addpath /asl/matlib/h4tools
-addpath /home/sergio/MATLABCODE/
-addpath /home/sergio/MATLABCODE/TIME
-addpath /home/sergio/MATLABCODE/PLOTTER
-addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS
-addpath /home/sergio/MATLABCODE/CONVERT_GAS_UNITS/Strow_humidity/convert_humidity
-addpath /home/sergio/MATLABCODE/TROPOPAUSE
+% run this with sbatch -p cpu2024  --array=1-216 sergio_matlab_chip.sbatch 1          for mls 2004-2022
+% run this with sbatch -p cpu2024  --array=1-252 sergio_matlab_chip.sbatch 1          for mls 2004-2025
+% run this with sbatch -p high_mem --array=1-276 sergio_matlab_jobB.sbatch 1
+%   brought data down 2004 to 2025
+%   monthly steps since 2004 to 2025 = 21 x 12 = 252 so anything past 253->blah is not gonna be done
 
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/emis
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util
-addpath /home/sergio/MATLABCODE/matlib/rtp_prod2/util/time
-
-addpath /home/sergio/MATLABCODE/JPL_DUST_Nov2014/MAKE_RTP
-addpath /home/sergio/MATLABCODE/AIRS_L3/MAKE_MONTHLY_CLIM
-warning('off', 'MATLAB:imagesci:hdf:removalWarningHDFSD')
-
-% run this with sbatch -p high_mem --array=1-216 sergio_matlab_jobB.sbatch 1         monthly steps since 2004, 18x12 = 216
 JOB = str2num(getenv('SLURM_ARRAY_TASK_ID'));
-%JOB = 1
+if length(JOB) == 0
+  JOB = 172;
+  JOB = 1;  
+end  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+dirout = '/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/';
+dirout = '/home/sergio/git/oem_climate_jacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/DATAObsStats_StartSept2002_CORRECT_LatLon/';
+%% data saved to eg /home/sergio/git/oem_climate_jacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/DATAObsStats_StartSept2002_CORRECT_LatLon//TimeSeries/MLS/Tile_Center/*.mat | wc -l
+
+%{
+liststr = '/home/sergio/git/oem_climate_jacs/TILES_TILES_TILES_MakeAvgCldProfs2002_2020/DATAObsStats_StartSept2002_CORRECT_LatLon//TimeSeries/MLS/Tile_Center/mls_tile_center_monthly_timestep_';
+check_all_jobs_done(liststr,252,'.mat');
+
+jobs_not_done.sc : sbatch   --array=172,237,244-245,247,250 sergio_matlab_chip.sbatch
+>> [yyuse([172 237 244 245 247 250]); mmuse([172 237 244 245 247 250])]'
+        2018          12
+        2024           5
+        2024          12
+        2025           1
+        2025           3
+        2025           6
+
+slurm-199004_237.out:139:bad gas_1
+slurm-199004_244.out:139:bad gas_1
+slurm-199004_247.out:139:bad gas_1
+slurm-199004_250.out:139:bad gas_1
+
+see do_gridded_interpolant.m
+slurm-199004_172.out:120:  junkT      1x0                 0  double
+slurm-199004_172.out:130:  junkO      1x0                 0  double
+slurm-199004_172.out:125:  junkW      1x0                 0  double
+
+slurm-199004_245.out:120:  junkT      1x43              344  double
+slurm-199004_245.out:130:  junkO      1x42              336  double
+slurm-199004_245.out:125:  junkW      1x0                 0  double
+%}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+addpath0
+addpath /home/sergio/git/matlabcode/matlibSergio/matlib/rtp_prod2_Aug11_2020/emis/
+
+addpath ../COMMON_SETTINGS
+set_path_to_execs
 
 fip = mktempS('fx.ip.rtp');
 fop = mktempS('fx.op.rtp');
 frp = mktempS('fx.rp.rtp');
 
-[h,ha,p,pa] = rtpread('/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_17years_all_lat_all_lon_2002_2019_palts_startSept2002_CLEAR.rtp');
+iNumYears = 20;
+iNumYears = 23;
+
+% see /umbc/rs/pi_sergio/WorkDirDec2025/oem_climate_code/AIRS_gridded_STM_May2021_trendsonlyCLR/read_fileMean17years.m
+if iNumYears == 20
+  fileMean17years = '/home/sergio/KCARTA/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_20years_all_lat_all_lon_2002_2022_monthlyERA5.rp.rtp';
+  fileMean17years = '/home/sergio/git/kcarta_gen/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_23years_all_lat_all_lon_2002_2025_monthlyERA5.op.rtp';   %% this is YY = 23
+  yySE = [2004 2021];  %% should do this
+  yySE = [2004 2022];  %% but only have this data  
+elseif iNumYears == 23
+  fileMean17years = '/home/sergio/git/kcarta_gen/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_23years_all_lat_all_lon_2002_2025_monthlyERA5.op.rtp';
+  fileMean17years = '/home/sergio/git/kcarta_gen/WORK/RUN_TARA/GENERIC_RADSnJACS_MANYPROFILES/RTP/summary_23years_all_lat_all_lon_2002_2025_monthlyERA5.op.rtp';   %% this is YY = 23
+  yySE = [2004 2021];  %% should do this
+  yySE = [2004 2025];  %% but only have this data    
+end
+
+[h,ha,p,pa] = rtpread(fileMean17years);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-yySE = [2004 2021];  %% should do this
-yySE = [2004 2020];  %% but only have this data
-
 yyuse = [2004 2004 2004 2004];
 yyuse = ones(1,4)*yySE(1); 
 mmuse = [09   10   11   12  ];
 
-%% now go from 2005 to 2019
+%% now go from 2005 to 20XY
 for yy = yySE(1)+1 : yySE(2)-1
   yjunk = yy*ones(1,12);
   mjunk = [1 2 3 4 5 6 7 8 9 10 11 12];
@@ -51,13 +104,16 @@ yy = yySE(2); yjunk = yy*ones(1,8);
   yyuse = [yyuse yjunk];
   mmuse = [mmuse mjunk];
 [1:length(yyuse); yyuse; mmuse]';
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+whos yyuse mmuse
+
+%% just pull out the one for YY(ii) MM(ii) that you want
 for ii = JOB
-  [yyuse(ii) mmuse(ii)]  
+  [ii yyuse(ii) mmuse(ii)]  
   p.rtime = ones(size(p.rtime))*utc2taiSergio(yyuse(ii),mmuse(ii),15,12.0);
 
-  fout = ['/asl/s1/sergio/MakeAvgObsStats2002_2020_startSept2002_v3/TimeSeries/MLS/Tile_Center/mls_tile_center_monthly_timestep_' num2str(ii,'%03d') '.mat']; 
+  fout = [dirout '/TimeSeries/MLS/Tile_Center/mls_tile_center_monthly_timestep_' num2str(ii,'%03d') '.mat']; 
   if exist(fout)
     fprintf(1,'%s already exists ... not saving \n',fout) 
     error('oioi')
@@ -69,7 +125,7 @@ for ii = JOB
   hL3.gunit = [20 12]';  %% this is native
   hL3.gunit = [10 10]';  %% change to ppmv so we can tack on MLS
   hL3.nchan = 2645;
-  h2645 = load('/home/sergio/MATLABCODE/CRODGERS_FAST_CLOUD/h2645structure.mat');
+  h2645 = load('/home/sergio/git/umbc_singlefootprint/h2645structure.mat');
   hL3.ichan = h2645.h.ichan;
   hL3.vchan = h2645.h.vchan;
   pL3 = rmfield(pL3,'gas_5');
@@ -82,39 +138,50 @@ for ii = JOB
   pL3.scanang = p.scanang;
   pL3.salti  = p.salti;
 
-  mls_T  = ['/asl/xfs3/mls/ML3MBT_004/MLS-Aura_L3MB-Temperature_v04-23-c02_' num2str(yyuse(ii)) '.nc'];
-  mls_W  = ['/asl/xfs3/mls/ML3MBH2O_004/MLS-Aura_L3MB-H2O_v04-23-c02_' num2str(yyuse(ii)) '.nc'];
-  mls_O3 = ['/asl/xfs3/mls/ML3MBO3_004/MLS-Aura_L3MB-O3_v04-23-c02_' num2str(yyuse(ii)) '.nc'];
+  mls_T  = [mlsdata 'ML3MBT_' vers '/MLS-Aura_L3MB-Temperature_' xyvers '-23-c02_' num2str(yyuse(ii)) '.nc'];
+  mls_W  = [mlsdata 'ML3MBH2O_' vers '/MLS-Aura_L3MB-H2O_' xyvers '-23-c02_' num2str(yyuse(ii)) '.nc'];
+  mls_O3 = [mlsdata 'ML3MBO3_' vers '/MLS-Aura_L3MB-O3_' xyvers '-23-c02_' num2str(yyuse(ii)) '.nc'];
 
-  mls_T  = ['/asl/xfs3/mls/ML3MBT_004/MLS-Aura_L3MB-Temperature_v04*' num2str(yyuse(ii)) '.nc'];
+  mls_T  = [mlsdata 'ML3MBT_' vers '/MLS-Aura_L3MB-Temperature_' xyvers '*' num2str(yyuse(ii)) '.nc'];
     bonk = dir(mls_T);
-    mls_T = ['/asl/xfs3/mls/ML3MBT_004/' bonk.name];
-  mls_W  = ['/asl/xfs3/mls/ML3MBH2O_004/MLS-Aura_L3MB-H2O_v04*' num2str(yyuse(ii)) '.nc'];
+    mls_T = [mlsdata 'ML3MBT_' vers '/' bonk.name];
+  mls_W  = [mlsdata 'ML3MBH2O_' vers '/MLS-Aura_L3MB-H2O_' xyvers '*' num2str(yyuse(ii)) '.nc'];
     bonk = dir(mls_W);
-    mls_W = ['/asl/xfs3/mls/ML3MBH2O_004/' bonk.name];
-  mls_O3 = ['/asl/xfs3/mls/ML3MBO3_004/MLS-Aura_L3MB-O3_v04*' num2str(yyuse(ii)) '.nc'];
+    mls_W = [mlsdata 'ML3MBH2O_' vers '/' bonk.name];
+  mls_O3 = [mlsdata 'ML3MBO3_' vers '/MLS-Aura_L3MB-O3_' xyvers '*' num2str(yyuse(ii)) '.nc'];
     bonk = dir(mls_O3);
-    mls_O3 = ['/asl/xfs3/mls/ML3MBO3_004/' bonk.name];
+    mls_O3 = [mlsdata 'ML3MBO3_' vers '/' bonk.name];
+    
   fprintf(1,' T  = %s \n',mls_T)
   fprintf(1,' W  = %s \n',mls_W)
   fprintf(1,' O3 = %s \n',mls_O3)
 
-  [aT,aW,aO3] = mls_reader_L3(mls_T,mls_W,mls_O3,mmuse(ii));
+  [xaT,xaW,xaO3] = mls_reader_L3(mls_T,mls_W,mls_O3,mmuse(ii));
   %% T,O3  works from level 08 to 55 (261 to 0,001 mb)
   %% WV works from level 07 to 55 (316 to 0,001 mb)
 
-  mls_plev = aT.Temperature_PressureGrid.lev;
-  mls_lon  = aT.Temperature_PressureGrid.lon;
-  mls_lat  = aT.Temperature_PressureGrid.lat;
+  mls_plev = xaT.Temperature_PressureGrid.lev;
+  mls_lon  = xaT.Temperature_PressureGrid.lon;
+  mls_lat  = xaT.Temperature_PressureGrid.lat;
   [mls_LAT,mls_LON] = ndgrid(mls_lat,mls_lon);
 
   %% see  ~/MATLABCODE/CONVERT_GAS_UNITS/toppmv.m
   %% elseif iGasUnitIN == 12    %%%in vmr (volume mixing ratio)
   %%  PPMV = VMR*1E+6
   %%  y = q*1e6;
-  aT = squeeze(aT.Temperature_PressureGrid.value(:,:,:,mmuse(ii)));
-  aW = squeeze(aW.H2O_PressureGrid.value(:,:,:,mmuse(ii))) *1e6;
-  aO3 = squeeze(aO3.O3_PressureGrid.value(:,:,:,mmuse(ii))) *1e6;;
+
+  xaO3
+  xaT
+  xaW
+
+%{
+size(xaT.Temperature_PressureGrid.value)
+    45    72    55    12
+%}
+
+  aT = squeeze(xaT.Temperature_PressureGrid.value(:,:,:,mmuse(ii)));
+  aW = squeeze(xaW.H2O_PressureGrid.value(:,:,:,mmuse(ii))) *1e6;
+  aO3 = squeeze(xaO3.O3_PressureGrid.value(:,:,:,mmuse(ii))) *1e6;;
 
   do_gridded_interpolant
 
@@ -166,40 +233,41 @@ for ii = JOB
   pL3new.gas_1 = [flipud(aWnew(booMLS,:)); pL3.gas_1(booAIRS(end)+1:24,:)];
   pL3new.gas_3 = [flipud(aO3new(booMLS,:)); pL3.gas_3(booAIRS(end)+1:24,:)];
 
-if length(find(isnan(pL3new.ptemp))) > 0
-  error('bad ptemp');
-elseif length(find(isnan(pL3new.gas_1))) > 0
-  error('bad gas_1');
-elseif length(find(isnan(pL3new.gas_3))) > 0
-  error('bad gas_3');
-end
+  %%%%%%%%%%%%%%%%%%%%%%%%%
+  if length(find(isnan(pL3new.ptemp))) > 0
+    error('bad ptemp');
+  elseif length(find(isnan(pL3new.gas_1))) > 0
+    error('bad gas_1');
+  elseif length(find(isnan(pL3new.gas_3))) > 0
+    error('bad gas_3');
+  end
+  
+  [zzz,rrr] = find(pL3new.gas_1 < 0 | pL3new.gas_3 < 0 | pL3new.ptemp < 150);
+  rrr = unique(rrr);
+  for jjj = 1 : length(rrr)
+    plevs = pL3new.plevs(:,rrr(jjj));
+    ptemp = pL3new.ptemp(:,rrr(jjj));
+    gas_1 = pL3new.gas_1(:,rrr(jjj));
+    gas_3 = pL3new.gas_3(:,rrr(jjj));
+    zgood = find(ptemp > 150 & gas_1 >= 0 & gas_3 >= 0);
+    zbad = find(ptemp <= 150 | gas_1 < 0 | gas_3 < 0);
+    ptemp(zbad) = interp1(log(plevs(zgood)),ptemp(zgood),log(plevs(zbad)),[],'extrap');  
+    gas_1(zbad) = exp(interp1(log(plevs(zgood)),log(gas_1(zgood)),log(plevs(zbad)),[],'extrap'));  
+    gas_3(zbad) = exp(interp1(log(plevs(zgood)),log(gas_3(zgood)),log(plevs(zbad)),[],'extrap'));  
+    pL3new.ptemp(:,rrr(jjj)) = ptemp;
+    pL3new.gas_1(:,rrr(jjj)) = gas_1;
+    pL3new.gas_3(:,rrr(jjj)) = gas_3;
+  end
 
-[zzz,rrr] = find(pL3new.gas_1 < 0 | pL3new.gas_3 < 0 | pL3new.ptemp < 150);
-rrr = unique(rrr);
-for jjj = 1 : length(rrr)
-  plevs = pL3new.plevs(:,rrr(jjj));
-  ptemp = pL3new.ptemp(:,rrr(jjj));
-  gas_1 = pL3new.gas_1(:,rrr(jjj));
-  gas_3 = pL3new.gas_3(:,rrr(jjj));
-  zgood = find(ptemp > 150 & gas_1 >= 0 & gas_3 >= 0);
-  zbad = find(ptemp <= 150 | gas_1 < 0 | gas_3 < 0);
-  ptemp(zbad) = interp1(log(plevs(zgood)),ptemp(zgood),log(plevs(zbad)),[],'extrap');  
-  gas_1(zbad) = exp(interp1(log(plevs(zgood)),log(gas_1(zgood)),log(plevs(zbad)),[],'extrap'));  
-  gas_3(zbad) = exp(interp1(log(plevs(zgood)),log(gas_3(zgood)),log(plevs(zbad)),[],'extrap'));  
-  pL3new.ptemp(:,rrr(jjj)) = ptemp;
-  pL3new.gas_1(:,rrr(jjj)) = gas_1;
-  pL3new.gas_3(:,rrr(jjj)) = gas_3;
-end
-
-rrr = find(isnan(pL3new.stemp));
-for jjj = 1 : length(rrr)
-  plevs = pL3new.plevs(:,rrr(jjj));
-  ptemp = pL3new.ptemp(:,rrr(jjj));
-  zgood = find(ptemp > 150);
-  stemp = interp1(log(plevs(zgood)),ptemp(zgood),log(pL3new.spres(rrr(jjj))),[],'extrap');  
-  pL3new.stemp(:,rrr(jjj)) = stemp;
-end
-
+  rrr = find(isnan(pL3new.stemp));
+  for jjj = 1 : length(rrr)
+    plevs = pL3new.plevs(:,rrr(jjj));
+    ptemp = pL3new.ptemp(:,rrr(jjj));
+    zgood = find(ptemp > 150);
+    stemp = interp1(log(plevs(zgood)),ptemp(zgood),log(pL3new.spres(rrr(jjj))),[],'extrap');  
+    pL3new.stemp(:,rrr(jjj)) = stemp;
+  end
+  %%%%%%%%%%%%%%%%%%%%%%%%%
 
   figure(4);  
   wonk = pL3new.ptemp; wonk(wonk < 0) = NaN; semilogy(nanmean(wonk,2),mean(pL3new.plevs,2)); set(gca,'ydir','reverse'); ylim([min(new_airs_plev) max(new_airs_plev)])
@@ -218,7 +286,8 @@ end
 
   p.rlon = wrapTo180(p.rlon);
   [p,pa] = rtp_add_emis(p,pa);
-
+  [p,bady0] = fix_nan_emis(p);
+  
   pnew_ip = p;
   hnew_ip = hL3;
   hnew_ip.pfields = 1;
@@ -242,14 +311,19 @@ end
 
   run_sarta.klayers_code = '/asl/packages/klayersV205/BinV201/klayers_airs';
   %run_sarta.klayers_code = '/home/sergio/KLAYERS/BinV201/klayers_airs_wetwater_140levs';
-  run_sarta.clear = +1;
-  run_sarta.cloud = +1;
-  run_sarta.cumsum = 9999;  %% larrabee likes this, puts clouds high so does well for DCC
-  run_sarta.cumsum = -1;    %% this is "closer" to MRO but since cliuds are at centroid, does not do too well with DCC
   code0 = '/asl/packages/sartaV108/BinV201/sarta_apr08_m140_iceaggr_waterdrop_desertdust_slabcloud_hg3_wcon_nte';
   code1 = '/home/sergio/SARTA_CLOUDY/BinV201/sarta_apr08_m140x_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
   code1 = '/home/sergio/SARTA_CLOUDY/BinV201/xsarta_apr08_m140_iceGHMbaum_waterdrop_desertdust_slabcloud_hg3';
   code1 = '/home/chepplew/gitLib/sarta/bin/airs_l1c_2834_cloudy_may19_prod_v3';
+
+  run_sarta.klayers_code = klayers;
+  code0 = sartaCld;
+  code1 = sartaCld;
+  
+  run_sarta.clear = +1;
+  run_sarta.cloud = +1;
+  run_sarta.cumsum = 9999;  %% larrabee likes this, puts clouds high so does well for DCC
+  run_sarta.cumsum = -1;    %% this is "closer" to MRO but since cliuds are at centroid, does not do too well with DCC
   run_sarta.sartaclear_code = code1;
   run_sarta.sartacloud_code = code1;
   run_sarta.co2ppm = co2ppm;
@@ -311,8 +385,7 @@ end
   i1419 = find(hnew_ip.vchan >= 1419,1); 
   figure(4); scatter_coast(pnew_op.rlon,pnew_op.rlat,50,rad2bt(1419,pnew_op.rcalc(i1419,:))); colormap jet; title('BT1419 (K)');
 
-
-[zzz,rrr] = find(isnan(pnew_op.rcalc));
+  [zzz,rrr] = find(isnan(pnew_op.rcalc));
   figure(3); plot(hnew_ip.vchan,std(rad2bt(hnew_ip.vchan,pnew_op.rcalc)'))
   figure(3); plot(hnew_ip.vchan,mean(rad2bt(hnew_ip.vchan,pnew_op.rcalc)'))
   pause(0.1)
@@ -321,3 +394,5 @@ end
 
 rmer = ['!/bin/rm ' fip ' ' fop ' ' frp];
 eval(rmer);
+disp('now go do trends in /home/sergio/git/oem_climate_code/FIND_NWP_MODEL_TRENDS/driver_computeMLS_monthly_trends.m')
+

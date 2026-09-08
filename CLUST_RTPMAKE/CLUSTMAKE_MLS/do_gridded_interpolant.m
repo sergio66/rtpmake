@@ -15,12 +15,21 @@ for iix = 1 : 55
   aO3new(iix,:) = FO3(pL3.rlat,pL3.rlon);
 end
 
+if length(boo) == 0
+  disp('oh oh boo  = find(mls_tlev > 0      & mls_Wlev > 0      & mls_O3lev > 0);  has nothing')  
+  disp('checking Tz - plevs'); junkT = find(mls_tlev > 0);  whos junkT
+  disp('checking WV - plevs'); junkW = find(mls_Wlev > 0);  whos junkW
+  disp('checking O3 - plevs'); junkO = find(mls_O3lev > 0); whos junkO
+  error('nyuk')
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% so do this
 aTx = aT;
 aWx = aW;
 aO3x = aO3;
+
 for iix = boo(1):boo(end)
   junk = squeeze(aT(:,:,iix));  [goodx,goody] = find(isfinite(junk)); goodx = unique(goodx);
     if sum(setdiff(goodx',3:43)) ~= 0

@@ -107,13 +107,14 @@ for i = 1:n
     zahmonth = str2num(fn(slash(5)+1:slash(5)+2));
     zahday   = str2num(fn(slash(6)+6:slash(6)+7));
     zahhr    = str2num(fn(slash(6)+8:slash(6)+9));
-    zahhr    = str2num(fn(slash(6)+16:slash(6)+17));
+    %zahhr    = str2num(fn(slash(6)+16:slash(6)+17));
   elseif fhdr(1:9) == '/umbc/rs/'  %% '/umbc/rs/strow/asl/ecmwf/
+    fn;
     zahyear  = str2num(fn(slash(6)+1:slash(6)+4));
     zahmonth = str2num(fn(slash(7)+1:slash(7)+2));
     zahday   = str2num(fn(slash(8)+6:slash(8)+7));
     zahhr    = str2num(fn(slash(8)+8:slash(8)+9));
-    zahhr    = str2num(fn(slash(8)+16:slash(8)+17));    
+    %zahhr    = str2num(fn(slash(8)+16:slash(8)+17));  %% sept 6, 2026    
   end
   ptime    = utc2taiSergio(zahyear,zahmonth,zahday,zahhr);  
   %whos ptime zah*

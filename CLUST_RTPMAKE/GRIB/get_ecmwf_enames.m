@@ -39,6 +39,14 @@ hstr = timestr(:,9:10);
 % index for fhrstr
 h = str2num(hstr);
 
+%whos h hstr rtime
+%clear h
+%whos rtime hstr
+%for ii = 1 : length(mtime)
+%  fprintf(1,'%5i %20.12f %20.12f\n',ii,mtime(ii),rmtime(ii))
+%  h(ii) = str2num(hstr(ii,:));
+%end  
+
 enames = [mstr dstr fhrstr(h+1,:) mstr dstr hstr];
 enames = cellstr(enames);
 
